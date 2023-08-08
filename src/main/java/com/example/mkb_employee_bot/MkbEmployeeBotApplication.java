@@ -1,7 +1,7 @@
 package com.example.mkb_employee_bot;
 
 import org.springframework.boot.SpringApplication;
-import com.example.mkb_employee_bot.bot.EmployeeBot;
+import com.example.mkb_employee_bot.component.bot.EmployeeBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

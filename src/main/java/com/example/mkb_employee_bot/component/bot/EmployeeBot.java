@@ -1,6 +1,7 @@
-package com.example.mkb_employee_bot.bot;
+package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entiry.enums.Language;
+import com.example.mkb_employee_bot.repository.UserRepository;
 import com.example.mkb_employee_bot.service.BotServiceImpl;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -23,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public class EmployeeBot extends TelegramLongPollingBot {
 
     private static BotServiceImpl botService;
+    private static UserRepository userRepository;
 
     Long chatId;
     String userStage;
@@ -32,9 +34,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
     String welcomeMessage = """
             MKBank Xodimlari botiga xush kelibsiz!
-             
-            Добро пожаловать в бот для сотрудников MKBank!
-             """;
+                        
+            Добро пожаловать в бот для сотрудников МКБанк!
+            """;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -42,6 +44,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
 
             chatId = update.getMessage().getChatId();
+            final var userRole = botService.getUserRole(chatId);
+            System.out.println("userRole: " + userRole);
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("messageText: " + messageText);
@@ -52,7 +56,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 );
                 updateContactFuture.join();
             }
-
             if ("/start".equals(messageText)) {
 
                 sendTextMessage(String.valueOf(chatId), welcomeMessage);
@@ -86,6 +89,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
+
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -105,6 +109,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     @Autowired
     public void setService(BotServiceImpl service) {
         EmployeeBot.botService = service;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        EmployeeBot.userRepository = userRepository;
     }
 
     @Override

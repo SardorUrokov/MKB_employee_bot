@@ -23,6 +23,7 @@ public class User {
     String fullName,
             userName,
             phoneNumber;
+
     Long userChatId;
 
     @Enumerated(EnumType.STRING)

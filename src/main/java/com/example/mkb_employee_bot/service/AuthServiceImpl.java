@@ -2,6 +2,7 @@ package com.example.mkb_employee_bot.service;
 
 import java.util.Date;
 
+import com.example.mkb_employee_bot.entiry.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class AuthServiceImpl {
                 .fullName(user.getFullName())
                 .userName(user.getUserName())
                 .createdAt(new Date())
-                .role(user.getRole())
+                .role(Role.USER)
                 .language(user.getLanguage())
                 .build();
 
