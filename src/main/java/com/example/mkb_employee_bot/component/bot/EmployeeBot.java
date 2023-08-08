@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.component.bot;
 import com.example.mkb_employee_bot.entiry.enums.Language;
 import com.example.mkb_employee_bot.repository.UserRepository;
 import com.example.mkb_employee_bot.service.BotServiceImpl;
+import com.example.mkb_employee_bot.service.ButtonService;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class EmployeeBot extends TelegramLongPollingBot {
 
     private static BotServiceImpl botService;
+    private static ButtonService buttonService;
     private static UserRepository userRepository;
 
     Long chatId;
@@ -44,8 +46,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
 
             chatId = update.getMessage().getChatId();
-            final var userRole = botService.getUserRole(chatId);
-            System.out.println("userRole: " + userRole);
+            final var isSuperAdmin = botService.getUserRole(chatId).equals("SUPER_ADMIN");
+            final var isAdmin = botService.getUserRole(chatId).equals("ADMIN");
+            System.out.println("isAdmin: " + isSuperAdmin);
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("messageText: " + messageText);
@@ -59,7 +62,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             if ("/start".equals(messageText)) {
 
                 sendTextMessage(String.valueOf(chatId), welcomeMessage);
-                CompletableFuture<SendMessage> welcomeMessage = botService.selectLanguageButtons(update);
+                CompletableFuture<SendMessage> welcomeMessage = buttonService.selectLanguageButtons(update);
                 SendMessage sendMessage = welcomeMessage.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -93,6 +96,42 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (isSuperAdmin) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.superAdminButtons(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (isAdmin) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.adminSectionAdminRoleButtons(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -109,6 +148,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     @Autowired
     public void setService(BotServiceImpl service) {
         EmployeeBot.botService = service;
+    }
+
+    @Autowired
+    public void setButtonService(ButtonService service) {
+        EmployeeBot.buttonService = service;
     }
 
     @Autowired

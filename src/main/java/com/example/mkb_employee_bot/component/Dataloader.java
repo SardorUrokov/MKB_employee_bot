@@ -26,7 +26,7 @@ public class Dataloader implements CommandLineRunner {
                     .fullName("Сардор")
                     .phoneNumber("998914525468")
                     .userName("Sardor_Shukhratovich")
-                    .role(Role.USER)
+                    .role(Role.SUPER_ADMIN)
                     .language(Language.UZ)
                     .createdAt(new Date())
                     .updatedAt(new Date())

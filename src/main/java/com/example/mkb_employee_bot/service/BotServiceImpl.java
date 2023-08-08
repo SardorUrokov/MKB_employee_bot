@@ -1,6 +1,5 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entiry.enums.Language;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.entiry.User;
 import com.example.mkb_employee_bot.repository.UserRepository;
@@ -26,6 +25,10 @@ public class BotServiceImpl {
     private final UserRepository userRepository;
     private final AuthServiceImpl authService;
     private String returnText = "";
+//    private String mainMenu = "";
+//    private String back = "";
+//    private final String sighBack = "⬅\uFE0F";
+//    private final String sighDown = "⬇\uFE0F";
 
     public void registerUser(Update update) {
 
@@ -50,44 +53,6 @@ public class BotServiceImpl {
                 );
             }
         });
-    }
-
-    public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
-
-        return CompletableFuture.supplyAsync(() -> {
-
-                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-                    replyKeyboardMarkup.setSelective(true);
-                    replyKeyboardMarkup.setOneTimeKeyboard(true);
-                    replyKeyboardMarkup.setResizeKeyboard(true);
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-
-                    keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text("\uD83C\uDDFA\uD83C\uDDFF")
-                                            .build(),
-
-                                    KeyboardButton.builder()
-                                            .text("\uD83C\uDDF7\uD83C\uDDFA")
-                                            .build()
-                            ))
-                    );
-
-                    returnText = """
-                            Iltimos, botdan foydalanish uchun tilni tanlang\uD83C\uDDFA\uD83C\uDDFF\s
-
-                            Пожалуйста, выберите язык для использования бота\uD83C\uDDF7\uD83C\uDDFA\s""";
-                    final var chatId = update.getMessage().getChatId();
-                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyKeyboardMarkup)
-                            .chatId(String.valueOf(chatId))
-                            .text(returnText)
-                            .build();
-                }
-        );
     }
 
     public CompletableFuture<SendMessage> setUserLanguage(Update update) {
@@ -154,7 +119,7 @@ public class BotServiceImpl {
         );
     }
 
-    public String getUserLanguage(Long userChatId) {
+    private String getUserLanguage(Long userChatId) {
         return userRepository.getUserLanguageByUserChatId(userChatId);
     }
 
