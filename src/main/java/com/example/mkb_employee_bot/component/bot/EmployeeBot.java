@@ -106,9 +106,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if (("Xodimlar".equals(messageText) || "Сотрудники".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+            } else if (("Департаменты".equals(messageText) || "Departamentlar".equals(messageText)) && isUser) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionButtons(update);
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -124,158 +124,176 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }else if (("Xodimlar".equals(messageText) || "Сотрудники".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
-            } else if (("Должности".equals(messageText) || "Lavozimlar".equals(messageText)) && (isAdmin || isSuperAdmin)) {
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionButtons(update);
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
-
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionButtons(update);
+                    SendMessage sendMessage = sendMessageCompletableFuture.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
 
-            } else if (("Departamentlar".equals(messageText) || "Департаменты".equals(messageText)) && (isAdmin || isSuperAdmin)) {
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionButtons(update);
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                } else if (("Должности".equals(messageText) || "Lavozimlar".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+                    CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionButtons(update);
+                    SendMessage sendMessage = sendMessageCompletableFuture.join();
 
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
 
-            } else if (("Boshqarmalar".equals(messageText) || "Отделы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.managementSectionButtons(update);
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                } else if (("Departamentlar".equals(messageText) || "Департаменты".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+                    CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionButtons(update);
+                    SendMessage sendMessage = sendMessageCompletableFuture.join();
 
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (("Adminlar".equals(messageText) || "Админы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
 
-                if (isAdmin)
-                    setUserLanguageAndRequestContact = buttonService.adminSectionAdminRoleButtons(update);
-                else
-                    setUserLanguageAndRequestContact = buttonService.adminSectionSuperAdminRoleButtons(update);
+                } else if (("Boshqarmalar".equals(messageText) || "Отделы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+                    CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.managementSectionButtons(update);
+                    SendMessage sendMessage = sendMessageCompletableFuture.join();
 
-                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (("Adminlar".equals(messageText) || "Админы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+                    CompletableFuture<SendMessage> setUserLanguageAndRequestContact;
 
-            } else if (isSuperAdmin || isAdmin) {
+                    if (isAdmin)
+                        setUserLanguageAndRequestContact = buttonService.adminSectionAdminRoleButtons(update);
+                    else
+                        setUserLanguageAndRequestContact = buttonService.adminSectionSuperAdminRoleButtons(update);
 
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.superAdminButtons(update);
-                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (isUser) {
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
 
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.userButtons(update);
-                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                } else if (isSuperAdmin || isAdmin) {
+
+                    CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.superAdminButtons(update);
+                    SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
+                        );
+                        executeFuture.join();
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (isUser) {
+
+                    CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.userButtons(update);
+                    SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
-    }
 
-    private void sendTextMessage(String chatId, String text) {
-        SendMessage message = new SendMessage(chatId, text);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        private void sendTextMessage (String chatId, String text){
+            SendMessage message = new SendMessage(chatId, text);
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Autowired
+        public void setService (BotServiceImpl service){
+            EmployeeBot.botService = service;
+        }
+
+        @Autowired
+        public void setButtonService (ButtonService service){
+            EmployeeBot.buttonService = service;
+        }
+
+        @Autowired
+        public void setUserRepository (UserRepository userRepository){
+            EmployeeBot.userRepository = userRepository;
+        }
+
+        @Override
+        public String getBotUsername () {
+            return this.botUsername;
+        }
+
+        @Override
+        public String getBotToken () {
+            return this.botToken;
         }
     }
-
-    @Autowired
-    public void setService(BotServiceImpl service) {
-        EmployeeBot.botService = service;
-    }
-
-    @Autowired
-    public void setButtonService(ButtonService service) {
-        EmployeeBot.buttonService = service;
-    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        EmployeeBot.userRepository = userRepository;
-    }
-
-    @Override
-    public String getBotUsername() {
-        return this.botUsername;
-    }
-
-    @Override
-    public String getBotToken() {
-        return this.botToken;
-    }
-}

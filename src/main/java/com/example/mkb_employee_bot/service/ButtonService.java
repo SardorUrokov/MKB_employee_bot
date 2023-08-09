@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -136,7 +138,6 @@ public class ButtonService {
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var departmentNames = getDepartmentNames();
-            String button1 = "", button2 = "";
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужный Департамент из списка " + sighDown;
@@ -152,16 +153,18 @@ public class ButtonService {
             replyKeyboardMarkup.setResizeKeyboard(true);
             replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-            keyboardRowList.add(
-                    new KeyboardRow(List.of(
-                            KeyboardButton.builder()
-                                    .text(button1)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(button2)
-                                    .build()
-                    ))
-            );
+            for (String departmentName : departmentNames) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(departmentName)
+                                                .build()
+                                )
+                        )
+                );
+            }
+
             keyboardRowList.add(
                     new KeyboardRow(List.of(
                             KeyboardButton.builder()
