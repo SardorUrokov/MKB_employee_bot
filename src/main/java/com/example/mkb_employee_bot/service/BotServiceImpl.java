@@ -25,10 +25,6 @@ public class BotServiceImpl {
     private final UserRepository userRepository;
     private final AuthServiceImpl authService;
     private String returnText = "";
-//    private String mainMenu = "";
-//    private String back = "";
-//    private final String sighBack = "⬅\uFE0F";
-//    private final String sighDown = "⬇\uFE0F";
 
     public void registerUser(Update update) {
 
@@ -75,12 +71,11 @@ public class BotServiceImpl {
                     }
                     userRepository.updateLanguageByUserId(chatId, language);
 
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     replyKeyboardMarkup.setSelective(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-
                     keyboardRowList.add(
                             new KeyboardRow(Collections.singleton(
                                     KeyboardButton.builder()
