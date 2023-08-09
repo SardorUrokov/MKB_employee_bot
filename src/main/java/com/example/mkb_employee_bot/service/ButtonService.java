@@ -1,6 +1,6 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.repository.UserRepository;
+import com.example.mkb_employee_bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,6 +19,10 @@ import java.util.concurrent.CompletableFuture;
 public class ButtonService {
 
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
+    private final PositionRepository positionRepository;
+    private final DepartmentRepository departmentRepository;
+    private final ManagementRepository managementRepository;
 
     private String back = "";
     private String mainMenu = "";
@@ -61,6 +65,123 @@ public class ButtonService {
         );
     }
 
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> userButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            String button1 = "", button2 = "", button3 = "", button4 = "", button5 = "";
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Выберите нужный раздел для получения информации " + sighDown;
+                button1 = "Сотрудники";
+                button2 = "Должности";
+                button3 = "Департаменты";
+                button4 = "Отделы";
+//                button5 = "Админы";
+            } else {
+                returnText = "Ma'lumot olish uchun kerakli bo'limni tanlang " + sighDown;
+                button1 = "Xodimlar";
+                button2 = "Lavozimlar";
+                button3 = "Departamentlar";
+                button4 = "Boshqarmalar";
+//                button5 = "Adminlar";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(button1)
+                                    .build(),
+                            KeyboardButton.builder()
+                                    .text(button2)
+                                    .build()
+                    ))
+            );
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(button3)
+                                    .build(),
+                            KeyboardButton.builder()
+                                    .text(button4)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> departmentSectionUserRoleButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var departmentNames = getDepartmentNames();
+            String button1 = "", button2 = "";
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Выберите нужный Департамент из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(button1)
+                                    .build(),
+                            KeyboardButton.builder()
+                                    .text(button2)
+                                    .build()
+                    ))
+            );
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * SUPER_ADMIN role
+     */
     public CompletableFuture<SendMessage> superAdminButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -130,6 +251,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * ADMIN role
+     */
     public CompletableFuture<SendMessage> adminSectionAdminRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -181,6 +305,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * SUPER_ADMIN role
+     */
     public CompletableFuture<SendMessage> adminSectionSuperAdminRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -247,6 +374,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * ADMIN, SUPER_ADMIN roles
+     */
     public CompletableFuture<SendMessage> employeeSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -312,6 +442,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * ADMIN, SUPER_ADMIN roles
+     */
     public CompletableFuture<SendMessage> positionSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -378,6 +511,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * ADMIN, SUPER_ADMIN roles
+     */
     public CompletableFuture<SendMessage> departmentSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -443,6 +579,10 @@ public class ButtonService {
                     .build();
         });
     }
+
+    /***
+     * ADMIN, SUPER_ADMIN roles
+     */
     public CompletableFuture<SendMessage> managementSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -511,5 +651,9 @@ public class ButtonService {
 
     private String getUserLanguage(Long userChatId) {
         return userRepository.getUserLanguageByUserChatId(userChatId);
+    }
+
+    private List<String> getDepartmentNames(){
+        return departmentRepository.getDepartmentNames();
     }
 }

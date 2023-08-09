@@ -30,7 +30,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
     Long chatId;
     String userStage;
-    Language userLanguage;
+    String userLanguage;
     Update tempUpdate = new Update();
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -46,9 +46,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
 
             chatId = update.getMessage().getChatId();
-            final var isSuperAdmin = botService.getUserRole(chatId).equals("SUPER_ADMIN");
-            final var isAdmin = botService.getUserRole(chatId).equals("ADMIN");
-            System.out.println("isAdmin: " + isSuperAdmin);
+            userLanguage = botService.getUserLanguage(chatId);
+
+            final var userRole = botService.getUserRole(chatId);
+            final var isSuperAdmin = userRole.equals("SUPER_ADMIN");
+            final var isAdmin = userRole.equals("ADMIN");
+            final var isUser = userRole.equals("USER");
+
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("messageText: " + messageText);
@@ -58,6 +62,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         botService.setPhoneNumber(update)
                 );
                 updateContactFuture.join();
+
+                if (userLanguage.equals("UZ") && !userRole.equals("USER"))
+                    sendTextMessage(chatId.toString(), "Sizning rolingiz: " + userRole);
+                else if (userLanguage.equals("RU") && !userRole.equals("USER"))
+                    sendTextMessage(chatId.toString(), "Ваш роль: " + userRole);
             }
             if ("/start".equals(messageText)) {
 
@@ -199,6 +208,24 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (isSuperAdmin || isAdmin) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.superAdminButtons(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (isUser) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.userButtons(update);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {

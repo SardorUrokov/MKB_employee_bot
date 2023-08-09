@@ -24,7 +24,8 @@ public class Employee {
     String fullName,
             dateOfBirth,
             phoneNumber,
-            additionalNumber;
+            additionalNumber,
+            nationality;
 
     @ManyToOne
     Position position;

@@ -96,7 +96,6 @@ public class BotServiceImpl {
     }
 
     public void setPhoneNumber(Update update) {
-
         CompletableFuture.runAsync(() -> {
                     String phoneNumber = update.getMessage().getContact().getPhoneNumber();
                     final var chatId = update.getMessage().getChatId();
@@ -104,7 +103,6 @@ public class BotServiceImpl {
 
                     if (exists) {
                         final var user = userRepository.findByUserChatId(chatId).orElseThrow();
-
                         if (user.getPhoneNumber() == null) {
                             userRepository.updatePhoneNumberByUserId(chatId, phoneNumber);
                             log.info("User's Contact is updated -> User ID: {} PhoneNumber: {} ", chatId, phoneNumber);
@@ -114,7 +112,7 @@ public class BotServiceImpl {
         );
     }
 
-    private String getUserLanguage(Long userChatId) {
+    public String getUserLanguage(Long userChatId) {
         return userRepository.getUserLanguageByUserChatId(userChatId);
     }
 
