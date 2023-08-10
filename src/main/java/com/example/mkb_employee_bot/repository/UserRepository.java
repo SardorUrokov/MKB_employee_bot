@@ -30,4 +30,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select role from users where user_chat_id = :userChatId", nativeQuery = true)
     String getUserRoleByUserChatId (Long userChatId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE users SET stage = :newStage, updated_At = CURRENT_TIMESTAMP WHERE users.user_chat_id = :userChatId", nativeQuery = true)
+    void updateUserStageByUserChatId (Long userChatId, String newStage);
 }

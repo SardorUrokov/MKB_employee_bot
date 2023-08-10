@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.service;
 
+import com.example.mkb_employee_bot.entiry.Employee;
 import com.example.mkb_employee_bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,22 +76,20 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "", button5 = "";
+            String button1 = "", button2 = "", button3 = "", button4 = "";
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужный раздел для получения информации " + sighDown;
-                button1 = "Сотрудники";
+                button1 = "Сотрудник";
                 button2 = "Должности";
                 button3 = "Департаменты";
                 button4 = "Отделы";
-//                button5 = "Админы";
             } else {
                 returnText = "Ma'lumot olish uchun kerakli bo'limni tanlang " + sighDown;
-                button1 = "Xodimlar";
+                button1 = "Xodim";
                 button2 = "Lavozimlar";
                 button3 = "Departamentlar";
                 button4 = "Boshqarmalar";
-//                button5 = "Adminlar";
             }
 
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -140,10 +139,16 @@ public class ButtonService {
             final var departmentNames = getDepartmentNames();
 
             if (userLanguage.equals("RU")) {
-                returnText = "Выберите нужный Департамент из списка " + sighDown;
+                if (departmentNames.isEmpty())
+                    returnText = "Список пустой, Департаментов нет";
+                else
+                    returnText = "Выберите нужный Департамент из списка " + sighDown;
                 mainMenu = "Главное Меню";
             } else {
-                returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                if (departmentNames.isEmpty())
+                    returnText = "Ro'yxat bo'sh, Departamentlar yo'q";
+                else
+                    returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
                 mainMenu = "Bosh Menu";
             }
 
@@ -182,6 +187,231 @@ public class ButtonService {
         });
     }
 
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> managementSectionUserRoleButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var managementNames = getManagementNames();
+
+            if (userLanguage.equals("RU")) {
+                if (managementNames.isEmpty())
+                    returnText = "Список пустой, отделов нет";
+                else
+                    returnText = "Выберите нужный Департамент из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (managementNames.isEmpty())
+                    returnText = "Ro'yxat bo'sh, Boshqarmalar yo'q";
+                else
+                    returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (String managementName : managementNames) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(managementName)
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> positionSectionUserRoleButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var positionNames = getPositionNames();
+
+            if (userLanguage.equals("RU")) {
+                if (positionNames.isEmpty())
+                    returnText = "Список пустой, Должности нет";
+                else
+                    returnText = "Выберите нужный Департамент из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (positionNames.isEmpty())
+                    returnText = "Ro'yxat bo'sh, Lavozimlar yo'q";
+                else
+                    returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (String positionName : positionNames) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(positionName)
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> employeeSectionUserRoleButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var employees = getEmployees();
+
+            if (userLanguage.equals("RU")) {
+                if (employees.isEmpty())
+                    returnText = "Список пустой, Сотрудники нет";
+                else
+                    returnText = "Введите имя и фамилию сотрудника " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (employees.isEmpty())
+                    returnText = "Ro'yxat bo'sh, Xodimlar yo'q";
+                else
+                    returnText = "Xodimning ism familiyasini kiriting " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            userRepository.updateUserStageByUserChatId(chatId, "SELECT_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER");
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> findEmployeeSectionUserRoleButtons(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var employees = employeeRepository.findByFullNameIgnoreCaseContaining(
+                    update.getMessage().getText()
+            );
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Выберите нужного сотрудника из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                returnText = "Kerakli xodimni ro'yhatdan tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (Employee employee : employees) {
+                final var fullName = employee.getFullName();
+
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(fullName)
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+//            userRepository.updateUserStageByUserChatId(chatId, "SELECT_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER");
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
     /***
      * SUPER_ADMIN role
      */
@@ -199,8 +429,6 @@ public class ButtonService {
                 button3 = "Департаменты";
                 button4 = "Отделы";
                 button5 = "Админы";
-//                mainMenu = "Главное Меню";
-//                back = "Назад " + sighBack;
             } else {
                 returnText = "Keyingi amalni bajarish uchun quyidagi tugmalardan birini bosing " + sighDown;
                 button1 = "Xodimlar";
@@ -208,8 +436,6 @@ public class ButtonService {
                 button3 = "Departamentlar";
                 button4 = "Boshqarmalar";
                 button5 = "Adminlar";
-//                mainMenu = "Bosh Menu";
-//                back = "Orqaga " + sighBack;
             }
 
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -656,7 +882,19 @@ public class ButtonService {
         return userRepository.getUserLanguageByUserChatId(userChatId);
     }
 
-    private List<String> getDepartmentNames(){
+    private List<String> getDepartmentNames() {
         return departmentRepository.getDepartmentNames();
+    }
+
+    private List<String> getManagementNames() {
+        return managementRepository.getManagementNames();
+    }
+
+    private List<String> getPositionNames() {
+        return positionRepository.getPositionNames();
+    }
+
+    public List<Employee> getEmployees() {
+        return employeeRepository.findAll();
     }
 }

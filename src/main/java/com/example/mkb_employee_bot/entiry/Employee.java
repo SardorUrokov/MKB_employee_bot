@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.entiry;
 
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -18,14 +19,12 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    Integer age;
-    Long userChatId;
-
     String fullName,
             dateOfBirth,
             phoneNumber,
             additionalNumber,
             nationality;
+    Integer age;
 
     @ManyToOne
     Position position;
@@ -34,8 +33,8 @@ public class Employee {
     Education education;
 
     @OneToMany
-    Set<Attachment> attachments;
+    List<Skill> skills;
 
     @OneToMany
-    Set<Skill> skills;
+    Set<Attachment> attachments;
 }

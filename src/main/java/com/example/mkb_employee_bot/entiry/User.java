@@ -1,6 +1,7 @@
 package com.example.mkb_employee_bot.entiry;
 
 import com.example.mkb_employee_bot.entiry.enums.Language;
+import com.example.mkb_employee_bot.entiry.enums.Stage;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +26,9 @@ public class User {
             phoneNumber;
 
     Long userChatId;
+
+    @Enumerated(EnumType.STRING)
+    Stage stage;
 
     @Enumerated(EnumType.STRING)
     Language language;
