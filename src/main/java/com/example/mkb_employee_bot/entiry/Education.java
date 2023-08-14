@@ -17,6 +17,7 @@ public class Education {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String name,
+            educationField,
             startedDate,
             endDate;
 

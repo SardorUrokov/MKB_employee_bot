@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.component.bot;
 
+import com.example.mkb_employee_bot.entiry.enums.Stage;
 import com.example.mkb_employee_bot.repository.EmployeeRepository;
 import lombok.Data;
 import lombok.AccessLevel;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.example.mkb_employee_bot.service.ButtonService;
 import com.example.mkb_employee_bot.service.BotServiceImpl;
 import com.example.mkb_employee_bot.repository.UserRepository;
+
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -45,9 +47,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
         if (update.hasMessage()) {
 
-
             chatId = update.getMessage().getChatId();
             userLanguage = botService.getUserLanguage(chatId);
+            userStage = userRepository.getUserStageByUserChatId(chatId);
 
             final var userRole = botService.getUserRole(chatId);
             final var isSuperAdmin = userRole.equals("SUPER_ADMIN");
@@ -56,6 +58,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
+            System.out.println("userStage: " + userStage);
             System.out.println("messageText: " + messageText);
 
             final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContaining(messageText);
@@ -66,12 +69,14 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         botService.setPhoneNumber(update)
                 );
                 updateContactFuture.join();
+                userRepository.updateUserStageByUserChatId(chatId, Stage.CONTACT_SHARED.name());
 
                 if (userLanguage.equals("UZ") && !userRole.equals("USER"))
                     sendTextMessage(chatId.toString(), "Sizning rolingiz: " + userRole);
                 else if (userLanguage.equals("RU") && !userRole.equals("USER"))
                     sendTextMessage(chatId.toString(), "Ваш роль: " + userRole);
             }
+
             if ("/start".equals(messageText)) {
 
                 sendTextMessage(String.valueOf(chatId), welcomeMessage);
@@ -110,6 +115,29 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if ("Bosh Menu".equals(messageText) || "Главное Меню".equals(messageText)) {
+                CompletableFuture<SendMessage> messageCompletableFuture;
+                if (isAdmin || isSuperAdmin)
+                    messageCompletableFuture = buttonService.superAdminButtons(update);
+                else
+                    messageCompletableFuture = buttonService.userButtons(update);
+
+                SendMessage sendMessage = messageCompletableFuture.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else if (("Департаменты".equals(messageText) || "Departamentlar".equals(messageText)) && isUser) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionUserRoleButtons(update);
@@ -182,9 +210,27 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (!isCaseContainingListEmpty && isUser && userStage.equals("SELECT_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER")) {
+            } else if (!isCaseContainingListEmpty && isUser && userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER")) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.findEmployeeSectionUserRoleButtons(update);
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (isUser && userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER")) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = botService.getSelectedEmployeeInfo(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {

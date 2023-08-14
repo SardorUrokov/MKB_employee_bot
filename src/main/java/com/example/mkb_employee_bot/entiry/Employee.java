@@ -29,8 +29,8 @@ public class Employee {
     @ManyToOne
     Position position;
 
-    @ManyToOne
-    Education education;
+    @OneToMany(fetch = FetchType.EAGER)
+    List<Education> educations;
 
     @OneToMany
     List<Skill> skills;

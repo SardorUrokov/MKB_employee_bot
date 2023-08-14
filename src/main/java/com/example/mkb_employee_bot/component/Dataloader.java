@@ -22,7 +22,6 @@ public class Dataloader implements CommandLineRunner {
     private final EducationRepository educationRepository;
     private final ManagementRepository managementRepository;
     private final DepartmentRepository departmentRepository;
-    private final AttachmentRepository attachmentRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -43,11 +42,20 @@ public class Dataloader implements CommandLineRunner {
 
             final var education = Education.builder()
                     .name("TSUE")
-                    .type(EduType.BACHELOR)
-                    .startedDate("2021-8-3")
+                    .educationField("Soliqlar va soliqqa tortish")
+                    .type(EduType.BAKALAVRIAT)
+                    .startedDate("2021-08-03")
                     .endDate("Present")
                     .build();
-            final var savedEducation = educationRepository.save(education);
+            final var education1 = Education.builder()
+                    .name("TUIT")
+                    .educationField("Dasturiy Injiniring")
+                    .type(EduType.MAGISTRATURA)
+                    .startedDate("2026-08-03")
+                    .endDate("Present")
+                    .build();
+
+            final var savedEducation = educationRepository.saveAll(List.of(education, education1));
 
             final var skillList = List.of(
                     Skill.builder()
@@ -71,8 +79,8 @@ public class Dataloader implements CommandLineRunner {
                     .phoneNumber("998914525468")
                     .nationality("Uzbek")
                     .age(18)
-                    .position(kichikMutaxxasis)
-                    .education(savedEducation)
+                    .position(mutaxxasis)
+                    .educations(List.of(education, education1))
                     .skills(skills)
                     .attachments(
                             Collections.emptySet()
@@ -86,7 +94,7 @@ public class Dataloader implements CommandLineRunner {
                     .phoneNumber("998914525468")
                     .userName("Sardor_Shukhratovich")
                     .role(Role.USER)
-                    .stage(Stage.START)
+                    .stage(Stage.STARTED)
                     .language(Language.RU)
                     .createdAt(new Date())
                     .updatedAt(new Date())

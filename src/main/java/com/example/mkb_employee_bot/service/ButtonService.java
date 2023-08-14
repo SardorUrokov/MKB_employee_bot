@@ -1,14 +1,13 @@
 package com.example.mkb_employee_bot.service;
 
 import com.example.mkb_employee_bot.entiry.Employee;
+import com.example.mkb_employee_bot.entiry.enums.Stage;
 import com.example.mkb_employee_bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -76,7 +75,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "";
+            String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужный раздел для получения информации " + sighDown;
@@ -152,6 +151,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -187,7 +187,6 @@ public class ButtonService {
         });
     }
 
-
     /***
      * USER role
      */
@@ -212,6 +211,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -271,6 +271,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -330,6 +331,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -345,7 +347,7 @@ public class ButtonService {
             );
             replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-            userRepository.updateUserStageByUserChatId(chatId, "SELECT_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER");
+            userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
             return SendMessage.builder()
                     .replyMarkup(replyKeyboardMarkup)
                     .chatId(String.valueOf(chatId))
@@ -403,7 +405,7 @@ public class ButtonService {
             );
             replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-//            userRepository.updateUserStageByUserChatId(chatId, "SELECT_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER");
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
             return SendMessage.builder()
                     .replyMarkup(replyKeyboardMarkup)
                     .chatId(String.valueOf(chatId))
@@ -420,7 +422,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "", button5 = "";
+            String button1, button2, button3, button4, button5;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Нажмите одну из следующих кнопок, чтобы выполнить следующее действие " + sighDown;
@@ -488,7 +490,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "";
+            String button1, button2;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Нажмите одну из следующих кнопок, чтобы выполнить следующее действие " + sighDown;
@@ -611,7 +613,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "";
+            String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужное действие в разделе Сотрудники " + sighDown;
@@ -679,7 +681,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "";
+            String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужное действие в разделе Должности " + sighDown;
@@ -748,7 +750,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "";
+            String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужное действие в разделе Департаменты " + sighDown;
@@ -817,7 +819,7 @@ public class ButtonService {
 
             final var chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
-            String button1 = "", button2 = "", button3 = "", button4 = "";
+            String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужное действие в разделе Отделы " + sighDown;
@@ -884,6 +886,18 @@ public class ButtonService {
 
     private List<String> getDepartmentNames() {
         return departmentRepository.getDepartmentNames();
+    }
+
+    private List<Employee> getDepartmentEmployees(Long departmentId) {
+        return employeeRepository.getEmployeesByPosition_Management_Department_Id(departmentId);
+    }
+
+    private List<String> getDepartmentEmployeesNames(Long department_id) {
+        List<String> employeeNames = new ArrayList<>();
+        for (Employee departmentEmployee : getDepartmentEmployees(department_id)) {
+            employeeNames.add(departmentEmployee.getFullName());
+        }
+        return employeeNames;
     }
 
     private List<String> getManagementNames() {

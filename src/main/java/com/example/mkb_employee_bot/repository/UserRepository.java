@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.example.mkb_employee_bot.entiry.User;
 import com.example.mkb_employee_bot.entiry.enums.Language;
+import com.example.mkb_employee_bot.entiry.enums.Stage;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query(value = "UPDATE users SET stage = :newStage, updated_At = CURRENT_TIMESTAMP WHERE users.user_chat_id = :userChatId", nativeQuery = true)
     void updateUserStageByUserChatId (Long userChatId, String newStage);
+
+    @Query(value = "select stage from users where user_chat_id = :userChatId", nativeQuery = true)
+    String getUserStageByUserChatId (Long userChatId);
 }
