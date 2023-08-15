@@ -385,13 +385,13 @@ public class ButtonService {
                 if (managementNames.isEmpty())
                     returnText = "Список пустой, отделов нет";
                 else
-                    returnText = "Выберите нужный Департамент из списка " + sighDown;
+                    returnText = "Выберите нужный Отдел из списка " + sighDown;
                 mainMenu = "Главное Меню";
             } else {
                 if (managementNames.isEmpty())
                     returnText = "Ro'yxat bo'sh, Boshqarmalar yo'q";
                 else
-                    returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                    returnText = "Ro'yxatdan kerakli Bo'limni tanlang " + sighDown;
                 mainMenu = "Bosh Menu";
             }
 
@@ -445,13 +445,13 @@ public class ButtonService {
                 if (positionNames.isEmpty())
                     returnText = "Список пустой, Должности нет";
                 else
-                    returnText = "Выберите нужный Департамент из списка " + sighDown;
+                    returnText = "Выберите нужный Должность из списка " + sighDown;
                 mainMenu = "Главное Меню";
             } else {
                 if (positionNames.isEmpty())
                     returnText = "Ro'yxat bo'sh, Lavozimlar yo'q";
                 else
-                    returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
+                    returnText = "Ro'yxatdan kerakli Lavozimni tanlang " + sighDown;
                 mainMenu = "Bosh Menu";
             }
 

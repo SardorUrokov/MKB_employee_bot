@@ -1,18 +1,12 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entiry.Education;
-import com.example.mkb_employee_bot.entiry.Employee;
-import com.example.mkb_employee_bot.entiry.Skill;
+import com.example.mkb_employee_bot.entiry.*;
 import com.example.mkb_employee_bot.entiry.enums.EduType;
 import com.example.mkb_employee_bot.entiry.enums.SkillType;
 import com.example.mkb_employee_bot.entiry.enums.Stage;
-import com.example.mkb_employee_bot.repository.EducationRepository;
-import com.example.mkb_employee_bot.repository.EmployeeRepository;
-import com.example.mkb_employee_bot.repository.SkillRepository;
+import com.example.mkb_employee_bot.repository.*;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import com.example.mkb_employee_bot.entiry.User;
-import com.example.mkb_employee_bot.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendGame;
@@ -38,6 +32,9 @@ public class BotServiceImpl {
     private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
     private final EducationRepository educationRepository;
+    private final PositionRepository positionRepository;
+    private final DepartmentRepository departmentRepository;
+    private final ManagementRepository managementRepository;
     private String returnText = "";
 
     public void registerUser(Update update) {
@@ -165,6 +162,31 @@ public class BotServiceImpl {
                     .build();
 
         });
+    }
+
+    public String getMessageSection(String messageText) {
+
+        String section = "";
+        for (Position position : positionRepository.findAll()) {
+            if (position.getName().equals(messageText)) {
+                section = "positionSection";
+                break;
+            }
+        }
+        for (Department department : departmentRepository.findAll()) {
+            if (department.getName().equals(messageText)) {
+                section = "departmentSection";
+                break;
+            }
+        }
+        for (Management management : managementRepository.findAll()) {
+            if (management.getName().equals(messageText)) {
+                section = "managementSection";
+                break;
+            }
+        }
+
+        return section;
     }
 
     private String getEmployeeInfoForUserLanguage_UZ(Employee employee) {

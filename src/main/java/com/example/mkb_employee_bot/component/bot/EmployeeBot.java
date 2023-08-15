@@ -64,6 +64,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
             final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContaining(messageText);
             final var isCaseContainingListEmpty = caseContainingList.isEmpty();
 
+            final var messageSection = botService.getMessageSection(messageText);
+
             if (message.hasContact()) {
                 CompletableFuture<Void> updateContactFuture = CompletableFuture.runAsync(() ->
                         botService.setPhoneNumber(update)
@@ -196,13 +198,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (userStage.equals("SECTION_SELECTED") && isUser) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
-                switch (messageText) {
-                    case "Departamentlar", "Департаменты" ->
+                switch (messageSection) {
+                    case "departmentSection" ->
                             sendMessageCompletableFuture = buttonService.departmentEmployees(update);
-                    case "Lavozimlar", "Должности" ->
-                            sendMessageCompletableFuture = buttonService.positionEmployees(update); //
-                    case "Boshqarmalar", "Отделы" ->
-                            sendMessageCompletableFuture = buttonService.managementEmployees(update); //
+                    case "positionSection" ->
+                            sendMessageCompletableFuture = buttonService.positionEmployees(update);
+                    case "managementSection" ->
+                            sendMessageCompletableFuture = buttonService.managementEmployees(update);
                     default -> {
                         if (userLanguage.equals("UZ"))
                             sendTextMessage(String.valueOf(chatId), "Iltimos, ro'yhatdagi bo'limlardan birini tanlang");
@@ -210,8 +212,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             sendTextMessage(chatId.toString(), "Пожалуйста, выберите один из разделов списка");
                     }
                 }
-
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
+
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
