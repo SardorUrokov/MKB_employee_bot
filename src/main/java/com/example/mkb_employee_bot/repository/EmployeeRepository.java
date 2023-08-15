@@ -28,4 +28,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Set<Long> getEmployeeEducationsIds(Long employeeId);
 
     List<Employee> getEmployeesByPosition_Management_Department_Id(Long department_id);
+
+    List<Employee> getEmployeesByPosition_Management_Id(Long management_id);
+
+    List<Employee> getEmployeesByPosition_Id(Long position_id);
 }

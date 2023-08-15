@@ -29,16 +29,16 @@ public class Dataloader implements CommandLineRunner {
         final var userList = userRepository.findAll();
         if (userList.isEmpty()) {
 
-            final var it = departmentRepository.save(new Department(1L, "IT"));
-            final var riskManagement = departmentRepository.save(new Department(2L, "Risk Management"));
+            final var it = departmentRepository.save(new Department("IT"));
+            final var riskManagement = departmentRepository.save(new Department("Risk Management"));
 
-            final var yangiTexnologiyalar = managementRepository.save(new Management(1L, "Yangi texnologiyalar", it));
-            final var integratsiyalar = managementRepository.save(new Management(2L, "Integratsiyalar", it));
-            final var riskTahlili = managementRepository.save(new Management(3L, "Risk tahlili", riskManagement));
+            final var yangiTexnologiyalar = managementRepository.save(new Management("Yangi texnologiyalar", it));
+            final var integratsiyalar = managementRepository.save(new Management("Integratsiyalar", it));
+            final var riskTahlili = managementRepository.save(new Management("Risk tahlili", riskManagement));
 
-            final var mutaxxasis = positionRepository.save(new Position(1L, "Mutaxxasis", yangiTexnologiyalar));
-            final var yetakchiMutaxxasis = positionRepository.save(new Position(2L, "Yetakchi Mutaxxasis", integratsiyalar));
-            final var kichikMutaxxasis = positionRepository.save(new Position(3L, "Kichik Mutaxxasis", riskTahlili));
+            final var mutaxxasis = positionRepository.save(new Position("Mutaxxasis", yangiTexnologiyalar));
+            final var yetakchiMutaxxasis = positionRepository.save(new Position("Yetakchi Mutaxxasis", integratsiyalar));
+            final var kichikMutaxxasis = positionRepository.save(new Position("Kichik Mutaxxasis", riskTahlili));
 
             final var education = Education.builder()
                     .name("TSUE")
@@ -55,7 +55,7 @@ public class Dataloader implements CommandLineRunner {
                     .endDate("Present")
                     .build();
 
-            final var savedEducation = educationRepository.saveAll(List.of(education, education1));
+            educationRepository.saveAll(List.of(education, education1));
 
             final var skillList = List.of(
                     Skill.builder()

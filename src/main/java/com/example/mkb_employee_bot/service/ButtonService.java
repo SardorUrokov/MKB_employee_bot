@@ -1,20 +1,21 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entiry.Employee;
-import com.example.mkb_employee_bot.entiry.enums.Stage;
-import com.example.mkb_employee_bot.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import jakarta.ws.rs.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import com.example.mkb_employee_bot.repository.*;
+import com.example.mkb_employee_bot.entiry.Employee;
+import com.example.mkb_employee_bot.entiry.enums.Stage;
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +115,189 @@ public class ButtonService {
                                     .build(),
                             KeyboardButton.builder()
                                     .text(button4)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> positionEmployees(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var department = positionRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
+            final var managementEmployees = getManagementEmployees(department.getId());
+
+            if (userLanguage.equals("RU")) {
+                if (managementEmployees.isEmpty())
+                    returnText = "Список пустой, сотрудников на данной Должности нет в списке.";
+                else
+                    returnText = "Выберите нужного Сотрудника из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (managementEmployees.isEmpty())
+                    returnText = "Ro'yhat bo'sh, ushbu Bo'limdagi xodimlar ro'yxatda yo'q.";
+                else
+                    returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_EMPLOYEE_INFO.name());
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (Employee employee : managementEmployees) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(employee.getFullName())
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> managementEmployees(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var department = managementRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
+            final var managementEmployees = getManagementEmployees(department.getId());
+
+            if (userLanguage.equals("RU")) {
+                if (managementEmployees.isEmpty())
+                    returnText = "Список пустой, Сотрудников этого Отдела нет в списке.";
+                else
+                    returnText = "Выберите нужного Сотрудника из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (managementEmployees.isEmpty())
+                    returnText = "Ro'yhat bo'sh, ushbu Bo'limdagi xodimlar ro'yxatda yo'q.";
+                else
+                    returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_EMPLOYEE_INFO.name());
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (Employee employee : managementEmployees) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(employee.getFullName())
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(String.valueOf(chatId))
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /***
+     * USER role
+     */
+    public CompletableFuture<SendMessage> departmentEmployees(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var department = departmentRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
+            final var departmentEmployees = getDepartmentEmployees(department.getId());
+
+            if (userLanguage.equals("RU")) {
+                if (departmentEmployees.isEmpty())
+                    returnText = "Список пустой, Сотрудников этого Департамента нет в списке.";
+                else
+                    returnText = "Выберите нужного Сотрудника из списка " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                if (departmentEmployees.isEmpty())
+                    returnText = "Ro'yhat bo'sh, ushbu Departamentdagi xodimlar ro'yxatda yo'q.";
+                else
+                    returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_EMPLOYEE_INFO.name());
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            for (Employee departmentEmployee : departmentEmployees) {
+                keyboardRowList.add(
+                        new KeyboardRow(
+                                Collections.singletonList(
+                                        KeyboardButton.builder()
+                                                .text(departmentEmployee.getFullName())
+                                                .build()
+                                )
+                        )
+                );
+            }
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
                                     .build()
                     ))
             );
@@ -892,6 +1076,14 @@ public class ButtonService {
         return employeeRepository.getEmployeesByPosition_Management_Department_Id(departmentId);
     }
 
+    private List<Employee> getManagementEmployees(Long departmentId) {
+        return employeeRepository.getEmployeesByPosition_Management_Id(departmentId);
+    }
+
+    private List<Employee> getPositionEmployees(Long position_id){
+        return employeeRepository.getEmployeesByPosition_Id(position_id);
+    }
+
     private List<String> getDepartmentEmployeesNames(Long department_id) {
         List<String> employeeNames = new ArrayList<>();
         for (Employee departmentEmployee : getDepartmentEmployees(department_id)) {
@@ -911,4 +1103,5 @@ public class ButtonService {
     public List<Employee> getEmployees() {
         return employeeRepository.findAll();
     }
+
 }

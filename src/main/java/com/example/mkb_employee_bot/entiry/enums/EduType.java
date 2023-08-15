@@ -1,7 +1,6 @@
 package com.example.mkb_employee_bot.entiry.enums;
 
 public enum EduType {
-
     MAKTAB(0),
     KOLLEJ(1),
     AKADEMIK_LITSEY(1),

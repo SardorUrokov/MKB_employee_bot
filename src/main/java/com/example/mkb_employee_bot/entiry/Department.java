@@ -20,4 +20,10 @@ public class Department {
     Long id;
 
     String name;
+
+    boolean isDeleted = false;
+
+    public Department(String name) {
+        this.name = name;
+    }
 }

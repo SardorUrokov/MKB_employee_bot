@@ -141,6 +141,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (("Департаменты".equals(messageText) || "Departamentlar".equals(messageText)) && isUser) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionUserRoleButtons(update);
+
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -178,6 +179,39 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
 
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (userStage.equals("SECTION_SELECTED") && isUser) {
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+
+                switch (messageText) {
+                    case "Departamentlar", "Департаменты" ->
+                            sendMessageCompletableFuture = buttonService.departmentEmployees(update);
+                    case "Lavozimlar", "Должности" ->
+                            sendMessageCompletableFuture = buttonService.positionEmployees(update); //
+                    case "Boshqarmalar", "Отделы" ->
+                            sendMessageCompletableFuture = buttonService.managementEmployees(update); //
+                    default -> {
+                        if (userLanguage.equals("UZ"))
+                            sendTextMessage(String.valueOf(chatId), "Iltimos, ro'yhatdagi bo'limlardan birini tanlang");
+                        else
+                            sendTextMessage(chatId.toString(), "Пожалуйста, выберите один из разделов списка");
+                    }
+                }
+
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {

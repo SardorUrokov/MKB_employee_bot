@@ -20,4 +20,11 @@ public class Position {
 
     @ManyToOne
     Management management;
+
+    boolean isDeleted = false;
+
+    public Position(String name, Management management) {
+        this.name = name;
+        this.management = management;
+    }
 }

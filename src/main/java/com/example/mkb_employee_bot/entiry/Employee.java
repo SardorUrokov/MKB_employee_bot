@@ -37,4 +37,19 @@ public class Employee {
 
     @OneToMany
     Set<Attachment> attachments;
+
+    boolean isDeleted = false;
+
+    public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, Set<Attachment> attachments) {
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.additionalNumber = additionalNumber;
+        this.nationality = nationality;
+        this.age = age;
+        this.position = position;
+        this.educations = educations;
+        this.skills = skills;
+        this.attachments = attachments;
+    }
 }

@@ -20,4 +20,11 @@ public class Management {
 
     @ManyToOne
     Department department;
+
+    boolean isDeleted = false;
+
+    public Management(String name, Department department) {
+        this.name = name;
+        this.department = department;
+    }
 }
