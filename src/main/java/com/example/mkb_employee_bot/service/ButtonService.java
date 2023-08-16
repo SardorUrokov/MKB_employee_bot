@@ -995,6 +995,45 @@ public class ButtonService {
         });
     }
 
+    public CompletableFuture<SendMessage> askNameForCreatingDepartment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Введите название для создания Департамента " + sighDown;
+                mainMenu = "Главное Меню";
+            }else {
+                returnText = "Departament yaratish uchun nomini kiriting  " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_DEPARTMENT.name());
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(chatId)
+                    .text(returnText)
+                    .build();
+        });
+    }
+
     /***
      * ADMIN, SUPER_ADMIN roles
      */
@@ -1080,7 +1119,7 @@ public class ButtonService {
         return employeeRepository.getEmployeesByPosition_Management_Id(departmentId);
     }
 
-    private List<Employee> getPositionEmployees(Long position_id){
+    private List<Employee> getPositionEmployees(Long position_id) {
         return employeeRepository.getEmployeesByPosition_Id(position_id);
     }
 
@@ -1103,5 +1142,4 @@ public class ButtonService {
     public List<Employee> getEmployees() {
         return employeeRepository.findAll();
     }
-
 }

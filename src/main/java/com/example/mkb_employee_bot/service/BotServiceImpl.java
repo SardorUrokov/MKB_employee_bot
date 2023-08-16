@@ -1,15 +1,12 @@
 package com.example.mkb_employee_bot.service;
 
 import com.example.mkb_employee_bot.entiry.*;
-import com.example.mkb_employee_bot.entiry.enums.EduType;
-import com.example.mkb_employee_bot.entiry.enums.SkillType;
-import com.example.mkb_employee_bot.entiry.enums.Stage;
 import com.example.mkb_employee_bot.repository.*;
-import jakarta.ws.rs.NotFoundException;
-import lombok.RequiredArgsConstructor;
+import com.example.mkb_employee_bot.entiry.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendGame;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -35,6 +32,8 @@ public class BotServiceImpl {
     private final EducationRepository educationRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
+    private final DepartmentServiceImpl departmentService;
+
     private String returnText = "";
 
     public void registerUser(Update update) {
@@ -59,6 +58,26 @@ public class BotServiceImpl {
                                 .build()
                 );
             }
+        });
+    }
+
+    public CompletableFuture<SendMessage> createDepartment(Update update) {
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+            final var department = departmentService.createDepartment(update.getMessage().getText());
+
+            if (userLanguage.equals("UZ"))
+                returnText = department.getName() + " nomli Departament " + department.getId() + "-id bilan saqlandi";
+            else
+                returnText = "Департамент с именем " + department.getName() + " сохранен с " + department.getId() + " id";
+
+            return SendMessage.builder()
+                    .chatId(chatId)
+                    .text(returnText)
+                    .build();
         });
     }
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface DepartmentService {
 
-    void createDepartment(String departmentName);
+    Department createDepartment(String departmentName);
 
     List<Department> getDepartmentList();
 

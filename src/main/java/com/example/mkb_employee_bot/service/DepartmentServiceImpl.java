@@ -14,11 +14,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     @Override
-    public void createDepartment(String departmentName) {
+    public Department createDepartment(String departmentName) {
         Department department = Department.builder()
                 .name(departmentName)
                 .build();
-        departmentRepository.save(department);
+        return departmentRepository.save(department);
     }
 
     @Override
