@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
+
 @Data
 @Entity
 @Builder
@@ -23,4 +25,10 @@ public class Education {
 
     @Enumerated(EnumType.STRING)
     EduType type;
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date updatedAt = new Date();
 }

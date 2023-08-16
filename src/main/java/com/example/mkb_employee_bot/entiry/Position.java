@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
+
 @Data
 @Entity
 @Builder
@@ -22,6 +24,12 @@ public class Position {
     Management management;
 
     boolean isDeleted = false;
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date updatedAt = new Date();
 
     public Position(String name, Management management) {
         this.name = name;

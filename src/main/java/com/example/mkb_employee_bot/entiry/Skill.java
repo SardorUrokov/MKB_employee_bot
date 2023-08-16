@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
+
 @Data
 @Entity
 @Builder
@@ -26,4 +28,10 @@ public class Skill {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date updatedAt = new Date();
 }

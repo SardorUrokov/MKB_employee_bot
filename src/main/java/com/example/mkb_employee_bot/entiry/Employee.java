@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.entiry;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +40,12 @@ public class Employee {
     Set<Attachment> attachments;
 
     boolean isDeleted = false;
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date updatedAt = new Date();
 
     public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, Set<Attachment> attachments) {
         this.fullName = fullName;

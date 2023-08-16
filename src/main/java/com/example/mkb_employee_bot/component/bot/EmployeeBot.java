@@ -140,7 +140,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (("Департаменты".equals(messageText) || "Departamentlar".equals(messageText)) && isUser) {
+            } else if ((("Департаменты".equals(messageText) || "Departamentlar".equals(messageText))  && isUser) || ("Departamentlar ro'yhati".equals(messageText) || "Список Департаменты".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionUserRoleButtons(update);
 
@@ -159,7 +159,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (("Отделы".equals(messageText) || "Boshqarmalar".equals(messageText)) && isUser) {
+            } else if ((("Отделы".equals(messageText) || "Boshqarmalar".equals(messageText))  && isUser) || ("Boshqarmalar ro'yhati".equals(messageText) || "Список Отделы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.managementSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
@@ -177,10 +177,28 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (("Lavozimlar".equals(messageText) || "Должности".equals(messageText)) && isUser) {
+            } else if ((("Должности".equals(messageText) || "Lavozimlar".equals(messageText))  && isUser) || ("Список Должностов".equals(messageText) || "Lavozimlar ro'yhati".equals(messageText)) && (isAdmin || isSuperAdmin)) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
 
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if ((("Сотрудник".equals(messageText) || "Xodim".equals(messageText))  && isUser) || ("Найти сотрудника".equals(messageText) || "Xodimni qidirish".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update);
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -201,8 +219,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 switch (messageSection) {
                     case "departmentSection" ->
                             sendMessageCompletableFuture = buttonService.departmentEmployees(update);
-                    case "positionSection" ->
-                            sendMessageCompletableFuture = buttonService.positionEmployees(update);
+                    case "positionSection" -> sendMessageCompletableFuture = buttonService.positionEmployees(update);
                     case "managementSection" ->
                             sendMessageCompletableFuture = buttonService.managementEmployees(update);
                     default -> {
@@ -228,25 +245,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (("Сотрудник".equals(messageText) || "Xodim".equals(messageText)) && isUser) {
-
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update);
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                    );
-                    executeFuture.join();
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (!isCaseContainingListEmpty && isUser && userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER")) {
+            } else if (!isCaseContainingListEmpty && isUser && (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER"))) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.findEmployeeSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();

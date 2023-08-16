@@ -153,7 +153,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
-            userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_EMPLOYEE_INFO.name());
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -214,7 +214,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
-            userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_EMPLOYEE_INFO.name());
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -275,7 +275,7 @@ public class ButtonService {
                 mainMenu = "Bosh Menu";
             }
 
-            userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_EMPLOYEE_INFO.name());
+            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboardRowList = new ArrayList<>();
             replyKeyboardMarkup.setSelective(true);
@@ -802,14 +802,14 @@ public class ButtonService {
             if (userLanguage.equals("RU")) {
                 returnText = "Выберите нужное действие в разделе Сотрудники " + sighDown;
                 button1 = "Добавить Сотрудники";
-                button2 = "Список Сотрудников";
+                button2 = "Найти Сотрудника";
                 button3 = "Редактировать Сотрудник";
                 button4 = "Удалить Сотрудрик";
                 mainMenu = "Главное Меню";
             } else {
                 returnText = "Xodimlar bo'limidagi kerakli amalni tanlang " + sighDown;
                 button1 = "Xodim qo'shish";
-                button2 = "Xodimlar ro'yhati";
+                button2 = "Xodimni qidirish";
                 button3 = "Xodimni tahrirlash";
                 button4 = "Xodimni o'chirish";
                 mainMenu = "Bosh Menu";

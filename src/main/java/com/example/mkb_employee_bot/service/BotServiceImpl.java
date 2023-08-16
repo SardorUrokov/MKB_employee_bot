@@ -30,9 +30,9 @@ public class BotServiceImpl {
     private final AuthServiceImpl authService;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
+    private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
     private final EducationRepository educationRepository;
-    private final PositionRepository positionRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
     private String returnText = "";
@@ -146,12 +146,13 @@ public class BotServiceImpl {
             replyKeyboardMarkup.setResizeKeyboard(true);
             replyKeyboardMarkup.setOneTimeKeyboard(true);
             keyboardRowList.add(
-                    new KeyboardRow(Collections.singleton(
-                            KeyboardButton.builder()
-//                                    .requestContact(true)
-                                    .text(buttonText)
-                                    .build()
-                    ))
+                    new KeyboardRow(
+                            Collections.singleton(
+                                    KeyboardButton.builder()
+                                            .text(buttonText)
+                                            .build()
+                            )
+                    )
             );
             replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
