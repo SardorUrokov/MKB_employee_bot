@@ -1,6 +1,8 @@
 package com.example.mkb_employee_bot.component.bot;
 
+import com.example.mkb_employee_bot.entiry.Department;
 import com.example.mkb_employee_bot.entiry.enums.Stage;
+import com.example.mkb_employee_bot.repository.DepartmentRepository;
 import com.example.mkb_employee_bot.repository.EmployeeRepository;
 import lombok.Data;
 import lombok.AccessLevel;
@@ -17,6 +19,7 @@ import com.example.mkb_employee_bot.service.ButtonService;
 import com.example.mkb_employee_bot.service.BotServiceImpl;
 import com.example.mkb_employee_bot.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -29,11 +32,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
     private static ButtonService buttonService;
     private static UserRepository userRepository;
     private static EmployeeRepository employeeRepository;
+    private static DepartmentRepository departmentRepository;
 
     Long chatId;
     String userStage;
     String userLanguage;
-    Update tempUpdate = new Update();
+    Department prevDepartment = new Department();
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
     String welcomeMessage = """
@@ -140,7 +144,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if ((("Департаменты".equals(messageText) || "Departamentlar".equals(messageText))  && isUser) || ("Departamentlar ro'yhati".equals(messageText) || "Список Департаменты".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+            } else if ((("Департаменты".equals(messageText) || "Departamentlar".equals(messageText)) && isUser) || ("Departamentlar ro'yhati".equals(messageText) || "Список Департаменты".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.departmentSectionUserRoleButtons(update);
 
@@ -159,7 +163,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if ((("Отделы".equals(messageText) || "Boshqarmalar".equals(messageText))  && isUser) || ("Boshqarmalar ro'yhati".equals(messageText) || "Список Отделы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+            } else if ((("Отделы".equals(messageText) || "Boshqarmalar".equals(messageText)) && isUser) || ("Boshqarmalar ro'yhati".equals(messageText) || "Список Отделы".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.managementSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
@@ -177,7 +181,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if ((("Должности".equals(messageText) || "Lavozimlar".equals(messageText))  && isUser) || ("Список Должностов".equals(messageText) || "Lavozimlar ro'yhati".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+            } else if ((("Должности".equals(messageText) || "Lavozimlar".equals(messageText)) && isUser) || ("Список Должностов".equals(messageText) || "Lavozimlar ro'yhati".equals(messageText)) && (isAdmin || isSuperAdmin)) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
 
@@ -195,7 +199,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if ((("Сотрудник".equals(messageText) || "Xodim".equals(messageText))  && isUser) || ("Найти сотрудника".equals(messageText) || "Xodimni qidirish".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+            } else if ((("Сотрудник".equals(messageText) || "Xodim".equals(messageText)) && isUser) || ("Найти сотрудника".equals(messageText) || "Xodimni qidirish".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
@@ -398,9 +402,101 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }  else if (userStage.equals("ENTER_NAME_FOR_CREATE_DEPARTMENT") && (isAdmin || isSuperAdmin)) {
+            } else if (userStage.equals("ENTER_NAME_FOR_CREATE_DEPARTMENT") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = botService.createDepartment(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if ("Departamentni o'chirish".equals(messageText) || "Удалить Департамент".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.getDepartmentListForDeleting(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_DELETING") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = botService.deleteDepartment(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (("Departamentni tahrirlash".equals(messageText) || "Редактировать Департамент".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.getDepartmentListForUpdating(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_UPDATING") && (isAdmin || isSuperAdmin)) {
+
+                prevDepartment = departmentRepository.findByName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askNameForUpdatingDepartment(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (userStage.equals("ENTER_NAME_FOR_UPDATE_DEPARTMENT") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = botService.updateDepartment(update, prevDepartment);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -483,6 +579,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     @Autowired
     public void setEmployeeRepository(EmployeeRepository employeeRepository) {
         EmployeeBot.employeeRepository = employeeRepository;
+    }
+
+    @Autowired
+    public void setDepartmentRepository(DepartmentRepository departmentRepository) {
+        EmployeeBot.departmentRepository = departmentRepository;
     }
 
     @Override

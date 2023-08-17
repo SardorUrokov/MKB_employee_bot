@@ -10,7 +10,7 @@ public interface DepartmentService {
 
     List<Department> getDepartmentList();
 
-    void updateDepartment(String departmentPreviousName, String departmentNewName);
+    Department updateDepartment(String departmentPreviousName, String departmentNewName);
 
     void deleteDepartment(String departmentName);
 }

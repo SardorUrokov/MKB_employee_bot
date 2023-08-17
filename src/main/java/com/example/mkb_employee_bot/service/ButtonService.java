@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+import com.example.mkb_employee_bot.entiry.Department;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
@@ -24,6 +25,7 @@ public class ButtonService {
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
+    private final DepartmentServiceImpl departmentService;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
@@ -995,6 +997,9 @@ public class ButtonService {
         });
     }
 
+    /***
+     * ADMIN, SUPER_ADMIN roles
+     */
     public CompletableFuture<SendMessage> askNameForCreatingDepartment(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
@@ -1004,7 +1009,7 @@ public class ButtonService {
             if (userLanguage.equals("RU")) {
                 returnText = "Введите название для создания Департамента " + sighDown;
                 mainMenu = "Главное Меню";
-            }else {
+            } else {
                 returnText = "Departament yaratish uchun nomini kiriting  " + sighDown;
                 mainMenu = "Bosh Menu";
             }
@@ -1035,6 +1040,156 @@ public class ButtonService {
     }
 
     /***
+     * ADMIN, SUPER_ADMIN roles
+     */
+    public CompletableFuture<SendMessage> getDepartmentListForDeleting(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Выберите Департамент для удаления " + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "O'chirish uchun Departamentni tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    for (String departmentName : getDepartmentNames()) {
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(
+                                                KeyboardButton.builder()
+                                                        .text(departmentName)
+                                                        .build()
+                                        )
+                                )
+                        );
+                    }
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_DELETING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    /**
+     * ADMIN, SUPER_ADMIN roles
+     */
+    public CompletableFuture<SendMessage> getDepartmentListForUpdating(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Выберите Департамент для редактирования " + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "Tahrirlash uchun Departamentni tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    for (String departmentName : getDepartmentNames()) {
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(
+                                                KeyboardButton.builder()
+                                                        .text(departmentName)
+                                                        .build()
+                                        )
+                                )
+                        );
+                    }
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_UPDATING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    /**
+     * ADMIN, SUPER_ADMIN roles
+     */
+    public CompletableFuture<SendMessage> askNameForUpdatingDepartment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Чтобы изменить название Департамента, введите новое имя " + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                returnText = "Departament nomini tahrirlash uchun yangi nom kiriting  " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_UPDATE_DEPARTMENT.name());
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(chatId)
+                    .text(returnText)
+                    .build();
+        });
+    }
+
+    /**
      * ADMIN, SUPER_ADMIN roles
      */
     public CompletableFuture<SendMessage> managementSectionButtons(Update update) {
@@ -1107,8 +1262,12 @@ public class ButtonService {
         return userRepository.getUserLanguageByUserChatId(userChatId);
     }
 
-    private List<String> getDepartmentNames() {
-        return departmentRepository.getDepartmentNames();
+    public List<String> getDepartmentNames() {
+        List<String> depertmentNameList = new ArrayList<>();
+        for (Department department : departmentService.getDepartmentList()) {
+            depertmentNameList.add(department.getName());
+        }
+        return depertmentNameList;
     }
 
     private List<Employee> getDepartmentEmployees(Long departmentId) {

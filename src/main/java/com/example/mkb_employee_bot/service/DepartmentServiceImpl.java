@@ -27,10 +27,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public void updateDepartment(String departmentPreviousName, String departmentNewName) {
+    public Department updateDepartment(String departmentPreviousName, String departmentNewName) {
         final var department = departmentRepository.findByName(departmentPreviousName).get();
         department.setName(departmentNewName);
-        departmentRepository.save(department);
+        return departmentRepository.save(department);
     }
 
     @Override

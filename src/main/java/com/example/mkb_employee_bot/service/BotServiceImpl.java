@@ -25,6 +25,7 @@ import static com.example.mkb_employee_bot.entiry.enums.SkillType.SOFT_SKILL;
 public class BotServiceImpl {
 
     private final AuthServiceImpl authService;
+    private final ButtonService buttonService;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final PositionRepository positionRepository;
@@ -62,23 +63,97 @@ public class BotServiceImpl {
     }
 
     public CompletableFuture<SendMessage> createDepartment(Update update) {
-
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
-            final var department = departmentService.createDepartment(update.getMessage().getText());
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+                    final var department = departmentService.createDepartment(update.getMessage().getText());
 
-            if (userLanguage.equals("UZ"))
-                returnText = department.getName() + " nomli Departament " + department.getId() + "-id bilan saqlandi";
-            else
-                returnText = "Департамент с именем " + department.getName() + " сохранен с " + department.getId() + " id";
+                    if (userLanguage.equals("UZ"))
+                        returnText = department.getName() + " nomli Departament " + department.getId() + "-id bilan saqlandi";
+                    else
+                        returnText = "Департамент с именем " + department.getName() + " сохранен с " + department.getId() + " id";
 
-            return SendMessage.builder()
-                    .chatId(chatId)
-                    .text(returnText)
-                    .build();
-        });
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> updateDepartment(Update update, Department previousDepartment) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+                    String mainMenuButton = "";
+                    final var updatedDepartment = departmentService.updateDepartment(previousDepartment.getName(), update.getMessage().getText());
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = previousDepartment.getName() + " nomli Departament " + updatedDepartment.getName() + " ga o'zgartirildi";
+                        mainMenuButton = "Bosh Menu";
+                    }else {
+                        returnText = "Название Департамента " + previousDepartment.getName() + " изменено на " + updatedDepartment.getName();
+                        mainMenuButton = "Главное Меню";
+                    }
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    final var departmentList = departmentService.getDepartmentList();
+                    for (Department department : departmentList) {
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        List.of(
+                                                KeyboardButton.builder()
+                                                        .text(department.getName())
+                                                        .build()
+                                        )
+                                )
+                        );
+                    }
+                    keyboardRowList.add(
+                            new KeyboardRow(Collections.singletonList(
+                                    KeyboardButton.builder()
+                                            .text(mainMenuButton)
+                                            .build()
+                            ))
+                    );
+
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    return SendMessage.builder()
+
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> deleteDepartment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var text = update.getMessage().getText();
+
+                    departmentService.deleteDepartment(text);
+
+                    final var userLanguage = getUserLanguage(chatId);
+                    if (userLanguage.equals("UZ"))
+                        returnText = text + " Departementi o'chirildi";
+                    else
+                        returnText = "Департамент " + text + " был удален";
+
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
     }
 
     public CompletableFuture<SendMessage> setUserLanguage(Update update) {

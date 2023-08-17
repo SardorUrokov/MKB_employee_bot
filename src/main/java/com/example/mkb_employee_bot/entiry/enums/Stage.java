@@ -1,5 +1,7 @@
 package com.example.mkb_employee_bot.entiry.enums;
 
+import jakarta.annotation.Resource;
+
 public enum Stage {
     STARTED(1),
     LANGUAGE_SELECTED(2),
@@ -8,6 +10,9 @@ public enum Stage {
     ROLE_IDENTIFIED(0),
     SECTION_SELECTED(5),
     DEPARTMENT_SELECTED_FOR_EMPLOYEE_INFO(),
+    DEPARTMENT_SELECTED_FOR_DELETING(),
+    DEPARTMENT_SELECTED_FOR_UPDATING(),
+    ENTER_NAME_FOR_UPDATE_DEPARTMENT(),
     MANAGEMENT_SELECTED_FOR_EMPLOYEE_INFO(),
     POSITION_SELECTED_FOR_EMPLOYEE_INFO(),
     DEPARTMENT_EMPLOYEE_SELECTED(),
@@ -23,8 +28,9 @@ public enum Stage {
     SELECT_EDUCATION_TYPE,
     ENTER_EDUCATION,
     SELECT_FILE_TYPE,
-    SHARE_ATTACHMENT,
-    ENTER_SKILLS;
+    ENTER_SKILLS,
+    SHARE_ATTACHMENT;
+
 
     private int value;
 
