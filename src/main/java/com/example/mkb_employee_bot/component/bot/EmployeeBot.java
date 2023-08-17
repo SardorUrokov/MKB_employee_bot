@@ -37,6 +37,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Long chatId;
     String userStage;
     String userLanguage;
+    Department selectedDepartment = new Department();
     Department prevDepartment = new Department();
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -218,8 +219,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
             } else if (userStage.equals("SECTION_SELECTED") && isUser) {
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
                 switch (messageSection) {
                     case "departmentSection" ->
                             sendMessageCompletableFuture = buttonService.departmentEmployees(update);
@@ -233,8 +234,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             sendTextMessage(chatId.toString(), "Пожалуйста, выберите один из разделов списка");
                     }
                 }
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
 
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -402,6 +403,64 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (("Добавить Отдел".equals(messageText) || "Boshqarma qo'shish".equals(messageText) && (isAdmin || isSuperAdmin))) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectDepartmentForCreateManagement(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_CREATING_MANAGEMENT") && (isAdmin || isSuperAdmin)) {
+
+                selectedDepartment = departmentRepository.findByName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askingNameForCreatingManagement(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("ENTER_NAME_FOR_CREATE_MANAGEMENT") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = botService.createManagement(selectedDepartment, update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else if (userStage.equals("ENTER_NAME_FOR_CREATE_DEPARTMENT") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = botService.createDepartment(update);
@@ -420,6 +479,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if ("Departamentni o'chirish".equals(messageText) || "Удалить Департамент".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.getDepartmentListForDeleting(update);

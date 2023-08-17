@@ -1039,6 +1039,44 @@ public class ButtonService {
         });
     }
 
+    public CompletableFuture<SendMessage> askSelectDepartmentForCreateManagement(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "Boshqarma yaratiladigan Departamentni tanlang";
+                        mainMenu = "Bosh Menu";
+                    } else {
+                        returnText = "Выберите Департамент, в котором будет создан Отдель";
+                        mainMenu = "Главное Меню";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_CREATING_MANAGEMENT.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+
+                }
+        );
+    }
+
     /***
      * ADMIN, SUPER_ADMIN roles
      */
@@ -1058,21 +1096,8 @@ public class ButtonService {
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    replyKeyboardMarkup.setSelective(true);
-                    replyKeyboardMarkup.setResizeKeyboard(true);
-                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
 
-                    for (String departmentName : getDepartmentNames()) {
-                        keyboardRowList.add(
-                                new KeyboardRow(
-                                        Collections.singletonList(
-                                                KeyboardButton.builder()
-                                                        .text(departmentName)
-                                                        .build()
-                                        )
-                                )
-                        );
-                    }
                     keyboardRowList.add(
                             new KeyboardRow(List.of(
                                     KeyboardButton.builder()
@@ -1258,6 +1283,49 @@ public class ButtonService {
         });
     }
 
+    /**
+     * ADMIN, SUPER_ADMIN roles
+     */
+    public CompletableFuture<SendMessage> askingNameForCreatingManagement(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            final var chatId = update.getMessage().getChatId();
+            final var userLanguage = getUserLanguage(chatId);
+
+            if (userLanguage.equals("RU")) {
+                returnText = "Чтобы создать Отдель, введите имя для него" + sighDown;
+                mainMenu = "Главное Меню";
+            } else {
+                returnText = "Boshqarmani yaratish uchun unga nom kiriting  " + sighDown;
+                mainMenu = "Bosh Menu";
+            }
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboardRowList = new ArrayList<>();
+            replyKeyboardMarkup.setSelective(true);
+            replyKeyboardMarkup.setResizeKeyboard(true);
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+            keyboardRowList.add(
+                    new KeyboardRow(List.of(
+                            KeyboardButton.builder()
+                                    .text(mainMenu)
+                                    .build()
+                    ))
+            );
+
+            userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_MANAGEMENT.name());
+            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                    .replyMarkup(replyKeyboardMarkup)
+                    .chatId(chatId)
+                    .text(returnText)
+                    .build();
+        });
+
+    }
+
     private String getUserLanguage(Long userChatId) {
         return userRepository.getUserLanguageByUserChatId(userChatId);
     }
@@ -1280,6 +1348,25 @@ public class ButtonService {
 
     private List<Employee> getPositionEmployees(Long position_id) {
         return employeeRepository.getEmployeesByPosition_Id(position_id);
+    }
+
+    public void setDepartmentListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        for (String departmentName : getDepartmentNames()) {
+            keyboardRowList.add(
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(departmentName)
+                                            .build()
+                            )
+                    )
+            );
+        }
     }
 
     private List<String> getDepartmentEmployeesNames(Long department_id) {

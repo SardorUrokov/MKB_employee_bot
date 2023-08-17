@@ -25,15 +25,14 @@ import static com.example.mkb_employee_bot.entiry.enums.SkillType.SOFT_SKILL;
 public class BotServiceImpl {
 
     private final AuthServiceImpl authService;
-    private final ButtonService buttonService;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
     private final EducationRepository educationRepository;
+    private final DepartmentServiceImpl departmentService;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
-    private final DepartmentServiceImpl departmentService;
 
     private String returnText = "";
 
@@ -93,7 +92,7 @@ public class BotServiceImpl {
                     if (userLanguage.equals("UZ")) {
                         returnText = previousDepartment.getName() + " nomli Departament " + updatedDepartment.getName() + " ga o'zgartirildi";
                         mainMenuButton = "Bosh Menu";
-                    }else {
+                    } else {
                         returnText = "Название Департамента " + previousDepartment.getName() + " изменено на " + updatedDepartment.getName();
                         mainMenuButton = "Главное Меню";
                     }
@@ -139,7 +138,6 @@ public class BotServiceImpl {
 
                     final var chatId = update.getMessage().getChatId();
                     final var text = update.getMessage().getText();
-
                     departmentService.deleteDepartment(text);
 
                     final var userLanguage = getUserLanguage(chatId);
@@ -155,6 +153,13 @@ public class BotServiceImpl {
                 }
         );
     }
+
+//    public CompletableFuture<SendMessage> addManagement(Update update){
+//        return CompletableFuture.supplyAsync(() -> {
+//
+//
+//        });
+//    }
 
     public CompletableFuture<SendMessage> setUserLanguage(Update update) {
         return CompletableFuture.supplyAsync(() -> {
@@ -355,5 +360,10 @@ public class BotServiceImpl {
                 "\nTa'lim yo'nalishi: " + education.getEducationField() +
                 "\n" + education.getType() +
                 "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
+    }
+
+    public CompletableFuture<SendMessage> createManagement(Department selectedDepartment, Update update) {
+        //should write ManagementService;
+        return null;
     }
 }
