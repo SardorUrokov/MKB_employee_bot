@@ -1,6 +1,7 @@
 package com.example.mkb_employee_bot.service;
 
 import com.example.mkb_employee_bot.entiry.*;
+import com.example.mkb_employee_bot.entiry.dto.ManagementDTO;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entiry.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class BotServiceImpl {
     private final DepartmentServiceImpl departmentService;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
+    private final ManagementServiceImpl managementService;
 
     private String returnText = "";
 
@@ -363,7 +365,27 @@ public class BotServiceImpl {
     }
 
     public CompletableFuture<SendMessage> createManagement(Department selectedDepartment, Update update) {
-        //should write ManagementService;
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    ManagementDTO dto = ManagementDTO.builder()
+                            .departmentId(selectedDepartment.getId())
+                            .name(update.getMessage().getText())
+                            .build();
+                    final var management = managementService.createManagement(dto);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = management.getName() + " nomli Boshqarma " + management.getId() + "-id bilan saqlandi";
+                    else
+                        returnText = "Отдель с именем " + management.getName() + " сохранен с " + management.getId() + " id";
+
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
     }
 }
