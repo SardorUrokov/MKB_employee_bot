@@ -1,9 +1,11 @@
 package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entiry.Department;
+import com.example.mkb_employee_bot.entiry.Management;
 import com.example.mkb_employee_bot.entiry.enums.Stage;
 import com.example.mkb_employee_bot.repository.DepartmentRepository;
 import com.example.mkb_employee_bot.repository.EmployeeRepository;
+import com.example.mkb_employee_bot.repository.ManagementRepository;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String userLanguage;
     Department selectedDepartment = new Department();
     Department prevDepartment = new Department();
+    Management prevManagement = new Management();
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
     String welcomeMessage = """
@@ -46,6 +49,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         
             Добро пожаловать в бот для сотрудников МКБанк!
             """;
+    private final ManagementRepository managementRepository;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -406,6 +410,84 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (("Добавить Отдел".equals(messageText) || "Boshqarma qo'shish".equals(messageText) && (isAdmin || isSuperAdmin))) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectDepartmentForCreateManagement(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Boshqarmani o'chirish".equals(messageText) || "Удалить Отдел".equals(messageText)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForDeleting(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_DELETING") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = botService.deleteManagement(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Редактировать Отдел".equals(messageText) || "Boshqarmalarni tahrirlash".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForUpdating(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_UPDATING") && (isAdmin || isSuperAdmin)) {
+
+                prevManagement = managementRepository.findByName(messageText).orElseThrow();
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectDepartmentForUpdatingManagement(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {

@@ -1119,6 +1119,91 @@ public class ButtonService {
     }
 
     /**
+     * ADMIN, SUPER_ADMIN
+     */
+    public CompletableFuture<SendMessage> askSelectManagementForDeleting(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Выберите Отдель для удаления " + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "O'chirish uchun Boshqarmani tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    setManagementListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_DELETING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+
+    }
+
+    /**
+     * ADMIN, SUPER_ADMIN roles
+     */
+    public CompletableFuture<SendMessage> askSelectManagementForUpdating(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Выберите Отдель для редактирования " + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "Tahrirlash uchun Boshqarmani tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    setManagementListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+
+    }
+
+
+    /**
      * ADMIN, SUPER_ADMIN roles
      */
     public CompletableFuture<SendMessage> getDepartmentListForUpdating(Update update) {
@@ -1289,40 +1374,41 @@ public class ButtonService {
     public CompletableFuture<SendMessage> askingNameForCreatingManagement(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+                    final var chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
 
-            if (userLanguage.equals("RU")) {
-                returnText = "Чтобы создать Отдель, введите имя для него" + sighDown;
-                mainMenu = "Главное Меню";
-            } else {
-                returnText = "Boshqarmani yaratish uchun unga nom kiriting  " + sighDown;
-                mainMenu = "Bosh Menu";
-            }
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Чтобы создать Отдель, введите имя для него" + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "Boshqarmani yaratish uchun unga nom kiriting  " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
 
-            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-            List<KeyboardRow> keyboardRowList = new ArrayList<>();
-            replyKeyboardMarkup.setSelective(true);
-            replyKeyboardMarkup.setResizeKeyboard(true);
-            replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-            keyboardRowList.add(
-                    new KeyboardRow(List.of(
-                            KeyboardButton.builder()
-                                    .text(mainMenu)
-                                    .build()
-                    ))
-            );
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
 
-            userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_MANAGEMENT.name());
-            replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_MANAGEMENT.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-            return SendMessage.builder()
-                    .replyMarkup(replyKeyboardMarkup)
-                    .chatId(chatId)
-                    .text(returnText)
-                    .build();
-        });
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
 
     }
 
@@ -1369,6 +1455,25 @@ public class ButtonService {
         }
     }
 
+    public void setManagementListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        for (String managementName : getManagementNames()) {
+            keyboardRowList.add(
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(managementName)
+                                            .build()
+                            )
+                    )
+            );
+        }
+    }
+
     private List<String> getDepartmentEmployeesNames(Long department_id) {
         List<String> employeeNames = new ArrayList<>();
         for (Employee departmentEmployee : getDepartmentEmployees(department_id)) {
@@ -1387,5 +1492,10 @@ public class ButtonService {
 
     public List<Employee> getEmployees() {
         return employeeRepository.findAll();
+    }
+
+    public CompletableFuture<SendMessage> askSelectDepartmentForUpdatingManagement(Update update) {
+
+        return null;
     }
 }

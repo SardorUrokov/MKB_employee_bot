@@ -50,6 +50,6 @@ public class ManagementServiceImpl implements ManagementService {
 
     @Override
     public void deleteManagement(String managementName) {
-
+        managementRepository.updateManagementIsDeleted(managementName);
     }
 }
