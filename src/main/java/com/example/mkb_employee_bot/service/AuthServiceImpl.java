@@ -2,11 +2,11 @@ package com.example.mkb_employee_bot.service;
 
 import java.util.Date;
 
-import com.example.mkb_employee_bot.entiry.enums.Role;
+import com.example.mkb_employee_bot.entity.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.example.mkb_employee_bot.entiry.User;
+import com.example.mkb_employee_bot.entity.User;
 import com.example.mkb_employee_bot.repository.UserRepository;
 
 @Slf4j

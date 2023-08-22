@@ -1,6 +1,5 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entiry.enums.EduType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,22 +12,28 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Education {
+public class Management {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String name,
-            educationField,
-            startedDate,
-            endDate;
 
-    @Enumerated(EnumType.STRING)
-    EduType type;
+    String name;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    Department department;
+
+    boolean isDeleted = false;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
+
+    public Management(String name, Department department) {
+        this.name = name;
+        this.department = department;
+    }
 }

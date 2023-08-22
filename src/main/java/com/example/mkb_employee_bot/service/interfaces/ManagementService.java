@@ -2,8 +2,8 @@ package com.example.mkb_employee_bot.service.interfaces;
 
 import java.util.List;
 
-import com.example.mkb_employee_bot.entiry.Management;
-import com.example.mkb_employee_bot.entiry.dto.ManagementDTO;
+import com.example.mkb_employee_bot.entity.Management;
+import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 
 public interface ManagementService {
 

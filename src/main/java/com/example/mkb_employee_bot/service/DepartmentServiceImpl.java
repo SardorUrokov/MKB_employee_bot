@@ -3,7 +3,7 @@ package com.example.mkb_employee_bot.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.example.mkb_employee_bot.entiry.Department;
+import com.example.mkb_employee_bot.entity.Department;
 import com.example.mkb_employee_bot.repository.DepartmentRepository;
 import com.example.mkb_employee_bot.service.interfaces.DepartmentService;
 

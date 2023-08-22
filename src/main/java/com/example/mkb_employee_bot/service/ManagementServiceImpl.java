@@ -1,7 +1,7 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entiry.Management;
-import com.example.mkb_employee_bot.entiry.dto.ManagementDTO;
+import com.example.mkb_employee_bot.entity.Management;
+import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 import com.example.mkb_employee_bot.repository.DepartmentRepository;
 import com.example.mkb_employee_bot.repository.ManagementRepository;
 import com.example.mkb_employee_bot.service.interfaces.ManagementService;
@@ -42,7 +42,7 @@ public class ManagementServiceImpl implements ManagementService {
                 .orElseThrow();
         final var management = managementRepository.findById(id).orElseThrow();
 
-        management.setName(department.getName());
+        management.setName(managementDTO.getName());
         management.setDepartment(department);
 
         return managementRepository.save(management);

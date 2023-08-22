@@ -1,4 +1,4 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Management {
+public class Position {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class Management {
     String name;
 
     @ManyToOne
-    Department department;
+    Management management;
 
     boolean isDeleted = false;
 
@@ -31,8 +31,8 @@ public class Management {
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
 
-    public Management(String name, Department department) {
+    public Position(String name, Management management) {
         this.name = name;
-        this.department = department;
+        this.management = management;
     }
 }

@@ -1,26 +1,24 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entiry.*;
-import com.example.mkb_employee_bot.entiry.dto.ManagementDTO;
+import com.example.mkb_employee_bot.entity.*;
+import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.entiry.enums.Stage;
+import com.example.mkb_employee_bot.entity.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
-import static com.example.mkb_employee_bot.entiry.enums.SkillType.HARD_SKILL;
-import static com.example.mkb_employee_bot.entiry.enums.SkillType.SOFT_SKILL;
+import static com.example.mkb_employee_bot.entity.enums.SkillType.HARD_SKILL;
+import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
 
 @Slf4j
 @Service
@@ -29,6 +27,7 @@ public class BotServiceImpl {
 
     private final AuthServiceImpl authService;
     private final ButtonService buttonService;
+    private final PositionServiceImpl positionService;
     private final DepartmentServiceImpl departmentService;
     private final ManagementServiceImpl managementService;
 
@@ -433,7 +432,7 @@ public class BotServiceImpl {
                     chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
                     ManagementDTO managementDTO = new ManagementDTO(
-                            previousManagement.getId(),
+                            previousManagement.getDepartment().getId(),
                             update.getMessage().getText()
                     );
                     final var updatedDepartment = managementService.updateManagement(previousManagement.getId(), managementDTO);
@@ -443,7 +442,31 @@ public class BotServiceImpl {
                     else
                         returnText = "Название Отдела " + previousManagement.getName() + " изменено на " + updatedDepartment.getName();
 
-                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
+                    final var messageCompletableFuture = buttonService.managementSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> deletePosition(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    final var text = update.getMessage().getText();
+                    positionService.deletePosition(text);
+
+                    if (getUserLanguage(chatId).equals("UZ"))
+                        returnText = text + " lavozimi o'chirildi";
+                    else
+                        returnText = "Должность " + text + " был удален";
+
+                    final var messageCompletableFuture = buttonService.positionSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
 
                     return SendMessage.builder()

@@ -1,7 +1,7 @@
 package com.example.mkb_employee_bot.repository;
 
 import java.util.Optional;
-import com.example.mkb_employee_bot.entiry.User;
+import com.example.mkb_employee_bot.entity.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;

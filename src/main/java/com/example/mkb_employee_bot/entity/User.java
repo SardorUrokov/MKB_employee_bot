@@ -1,37 +1,44 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entiry.enums.SkillType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.mkb_employee_bot.entity.enums.Language;
+import com.example.mkb_employee_bot.entity.enums.Stage;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import com.example.mkb_employee_bot.entity.enums.Role;
 
 import java.util.Date;
 
 @Data
-@Entity
 @Builder
+@Entity(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Skill {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String name;
+
+    String fullName,
+            userName,
+            phoneNumber;
+
+    Long userChatId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "skill_type")
-    SkillType skillType;
+    Stage stage;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @Enumerated(EnumType.STRING)
+    Language language;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
+
+    @Enumerated(EnumType.STRING)
+    Role role = Role.USER;
 }

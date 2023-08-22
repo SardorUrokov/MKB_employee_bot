@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import com.example.mkb_employee_bot.entiry.Department;
+import com.example.mkb_employee_bot.entity.Department;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.entiry.Employee;
-import com.example.mkb_employee_bot.entiry.enums.Stage;
+import com.example.mkb_employee_bot.entity.Employee;
+import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -34,6 +34,7 @@ public class ButtonService {
     private String returnText = "";
     private final String sighDown = "⬇\uFE0F";
     private final String sighBack = "⬅\uFE0F";
+    private Long chatId;
 
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
 
@@ -58,7 +59,7 @@ public class ButtonService {
 
                             Пожалуйста, выберите язык для использования бота\uD83C\uDDF7\uD83C\uDDFA\s""";
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
@@ -76,7 +77,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> userButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -136,7 +137,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> positionEmployees(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var department = positionRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var managementEmployees = getManagementEmployees(department.getId());
@@ -197,7 +198,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> managementEmployees(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var department = managementRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var managementEmployees = getManagementEmployees(department.getId());
@@ -258,7 +259,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> departmentEmployees(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var department = departmentRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var departmentEmployees = getDepartmentEmployees(department.getId());
@@ -319,7 +320,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> departmentSectionUserRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var departmentNames = getDepartmentNames();
 
@@ -379,7 +380,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> managementSectionUserRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var managementNames = getManagementNames();
 
@@ -439,7 +440,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> positionSectionUserRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var positionNames = getPositionNames();
 
@@ -499,7 +500,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> employeeSectionUserRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var employees = getEmployees();
 
@@ -548,7 +549,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> findEmployeeSectionUserRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             final var employees = employeeRepository.findByFullNameIgnoreCaseContaining(
                     update.getMessage().getText()
@@ -606,7 +607,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> superAdminButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4, button5;
 
@@ -674,7 +675,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> adminSectionAdminRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2;
 
@@ -728,7 +729,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> adminSectionSuperAdminRoleButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -797,7 +798,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> employeeSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -865,7 +866,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> positionSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -934,7 +935,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> departmentSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -1003,7 +1004,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> askNameForCreatingDepartment(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
 
             if (userLanguage.equals("RU")) {
@@ -1042,7 +1043,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> askSelectDepartmentForCreateManagement(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("UZ")) {
@@ -1083,7 +1084,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> getDepartmentListForDeleting(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
@@ -1124,7 +1125,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> askSelectManagementForDeleting(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
@@ -1163,10 +1164,10 @@ public class ButtonService {
     /**
      * ADMIN, SUPER_ADMIN roles
      */
-    public CompletableFuture<SendMessage> askSelectManagementForUpdating(Update update) {
+    public CompletableFuture<SendMessage> askSelectManagementForUpdating(Department department, Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
@@ -1179,7 +1180,7 @@ public class ButtonService {
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    setManagementListToButtons(keyboardRowList, replyKeyboardMarkup);
+                    setManagementListToButtonsByDepartmentId(department.getId(), keyboardRowList, replyKeyboardMarkup);
 
                     keyboardRowList.add(
                             new KeyboardRow(List.of(
@@ -1209,7 +1210,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> getDepartmentListForUpdating(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
@@ -1263,7 +1264,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> askNameForUpdatingDepartment(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
 
             if (userLanguage.equals("RU")) {
@@ -1305,7 +1306,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> managementSectionButtons(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            final var chatId = update.getMessage().getChatId();
+            chatId = update.getMessage().getChatId();
             final var userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
@@ -1371,17 +1372,17 @@ public class ButtonService {
     /**
      * ADMIN, SUPER_ADMIN roles
      */
-    public CompletableFuture<SendMessage> askingNameForCreatingManagement(Update update) {
+    public CompletableFuture<SendMessage> askingNameForCreatingManagement(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    final var chatId = update.getMessage().getChatId();
+                    chatId = update.getMessage().getChatId();
                     final var userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
-                        returnText = "Чтобы создать Отдель, введите имя для него" + sighDown;
+                        returnText = "Введите имя для Отдела" + sighDown;
                         mainMenu = "Главное Меню";
                     } else {
-                        returnText = "Boshqarmani yaratish uchun unga nom kiriting  " + sighDown;
+                        returnText = "Boshqarma uchun nom kiriting  " + sighDown;
                         mainMenu = "Bosh Menu";
                     }
 
@@ -1399,7 +1400,11 @@ public class ButtonService {
                             ))
                     );
 
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_MANAGEMENT.name());
+                    if (forWhat.equals("forSaving"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_SAVING_UPDATED_MANAGEMENT.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_MANAGEMENT.name());
+
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
@@ -1474,6 +1479,45 @@ public class ButtonService {
         }
     }
 
+    public void setPositionListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        for (String positionName : getPositionNames()) {
+            keyboardRowList.add(
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(positionName)
+                                            .build()
+                            )
+                    )
+            );
+        }
+    }
+
+    public void setManagementListToButtonsByDepartmentId(Long departmentId, List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        final var namesByDepartmentId = getManagementNamesByDepartmentId(departmentId);
+
+        for (String managementName : namesByDepartmentId) {
+            keyboardRowList.add(
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(managementName)
+                                            .build()
+                            )
+                    )
+            );
+        }
+    }
+
     private List<String> getDepartmentEmployeesNames(Long department_id) {
         List<String> employeeNames = new ArrayList<>();
         for (Employee departmentEmployee : getDepartmentEmployees(department_id)) {
@@ -1486,6 +1530,10 @@ public class ButtonService {
         return managementRepository.getManagementNames();
     }
 
+    private List<String> getManagementNamesByDepartmentId(Long departmentId) {
+        return managementRepository.getManagementNamesByDepartmentId(departmentId);
+    }
+
     private List<String> getPositionNames() {
         return positionRepository.getPositionNames();
     }
@@ -1494,8 +1542,91 @@ public class ButtonService {
         return employeeRepository.findAll();
     }
 
-    public CompletableFuture<SendMessage> askSelectDepartmentForUpdatingManagement(Update update) {
+    public CompletableFuture<SendMessage> askSelectDepartmentForUpdatingManagement(Update update, String forWhat) {
+        return CompletableFuture.supplyAsync(() -> {
 
-        return null;
+                    chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
+                    if (userLanguage.equals("RU")) {
+
+                        if (forWhat.equals("forSelecting"))
+                            returnText = "Выберите Департамент Отдела для редактирования " + sighDown;
+                        else
+                            returnText = "Выберите Департамент для Отдела " + sighDown;
+                        mainMenu = "Главное Меню";
+
+                    } else {
+
+                        if (forWhat.equals("forSelecting"))
+                            returnText = "Tahrirlanadigan Boshqarma departamentini tanlang " + sighDown;
+                        else
+                            returnText = "Boshqarma uchun Departamentni tanlang " + sighDown;
+
+                        mainMenu = "Bosh Menu";
+                    }
+                    setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    if (forWhat.equals("forSaving"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_SAVING_UPDATED_MANAGEMENT.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_UPDATING_MANAGEMENT.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askSelectPositionForDeleting(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Выберите Должность для удаления " + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "O'chirish uchun Lavozimni tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    setPositionListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(List.of(
+                                    KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
+                            ))
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_DELETING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
     }
 }

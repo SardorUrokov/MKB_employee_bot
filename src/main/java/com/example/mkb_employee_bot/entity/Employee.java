@@ -1,4 +1,4 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
 import java.util.Date;
 import java.util.List;

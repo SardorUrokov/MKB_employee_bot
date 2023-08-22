@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.example.mkb_employee_bot.entiry.*;
-import com.example.mkb_employee_bot.entiry.enums.*;
+import com.example.mkb_employee_bot.entity.*;
+import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

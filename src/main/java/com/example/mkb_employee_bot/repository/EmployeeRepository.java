@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.example.mkb_employee_bot.entiry.Employee;
-import com.example.mkb_employee_bot.entiry.Skill;
-import com.example.mkb_employee_bot.entiry.enums.SkillType;
+import com.example.mkb_employee_bot.entity.Employee;
+import com.example.mkb_employee_bot.entity.Skill;
+import com.example.mkb_employee_bot.entity.enums.SkillType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

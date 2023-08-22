@@ -1,6 +1,6 @@
 package com.example.mkb_employee_bot.service.interfaces;
 
-import com.example.mkb_employee_bot.entiry.Department;
+import com.example.mkb_employee_bot.entity.Department;
 
 import java.util.List;
 

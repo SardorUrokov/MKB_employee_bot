@@ -1,44 +1,34 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entiry.enums.Language;
-import com.example.mkb_employee_bot.entiry.enums.Stage;
+import com.example.mkb_employee_bot.entity.enums.EduType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import com.example.mkb_employee_bot.entiry.enums.Role;
 
 import java.util.Date;
 
 @Data
+@Entity
 @Builder
-@Entity(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class Education {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
-    String fullName,
-            userName,
-            phoneNumber;
-
-    Long userChatId;
+    String name,
+            educationField,
+            startedDate,
+            endDate;
 
     @Enumerated(EnumType.STRING)
-    Stage stage;
-
-    @Enumerated(EnumType.STRING)
-    Language language;
+    EduType type;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
-
-    @Enumerated(EnumType.STRING)
-    Role role = Role.USER;
 }

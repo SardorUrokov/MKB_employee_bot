@@ -1,7 +1,7 @@
-package com.example.mkb_employee_bot.entiry;
+package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entiry.enums.AttachmentType;
-import com.example.mkb_employee_bot.entiry.enums.FileType;
+import com.example.mkb_employee_bot.entity.enums.AttachmentType;
+import com.example.mkb_employee_bot.entity.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

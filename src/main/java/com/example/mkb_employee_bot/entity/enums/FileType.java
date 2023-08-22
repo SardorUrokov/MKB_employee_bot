@@ -1,4 +1,4 @@
-package com.example.mkb_employee_bot.entiry.enums;
+package com.example.mkb_employee_bot.entity.enums;
 
 public enum FileType {
 
