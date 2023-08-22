@@ -1,16 +1,14 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.entity.Management;
-import com.example.mkb_employee_bot.entity.Position;
-import com.example.mkb_employee_bot.entity.dto.PositionDTO;
-import com.example.mkb_employee_bot.repository.ManagementRepository;
-import com.example.mkb_employee_bot.repository.PositionRepository;
-import com.example.mkb_employee_bot.service.interfaces.PositionService;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
+import com.example.mkb_employee_bot.entity.Position;
+import com.example.mkb_employee_bot.entity.dto.PositionDTO;
+import com.example.mkb_employee_bot.repository.PositionRepository;
+import com.example.mkb_employee_bot.repository.ManagementRepository;
+import com.example.mkb_employee_bot.service.interfaces.PositionService;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +38,20 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public Position updatePosition(Long id, PositionDTO positionDTO) {
-        return null;
+    public Position updatePosition(Long positionId, PositionDTO positionDTO) {
+
+        final var position = positionRepository
+                .findById(positionId)
+                .orElseThrow();
+
+        final var management = managementRepository
+                .findById(positionDTO.getManagementId())
+                .orElseThrow();
+
+        position.setName(positionDTO.getName());
+        position.setManagement(management);
+
+        return positionRepository.save(position);
     }
 
     @Override

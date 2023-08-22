@@ -1,14 +1,14 @@
 package com.example.mkb_employee_bot.service;
 
+import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import com.example.mkb_employee_bot.entity.Management;
 import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 import com.example.mkb_employee_bot.repository.DepartmentRepository;
 import com.example.mkb_employee_bot.repository.ManagementRepository;
 import com.example.mkb_employee_bot.service.interfaces.ManagementService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +19,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     @Override
     public Management createManagement(ManagementDTO managementDTO) {
+
         final var department = departmentRepository
                 .findById(managementDTO.getDepartmentId())
                 .orElseThrow();
@@ -27,6 +28,7 @@ public class ManagementServiceImpl implements ManagementService {
                 .name(managementDTO.getName())
                 .department(department)
                 .build();
+
         return managementRepository.save(management);
     }
 
@@ -37,10 +39,14 @@ public class ManagementServiceImpl implements ManagementService {
 
     @Override
     public Management updateManagement(Long id, ManagementDTO managementDTO) {
+
         final var department = departmentRepository
                 .findById(managementDTO.getDepartmentId())
                 .orElseThrow();
-        final var management = managementRepository.findById(id).orElseThrow();
+
+        final var management = managementRepository
+                .findById(id)
+                .orElseThrow();
 
         management.setName(managementDTO.getName());
         management.setDepartment(department);

@@ -24,7 +24,7 @@ import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BotServiceImpl {
+public class BotService {
 
     private final AuthServiceImpl authService;
     private final ButtonService buttonService;
@@ -40,145 +40,42 @@ public class BotServiceImpl {
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
-    private String returnText = "";
     private Long chatId;
+    private String userLanguage;
+    private String returnText = "";
 
     public void registerUser(Update update) {
-
         CompletableFuture.runAsync(() -> {
-            Long chatId = update.getMessage().getChatId();
-            final var user = update.getMessage().getFrom();
-//            final var phoneNumber = update.getMessage().getContact().getPhoneNumber();
-            final var userName = user.getUserName();
-            final var firstName = user.getFirstName();
-            final var lastName = user.getLastName() == null ? ("") : user.getLastName();
-            final var fullName = firstName + " " + lastName;
 
-            Optional<User> optionalUser = userRepository.findByUserChatId(chatId);
+                    Long chatId = update.getMessage().getChatId();
+                    final var user = update.getMessage().getFrom();
+                    final var userName = user.getUserName();
+                    final var firstName = user.getFirstName();
+                    final var lastName = user.getLastName() == null ? ("") : user.getLastName();
+                    final var fullName = firstName + " " + lastName;
 
-            if (optionalUser.isEmpty()) {
-                authService.register(
-                        User.builder()
-                                .userChatId(chatId)
-                                .fullName(fullName)
-                                .userName(userName)
-                                .build()
-                );
-            }
-        });
-    }
-
-    public CompletableFuture<SendMessage> createDepartment(Update update) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
-                    final var department = departmentService.createDepartment(update.getMessage().getText());
-
-                    if (userLanguage.equals("UZ"))
-                        returnText = department.getName() + " nomli Departament " + department.getId() + "-id bilan saqlandi";
-                    else
-                        returnText = "Департамент с именем " + department.getName() + " сохранен с " + department.getId() + " id";
-
-                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
-                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .text(returnText)
-                            .build();
-                }
-        );
-    }
-
-    public CompletableFuture<SendMessage> updateDepartment(Update update, Department previousDepartment) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
-                    final var updatedDepartment = departmentService.updateDepartment(previousDepartment.getName(), update.getMessage().getText());
-
-                    if (userLanguage.equals("UZ"))
-                        returnText = previousDepartment.getName() + " nomli Departament " + updatedDepartment.getName() + " ga o'zgartirildi";
-                    else
-                        returnText = "Название Департамента " + previousDepartment.getName() + " изменено на " + updatedDepartment.getName();
-
-
-//                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-//                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-//                    replyKeyboardMarkup.setSelective(true);
-//                    replyKeyboardMarkup.setResizeKeyboard(true);
-//                    replyKeyboardMarkup.setOneTimeKeyboard(true);
-//
-//                    final var departmentList = departmentService.getDepartmentList();
-//                    for (Department department : departmentList) {
-//                        keyboardRowList.add(
-//                                new KeyboardRow(
-//                                        List.of(
-//                                                KeyboardButton.builder()
-//                                                        .text(department.getName())
-//                                                        .build()
-//                                        )
-//                                )
-//                        );
-//                    }
-//                    keyboardRowList.add(
-//                            new KeyboardRow(Collections.singletonList(
-//                                    KeyboardButton.builder()
-//                                            .text(mainMenuButton)
-//                                            .build()
-//                            ))
-//                    );
-//
-//                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
-
-                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
-                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .text(returnText)
-                            .build();
-                }
-        );
-    }
-
-    public CompletableFuture<SendMessage> deleteDepartment(Update update) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    final var text = update.getMessage().getText();
-                    departmentService.deleteDepartment(text);
-
-                    final var userLanguage = getUserLanguage(chatId);
-                    if (userLanguage.equals("UZ"))
-                        returnText = text + " Departementi o'chirildi";
-                    else
-                        returnText = "Департамент " + text + " был удален";
-
-
-                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
-                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .text(returnText)
-                            .build();
+                    Optional<User> optionalUser = userRepository.findByUserChatId(chatId);
+                    if (optionalUser.isEmpty()) {
+                        authService.register(
+                                User.builder()
+                                        .userChatId(chatId)
+                                        .fullName(fullName)
+                                        .userName(userName)
+                                        .build()
+                        );
+                    }
                 }
         );
     }
 
     public CompletableFuture<SendMessage> setUserLanguage(Update update) {
         return CompletableFuture.supplyAsync(() -> {
+
                     registerUser(update);
 
                     final var updateMessage = update.getMessage();
                     chatId = update.getMessage().getChatId();
-                    String buttonText = "";
-                    String language = "";
+                    String buttonText, language;
 
                     if ("\uD83C\uDDFA\uD83C\uDDFF".equals(updateMessage.getText())) {
                         returnText = "Iltimos telefon raqamingizni jo'nating";
@@ -194,16 +91,19 @@ public class BotServiceImpl {
 
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
                     replyKeyboardMarkup.setSelective(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     keyboardRowList.add(
-                            new KeyboardRow(Collections.singleton(
-                                    KeyboardButton.builder()
-                                            .requestContact(true)
-                                            .text(buttonText)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singleton(
+                                            KeyboardButton.builder()
+                                                    .requestContact(true)
+                                                    .text(buttonText)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -347,10 +247,9 @@ public class BotServiceImpl {
         final var educations = employee.getEducations();
         final var educationsIds = employeeRepository.getEmployeeEducationsIds(employee.getId());
 
-        for (Education item : educations) {
+        for (Education ignored : educations) {
 
             int value, preValue = 0;
-            final var type = item.getType();
             StringBuilder stringBuilder = new StringBuilder();
 
             for (Education education : educationRepository.findEducationByIdIn(educationsIds)) {
@@ -373,11 +272,93 @@ public class BotServiceImpl {
                 "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
     }
 
+
+    /**
+     * DEPARTMENT methods
+     */
+    public CompletableFuture<SendMessage> createDepartment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var department = departmentService.createDepartment(update.getMessage().getText());
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = department.getName() + " nomli Departament " + department.getId() + "-id bilan saqlandi";
+                    else
+                        returnText = "Департамент с именем " + department.getName() + " сохранен с " + department.getId() + " id";
+
+                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> updateDepartment(Update update, Department previousDepartment) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var updatedDepartment = departmentService.updateDepartment(previousDepartment.getName(), update.getMessage().getText());
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = previousDepartment.getName() + " nomli Departament " + updatedDepartment.getName() + " ga o'zgartirildi";
+                    else
+                        returnText = "Название Департамента " + previousDepartment.getName() + " изменено на " + updatedDepartment.getName();
+
+                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> deleteDepartment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    final var text = update.getMessage().getText();
+                    departmentService.deleteDepartment(text);
+
+                    userLanguage = getUserLanguage(chatId);
+                    if (userLanguage.equals("UZ"))
+                        returnText = text + " Departementi o'chirildi";
+                    else
+                        returnText = "Департамент " + text + " был удален";
+
+
+                    final var messageCompletableFuture = buttonService.departmentSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+
+    /**
+     * MANAGEMENT methods
+     */
     public CompletableFuture<SendMessage> createManagement(Department selectedDepartment, Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     ManagementDTO dto = ManagementDTO.builder()
                             .departmentId(selectedDepartment.getId())
@@ -390,6 +371,34 @@ public class BotServiceImpl {
                     else
                         returnText = "Отдель с именем " + management.getName() + " сохранен с " + management.getId() + " id";
 
+
+                    final var messageCompletableFuture = buttonService.managementSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> updateManagement(Update update, Management previousManagement) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    ManagementDTO managementDTO = new ManagementDTO(
+                            previousManagement.getDepartment().getId(),
+                            update.getMessage().getText()
+                    );
+                    final var updatedDepartment = managementService.updateManagement(previousManagement.getId(), managementDTO);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = previousManagement.getName() + " nomli Boshqarma " + updatedDepartment.getName() + " ga o'zgartirildi";
+                    else
+                        returnText = "Название Отдела " + previousManagement.getName() + " изменено на " + updatedDepartment.getName();
 
                     final var messageCompletableFuture = buttonService.managementSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
@@ -427,24 +436,58 @@ public class BotServiceImpl {
         );
     }
 
-    public CompletableFuture<SendMessage> updateManagement(Update update, Management previousManagement) {
+
+    /**
+     * POSITION methods
+     */
+    public CompletableFuture<SendMessage> createPosition(Management management, Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
-                    ManagementDTO managementDTO = new ManagementDTO(
-                            previousManagement.getDepartment().getId(),
-                            update.getMessage().getText()
-                    );
-                    final var updatedDepartment = managementService.updateManagement(previousManagement.getId(), managementDTO);
+                    userLanguage = getUserLanguage(chatId);
+
+                    PositionDTO dto = PositionDTO.builder()
+                            .managementId(management.getId())
+                            .name(update.getMessage().getText())
+                            .build();
+
+                    final var position = positionService.createPosition(dto);
 
                     if (userLanguage.equals("UZ"))
-                        returnText = previousManagement.getName() + " nomli Boshqarma " + updatedDepartment.getName() + " ga o'zgartirildi";
+                        returnText = position.getName() + " nomli Lavozim " + position.getId() + "-id bilan saqlandi";
                     else
-                        returnText = "Название Отдела " + previousManagement.getName() + " изменено на " + updatedDepartment.getName();
+                        returnText = "Должность с именем " + position.getName() + " сохранен с " + position.getId() + " id";
 
-                    final var messageCompletableFuture = buttonService.managementSectionButtons(update);
+                    final var messageCompletableFuture = buttonService.positionSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> updatePosition(Update update, Position previousPosition) {
+        return CompletableFuture.supplyAsync(() -> {
+            
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    PositionDTO positionDTO = new PositionDTO(
+                            update.getMessage().getText(),
+                            previousPosition.getManagement().getId()
+                    );
+                    
+                    final var updatedPosition = positionService.updatePosition(previousPosition.getId(), positionDTO);
+                    final var messageCompletableFuture = buttonService.positionSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = previousPosition.getName() + " nomli Lavozim " + updatedPosition.getName() + " ga o'zgartirildi";
+                    else
+                        returnText = "Название Должность " + previousPosition.getName() + " изменено на " + updatedPosition.getName();
 
                     return SendMessage.builder()
                             .replyMarkup(replyMarkup)
@@ -466,36 +509,6 @@ public class BotServiceImpl {
                         returnText = text + " lavozimi o'chirildi";
                     else
                         returnText = "Должность " + text + " был удален";
-
-                    final var messageCompletableFuture = buttonService.positionSectionButtons(update);
-                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .text(returnText)
-                            .build();
-                }
-        );
-    }
-
-    public CompletableFuture<SendMessage> createPosition(Management management, Update update) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
-
-                    PositionDTO dto = PositionDTO.builder()
-                            .managementId(management.getId())
-                            .name(update.getMessage().getText())
-                            .build();
-
-                    final var position = positionService.createPosition(dto);
-
-                    if (userLanguage.equals("UZ"))
-                        returnText = position.getName() + " nomli Lavozim " + position.getId() + "-id bilan saqlandi";
-                    else
-                        returnText = "Должность с именем " + position.getName() + " сохранен с " + position.getId() + " id";
 
                     final var messageCompletableFuture = buttonService.positionSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();

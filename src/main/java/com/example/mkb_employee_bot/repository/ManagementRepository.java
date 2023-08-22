@@ -24,5 +24,4 @@ public interface ManagementRepository extends JpaRepository<Management, Long> {
     @Modifying
     @Query(value = "UPDATE Management SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Management.name = :name", nativeQuery = true)
     void updateManagementIsDeleted(String name);
-
 }

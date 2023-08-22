@@ -2,10 +2,9 @@ package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entity.Department;
 import com.example.mkb_employee_bot.entity.Management;
+import com.example.mkb_employee_bot.entity.Position;
 import com.example.mkb_employee_bot.entity.enums.Stage;
-import com.example.mkb_employee_bot.repository.DepartmentRepository;
-import com.example.mkb_employee_bot.repository.EmployeeRepository;
-import com.example.mkb_employee_bot.repository.ManagementRepository;
+import com.example.mkb_employee_bot.repository.*;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.example.mkb_employee_bot.service.ButtonService;
-import com.example.mkb_employee_bot.service.BotServiceImpl;
-import com.example.mkb_employee_bot.repository.UserRepository;
+import com.example.mkb_employee_bot.service.BotService;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,10 +27,11 @@ import java.util.concurrent.CompletableFuture;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeBot extends TelegramLongPollingBot {
 
-    private static BotServiceImpl botService;
+    private static BotService botService;
     private static ButtonService buttonService;
 
     private static UserRepository userRepository;
+    private static PositionRepository positionRepository;
     private static EmployeeRepository employeeRepository;
     private static DepartmentRepository departmentRepository;
     private static ManagementRepository managementRepository;
@@ -43,6 +42,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Department selectedDepartment = new Department();
     Department prevDepartment = new Department();
     Management prevManagement = new Management();
+    Position prevPosition = new Position();
+
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
     String welcomeMessage = """
@@ -93,12 +94,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = welcomeMessage.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -110,12 +112,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -131,12 +134,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -149,12 +153,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -166,12 +171,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -183,12 +189,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -200,12 +207,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -230,12 +238,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -247,12 +256,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -264,12 +274,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -281,12 +292,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -299,12 +311,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -317,12 +330,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -335,12 +349,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -356,12 +371,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -374,12 +390,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -391,12 +408,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -409,12 +427,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -427,12 +446,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -441,7 +461,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ("Добавить Должность".equals(messageText) || "Lavozim qo'shish".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
-                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update);
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forCreating");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -521,12 +541,97 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Редактировать Должность".equals(messageText) || "Lavozimni tahrirlash".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forUpdating");
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_UPDATING_POSITION") && (isAdmin || isSuperAdmin)) {
+
+                prevManagement = managementRepository.findByName(messageText).get();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectPositionForUpdating(prevManagement, update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("POSITION_SELECTED_FOR_UPDATING") && (isAdmin || isSuperAdmin)) {
+
+                String text;
+                if (userLanguage.equals("UZ")) text = "Juda soz! Endi tahrirlashni boshlaymiz.";
+                else text = "Отлично! Теперь приступим к редактированию.";
+                sendTextMessage(chatId.toString(), text);
+
+                prevPosition = positionRepository.findByName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askNameForCreatingPosition(update, "forUpdating");
+                final var sendMessage = messageCompletableFuture.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+
+                    executeFuture.join();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("ENTER_NAME_FOR_UPDATE_POSITION") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = botService.updatePosition(update, prevPosition);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -539,12 +644,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -558,12 +664,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -576,12 +683,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -595,12 +703,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -620,12 +729,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 final var sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -638,12 +748,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -657,29 +768,32 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if (userStage.equals("ENTER_NAME_FOR_CREATE_DEPARTMENT") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = botService.createDepartment(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -692,12 +806,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -709,12 +824,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -726,12 +842,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -745,12 +862,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -779,12 +897,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -796,12 +915,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -821,7 +941,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     }
 
     @Autowired
-    public void setService(BotServiceImpl service) {
+    public void setService(BotService service) {
         EmployeeBot.botService = service;
     }
 
@@ -848,6 +968,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     @Autowired
     public void setManagementRepository(ManagementRepository managementRepository) {
         EmployeeBot.managementRepository = managementRepository;
+    }
+
+    @Autowired
+    public void setPositionRepository(PositionRepository positionRepository) {
+        EmployeeBot.positionRepository = positionRepository;
     }
 
     @Override
