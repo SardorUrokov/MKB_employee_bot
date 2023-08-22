@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.repository;
 
+import java.util.List;
 import java.util.Optional;
 import com.example.mkb_employee_bot.entity.User;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUserChatId(Long userChatId);
+
+    @Query(value = "SELECT u FROM users u WHERE u.role = 'ADMIN' OR u.role = 'SUPER_ADMIN'"
+//            , nativeQuery = true
+    )
+    List<User> getAdminList();
 
     boolean existsByUserChatId(Long userChatId);
 
@@ -36,5 +42,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select stage from users where user_chat_id = :userChatId", nativeQuery = true)
     String getUserStageByUserChatId (Long userChatId);
-
 }

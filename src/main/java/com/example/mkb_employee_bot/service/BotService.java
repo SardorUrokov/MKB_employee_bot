@@ -11,6 +11,7 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -272,6 +273,39 @@ public class BotService {
                 "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
     }
 
+    public CompletableFuture<SendMessage> getAdminInfo(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final CompletableFuture<SendMessage> messageCompletableFuture;
+                    final var user = userRepository.findByUserChatId(chatId).orElseThrow();
+                    final var adminInfo = setAdminInfo(user);
+                    final var userRole = getUserRole(chatId);
+
+                    if (userRole.equals("SUPER_ADMIN"))
+                        messageCompletableFuture = buttonService.adminSectionSuperAdminRoleButtons(update);
+                    else
+                        messageCompletableFuture = buttonService.adminSectionAdminRoleButtons(update);
+
+                    SendMessage sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(adminInfo)
+                            .build();
+                }
+        );
+    }
+
+    private String setAdminInfo(User user) {
+        return "Role:  " + user.getRole() +
+                "\nPhone Number:  " + user.getPhoneNumber() +
+                "\nChat Id:  " + user.getUserChatId() +
+                "\nAdded at:  " + user.getCreatedAt();
+    }
 
     /**
      * DEPARTMENT methods
@@ -472,14 +506,14 @@ public class BotService {
 
     public CompletableFuture<SendMessage> updatePosition(Update update, Position previousPosition) {
         return CompletableFuture.supplyAsync(() -> {
-            
+
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     PositionDTO positionDTO = new PositionDTO(
                             update.getMessage().getText(),
                             previousPosition.getManagement().getId()
                     );
-                    
+
                     final var updatedPosition = positionService.updatePosition(previousPosition.getId(), positionDTO);
                     final var messageCompletableFuture = buttonService.positionSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();

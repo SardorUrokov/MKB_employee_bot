@@ -891,6 +891,44 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (("Инфо Администратора".equals(messageText) || "Admin ma'lumotlari".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.getAdminInfo(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Список Админов".equals(messageText) || "Adminlar ro'yxati".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.getAdminList(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (isSuperAdmin || isAdmin) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.superAdminButtons(update);

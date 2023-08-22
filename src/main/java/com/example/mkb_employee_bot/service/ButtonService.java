@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.example.mkb_employee_bot.entity.Department;
 import com.example.mkb_employee_bot.entity.Management;
+import com.example.mkb_employee_bot.entity.User;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
@@ -1008,7 +1009,7 @@ public class ButtonService {
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
-                            .chatId(String.valueOf(chatId))
+                            .chatId(chatId)
                             .text(returnText)
                             .build();
                 }
@@ -1586,6 +1587,62 @@ public class ButtonService {
 
     public List<Employee> getEmployees() {
         return employeeRepository.findAll();
+    }
+
+    public List<User> adminList() {
+        return userRepository.getAdminList();
+    }
+
+    public CompletableFuture<SendMessage> getAdminList(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    final var adminList = adminList();
+                    returnText = "List of Admins";
+
+                    if (userLanguage.equals("UZ")) {
+                        mainMenu = "Bosh Menu";
+                    } else {
+                        mainMenu = "Главное Меню";
+                    }
+                    for (User admin : adminList) {
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        List.of(
+                                                KeyboardButton.builder()
+                                                        .text(admin.getRole() + " - " + admin.getPhoneNumber())
+                                                        .build()
+                                        )
+                                )
+                        );
+                    }
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
+                    );
+
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
     }
 
     public CompletableFuture<SendMessage> askSelectDepartmentForUpdatingManagement(Update update, String forWhat) {

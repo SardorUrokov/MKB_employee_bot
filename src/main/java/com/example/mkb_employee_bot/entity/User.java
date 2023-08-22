@@ -39,6 +39,7 @@ public class User {
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
 
+    @JoinColumn(name = "user_role")
     @Enumerated(EnumType.STRING)
     Role role = Role.USER;
 }
