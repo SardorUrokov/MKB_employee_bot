@@ -2,6 +2,7 @@ package com.example.mkb_employee_bot.service;
 
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
+import com.example.mkb_employee_bot.entity.dto.PositionDTO;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -465,6 +466,36 @@ public class BotServiceImpl {
                         returnText = text + " lavozimi o'chirildi";
                     else
                         returnText = "Должность " + text + " был удален";
+
+                    final var messageCompletableFuture = buttonService.positionSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> createPosition(Management management, Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    final var userLanguage = getUserLanguage(chatId);
+
+                    PositionDTO dto = PositionDTO.builder()
+                            .managementId(management.getId())
+                            .name(update.getMessage().getText())
+                            .build();
+
+                    final var position = positionService.createPosition(dto);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = position.getName() + " nomli Lavozim " + position.getId() + "-id bilan saqlandi";
+                    else
+                        returnText = "Должность с именем " + position.getName() + " сохранен с " + position.getId() + " id";
 
                     final var messageCompletableFuture = buttonService.positionSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();

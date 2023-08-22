@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.mkb_employee_bot.entity.Department;
+import com.example.mkb_employee_bot.entity.Management;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
@@ -35,6 +36,7 @@ public class ButtonService {
     private final String sighDown = "⬇\uFE0F";
     private final String sighBack = "⬅\uFE0F";
     private Long chatId;
+    private String userLanguage = "";
 
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
 
@@ -78,7 +80,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -138,7 +140,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var department = positionRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var managementEmployees = getManagementEmployees(department.getId());
 
@@ -199,7 +201,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var department = managementRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var managementEmployees = getManagementEmployees(department.getId());
 
@@ -260,7 +262,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var department = departmentRepository.findByName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
             final var departmentEmployees = getDepartmentEmployees(department.getId());
 
@@ -321,7 +323,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var departmentNames = getDepartmentNames();
 
             if (userLanguage.equals("RU")) {
@@ -381,7 +383,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var managementNames = getManagementNames();
 
             if (userLanguage.equals("RU")) {
@@ -441,7 +443,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var positionNames = getPositionNames();
 
             if (userLanguage.equals("RU")) {
@@ -501,7 +503,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var employees = getEmployees();
 
             if (userLanguage.equals("RU")) {
@@ -550,7 +552,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             final var employees = employeeRepository.findByFullNameIgnoreCaseContaining(
                     update.getMessage().getText()
             );
@@ -608,7 +610,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4, button5;
 
             if (userLanguage.equals("RU")) {
@@ -676,7 +678,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2;
 
             if (userLanguage.equals("RU")) {
@@ -730,7 +732,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -799,7 +801,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -867,7 +869,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -936,7 +938,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -1005,7 +1007,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
 
             if (userLanguage.equals("RU")) {
                 returnText = "Введите название для создания Департамента " + sighDown;
@@ -1044,7 +1046,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("UZ")) {
                         returnText = "Boshqarma yaratiladigan Departamentni tanlang";
@@ -1085,7 +1087,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Департамент для удаления " + sighDown;
@@ -1126,7 +1128,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Отдель для удаления " + sighDown;
@@ -1168,7 +1170,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Отдель для редактирования " + sighDown;
@@ -1211,7 +1213,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Департамент для редактирования " + sighDown;
@@ -1265,7 +1267,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
 
             if (userLanguage.equals("RU")) {
                 returnText = "Чтобы изменить название Департамента, введите новое имя " + sighDown;
@@ -1307,7 +1309,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
             chatId = update.getMessage().getChatId();
-            final var userLanguage = getUserLanguage(chatId);
+            userLanguage = getUserLanguage(chatId);
             String button1, button2, button3, button4;
 
             if (userLanguage.equals("RU")) {
@@ -1376,7 +1378,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Введите имя для Отдела" + sighDown;
@@ -1414,7 +1416,6 @@ public class ButtonService {
                             .build();
                 }
         );
-
     }
 
     private String getUserLanguage(Long userChatId) {
@@ -1546,7 +1547,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 
@@ -1596,7 +1597,7 @@ public class ButtonService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
-                    final var userLanguage = getUserLanguage(chatId);
+                    userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Должность для удаления " + sighDown;
@@ -1619,6 +1620,91 @@ public class ButtonService {
                     );
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_DELETING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askSelectManagementForCreatingPosition(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "Lavozim yaratiladigan Boshqarmani tanlang " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    } else {
+                        returnText = "Выберите отдела, в которой будет создана Должность " + sighDown;
+                        mainMenu = "Главное меню";
+                    }
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    setManagementListToButtons(keyboardRowList, replyKeyboardMarkup);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singleton(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_POSITION.name());
+
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text(returnText)
+                            .replyMarkup(replyKeyboardMarkup)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askNameForCreatingPosition(Update update, String forWhat) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("RU")) {
+                        returnText = "Введите название должности" + sighDown;
+                        mainMenu = "Главное Меню";
+                    } else {
+                        returnText = "Lavozim uchun nom kiriting  " + sighDown;
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
+                    );
+
+                    if (forWhat.equals("forCreating"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATING_POSITION_NAME.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_UPDATE_POSITION.name());
+
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
