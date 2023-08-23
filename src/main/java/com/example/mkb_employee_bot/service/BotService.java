@@ -612,9 +612,17 @@ public class BotService {
                                 .build();
                     } else {
                         if (userLanguage.equals("UZ"))
-                            returnText = "Telefon raqam noto'g'ri formatda kiritildi ‼\uFE0F";
+                            returnText = """
+                                    Telefon raqam noto'g'ri formatda kiritildi ‼️
+                                    
+                                    Raqamni qaytadan kiriting
+                                    """;
                         else
-                            returnText = "Номер телефона введен в неверном формате ‼\uFE0F";
+                            returnText = """
+                                    Номер телефона введен в неверном формате ‼️
+                                    
+                                    Введите номер повторно
+                                    """;
 
                         final var messageCompletableFuture = buttonService.askPhoneNumberForAddingAdmin(update);
                         final var sendMessage = messageCompletableFuture.join();

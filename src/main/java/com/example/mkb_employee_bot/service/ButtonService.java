@@ -1969,7 +1969,8 @@ public class ButtonService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
 
-                    if (userLanguage.equals("UZ"))
+                    if (userLanguage.equals("UZ")) {
+                        mainMenu = "Bosh Menu";
                         returnText = """
                                 ADMIN yaratish uchun uning telefon raqamini kiriting
                                                                 
@@ -1977,13 +1978,16 @@ public class ButtonService {
                                 99 - Aloqa operatori maxsus kodi;
                                 1234567 - Mobil raqam;
                                 """;
-                    else
-                        returnText = "Для создания АДМИНА введите его номер телефона\n" +
-                                "\n" +
-                                "‼\uFE0F Образец: 991234567\n" +
-                                "99 – Спецкод оператора связи;\n" +
-                                "1234567 – Номер мобильного;\n";
-
+                    }else {
+                        mainMenu = "Главное Меню";
+                        returnText = """
+                                Для создания АДМИНА введите его номер телефона
+                                
+                                ‼️ Образец:  991234567
+                                99 – Спецкод оператора связи;
+                                1234567 – Номер мобильного;
+                                """;
+                    }
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     replyKeyboardMarkup.setSelective(true);

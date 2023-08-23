@@ -1002,6 +1002,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     else
                         sendTextMessage(chatId.toString(), "Роль АДМИН не имеет права добавлять еще одного админа ‼️");
                 } else {
+
                     CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.askPhoneNumberForAddingAdmin(update);
                     SendMessage sendMessage = sendMessageCompletableFuture.join();
                     try {
