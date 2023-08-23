@@ -14,7 +14,7 @@ import com.example.mkb_employee_bot.repository.UserRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImpl {
+public class AuthService {
 
     private final UserRepository userRepository;
 

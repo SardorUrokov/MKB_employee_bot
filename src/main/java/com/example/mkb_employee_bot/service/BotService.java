@@ -28,7 +28,7 @@ import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
 @RequiredArgsConstructor
 public class BotService {
 
-    private final AuthServiceImpl authService;
+    private final AuthService authService;
     private final ButtonService buttonService;
     private final PositionServiceImpl positionService;
     private final DepartmentServiceImpl departmentService;
