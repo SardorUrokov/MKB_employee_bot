@@ -83,7 +83,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String button1, button2, button3, button4;
+                    String button1, button2, button3, button4, languageButton;
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите нужный раздел для получения информации " + sighDown;
@@ -91,12 +91,14 @@ public class ButtonService {
                         button2 = "Должности";
                         button3 = "Департаменты";
                         button4 = "Отделы";
+                        languageButton = "Изменить язык \uD83C\uDDF7\uD83C\uDDFA / \uD83C\uDDFA\uD83C\uDDFF";
                     } else {
                         returnText = "Ma'lumot olish uchun kerakli bo'limni tanlang " + sighDown;
                         button1 = "Xodim";
                         button2 = "Lavozimlar";
                         button3 = "Departamentlar";
                         button4 = "Boshqarmalar";
+                        languageButton = "Tilni o'zgartirish \uD83C\uDDFA\uD83C\uDDFF / \uD83C\uDDF7\uD83C\uDDFA";
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -124,6 +126,15 @@ public class ButtonService {
                                             .text(button4)
                                             .build()
                             ))
+                    );
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(languageButton)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -622,7 +633,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String button1, button2, button3, button4, button5;
+                    String button1, button2, button3, button4, button5, languageButton;
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Нажмите одну из следующих кнопок, чтобы выполнить следующее действие " + sighDown;
@@ -631,6 +642,7 @@ public class ButtonService {
                         button3 = "Департаменты";
                         button4 = "Отделы";
                         button5 = "Админы";
+                        languageButton = "Изменить язык \uD83C\uDDF7\uD83C\uDDFA / \uD83C\uDDFA\uD83C\uDDFF";
                     } else {
                         returnText = "Keyingi amalni bajarish uchun quyidagi tugmalardan birini bosing " + sighDown;
                         button1 = "Xodimlar";
@@ -638,6 +650,7 @@ public class ButtonService {
                         button3 = "Departamentlar";
                         button4 = "Boshqarmalar";
                         button5 = "Adminlar";
+                        languageButton = "Tilni o'zgartirish \uD83C\uDDFA\uD83C\uDDFF / \uD83C\uDDF7\uD83C\uDDFA";
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -646,31 +659,40 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button1)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button2)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button1)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button2)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button3)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button4)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button3)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button4)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(Collections.singleton(
-                                    KeyboardButton.builder()
-                                            .text(button5)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button5)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(languageButton)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -1978,11 +2000,11 @@ public class ButtonService {
                                 99 - Aloqa operatori maxsus kodi;
                                 1234567 - Mobil raqam;
                                 """;
-                    }else {
+                    } else {
                         mainMenu = "Главное Меню";
                         returnText = """
                                 Для создания АДМИНА введите его номер телефона
-                                
+                                                                
                                 ‼️ Образец:  991234567
                                 99 – Спецкод оператора связи;
                                 1234567 – Номер мобильного;
@@ -2006,7 +2028,7 @@ public class ButtonService {
                     userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_PHONE_NUMBER_FOR_CREATING_ADMIN.name());
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-            return SendMessage.builder()
+                    return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
                             .text(returnText)
                             .chatId(chatId)

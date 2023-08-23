@@ -614,13 +614,13 @@ public class BotService {
                         if (userLanguage.equals("UZ"))
                             returnText = """
                                     Telefon raqam noto'g'ri formatda kiritildi ‼️
-                                    
+                                                                        
                                     Raqamni qaytadan kiriting
                                     """;
                         else
                             returnText = """
                                     Номер телефона введен в неверном формате ‼️
-                                    
+                                                                        
                                     Введите номер повторно
                                     """;
 
@@ -634,6 +634,41 @@ public class BotService {
                                 .chatId(chatId)
                                 .build();
                     }
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> changeLanguage(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("UZ")) {
+                        userRepository.updateLanguageByUserId(chatId, "RU");
+                        returnText = "Язык изменен \uD83C\uDDFA\uD83C\uDDFF > \uD83C\uDDF7\uD83C\uDDFA";
+                    } else {
+                        userRepository.updateLanguageByUserId(chatId, "UZ");
+                        returnText = "Til o'zgartirildi \uD83C\uDDF7\uD83C\uDDFA > \uD83C\uDDFA\uD83C\uDDFF";
+                    }
+
+                    final var role = userRepository.getUserRoleByUserChatId(chatId);
+                    SendMessage sendMessage;
+
+                    if (role.equals("USER")) {
+                        final var messageCompletableFuture = buttonService.userButtons(update);
+                        sendMessage = messageCompletableFuture.join();
+                    } else {
+                        final var messageCompletableFuture = buttonService.superAdminButtons(update);
+                        sendMessage = messageCompletableFuture.join();
+                    }
+
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
                 }
         );
     }
