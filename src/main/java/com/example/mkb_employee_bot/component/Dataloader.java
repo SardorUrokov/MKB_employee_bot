@@ -93,13 +93,26 @@ public class Dataloader implements CommandLineRunner {
                     .fullName("Сардор")
                     .phoneNumber("998914525468")
                     .userName("Sardor_Shukhratovich")
-                    .role(Role.ADMIN)
+                    .role(Role.SUPER_ADMIN)
                     .stage(Stage.STARTED)
                     .language(Language.RU)
                     .createdAt(new Date())
                     .updatedAt(new Date())
                     .build();
-            userRepository.save(user);
+
+            User user1 = User.builder()
+                    .userChatId(612492175L)
+                    .fullName("Сардор")
+                    .phoneNumber("998981234567")
+                    .userName("Sardor_Sh")
+                    .role(Role.SUPER_ADMIN)
+                    .stage(Stage.STARTED)
+                    .language(Language.UZ)
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
+                    .build();
+
+            userRepository.saveAll(List.of(user, user1));
         }
     }
 }

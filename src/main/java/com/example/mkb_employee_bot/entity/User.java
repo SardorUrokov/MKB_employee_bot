@@ -1,11 +1,13 @@
 package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entity.enums.Language;
+import com.example.mkb_employee_bot.entity.enums.Role;
 import com.example.mkb_employee_bot.entity.enums.Stage;
+import com.example.mkb_employee_bot.entity.enums.Language;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import com.example.mkb_employee_bot.entity.enums.Role;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 
@@ -33,13 +35,19 @@ public class User {
     @Enumerated(EnumType.STRING)
     Language language;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
-    Date createdAt = new Date();
+    @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
-    Date updatedAt = new Date();
+    @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
 
-    @JoinColumn(name = "user_role")
     @Enumerated(EnumType.STRING)
     Role role = Role.USER;
+
+    public User(String phoneNumber, Role role) {
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+    }
 }

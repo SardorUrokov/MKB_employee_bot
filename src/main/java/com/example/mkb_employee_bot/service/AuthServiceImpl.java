@@ -1,6 +1,8 @@
 package com.example.mkb_employee_bot.service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import com.example.mkb_employee_bot.entity.enums.Role;
 import lombok.extern.slf4j.Slf4j;
@@ -29,5 +31,23 @@ public class AuthServiceImpl {
 
         final User saved = userRepository.save(saving);
         log.info("User Created -> {}", saved);
+    }
+
+    public boolean deleteUser(String phoneNumber) {
+        final var user = userRepository.findByPhoneNumber(phoneNumber).orElseThrow();
+
+        if (user.getRole().name().equals("SUPER_ADMIN")) {
+            final var superAdminUsers = userRepository.findAllByRole(Role.SUPER_ADMIN);
+
+            if (superAdminUsers.size() == 1 || superAdminUsers.isEmpty())
+                return false;
+            else {
+                userRepository.updateRoleToUSERByPhoneNumber("USER", phoneNumber);
+                return true;
+            }
+        } else {
+            userRepository.updateRoleToUSERByPhoneNumber("USER", phoneNumber);
+            return true;
+        }
     }
 }

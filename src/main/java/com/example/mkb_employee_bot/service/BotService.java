@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.service;
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 import com.example.mkb_employee_bot.entity.dto.PositionDTO;
+import com.example.mkb_employee_bot.entity.enums.Role;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -280,7 +281,7 @@ public class BotService {
                     userLanguage = getUserLanguage(chatId);
                     final CompletableFuture<SendMessage> messageCompletableFuture;
                     final var user = userRepository.findByUserChatId(chatId).orElseThrow();
-                    final var adminInfo = setAdminInfo(user);
+                    final var adminInfo = buttonService.setAdminInfo(user);
                     final var userRole = getUserRole(chatId);
 
                     if (userRole.equals("SUPER_ADMIN"))
@@ -300,12 +301,6 @@ public class BotService {
         );
     }
 
-    private String setAdminInfo(User user) {
-        return "Role:  " + user.getRole() +
-                "\nPhone Number:  " + user.getPhoneNumber() +
-                "\nChat Id:  " + user.getUserChatId() +
-                "\nAdded at:  " + user.getCreatedAt();
-    }
 
     /**
      * DEPARTMENT methods
@@ -404,7 +399,6 @@ public class BotService {
                         returnText = management.getName() + " nomli Boshqarma " + management.getId() + "-id bilan saqlandi";
                     else
                         returnText = "Отдель с именем " + management.getName() + " сохранен с " + management.getId() + " id";
-
 
                     final var messageCompletableFuture = buttonService.managementSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
@@ -552,6 +546,86 @@ public class BotService {
                             .chatId(chatId)
                             .text(returnText)
                             .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> deleteAdmin(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var text = update.getMessage().getText();
+                    final var substring = text.substring(text.length() - 12);
+                    final var isUserDeleted = authService.deleteUser(substring);
+
+                    if (isUserDeleted) {
+                        if (userLanguage.equals("UZ"))
+                            returnText = substring + " raqamli User ADMINlar listidan o'chirildi";
+                        else
+                            returnText = "Пользователь номер " + substring + " удален из списка АДМИНов.";
+                    } else {
+                        if (userLanguage.equals("UZ"))
+                            returnText = "⚠\uFE0F Tizimda SUPER_ADMIN soni 1ta bo'lganligi uchun User Adminlar ro'yxatidan o'chirilmadi ‼\uFE0F";
+                        else
+                            returnText = "⚠\uFE0F Поскольку количество SUPER_ADMIN в системе было 1, он не был удален из списка администраторов пользователей ‼\uFE0F";
+                    }
+                    final var messageCompletableFuture = buttonService.adminSectionSuperAdminRoleButtons(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> createAdmin(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var updateText = update.getMessage().getText();
+
+                    if (updateText.length() == 9) {
+                        User user = new User(updateText, Role.ADMIN);
+                        authService.register(user);
+
+                        if (userLanguage.equals("UZ"))
+                            returnText = updateText + " telefon raqami bilan ADMIN yaratildi✅";
+                        else
+                            returnText = "✅ АДМИН создан с номером телефона 123 " + updateText;
+
+                        final var messageCompletableFuture = buttonService.adminSectionSuperAdminRoleButtons(update);
+                        final var sendMessage = messageCompletableFuture.join();
+                        final var replyMarkup = sendMessage.getReplyMarkup();
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ADMIN_CREATED.name());
+
+                        return SendMessage.builder()
+                                .replyMarkup(replyMarkup)
+                                .text(returnText)
+                                .chatId(chatId)
+                                .build();
+                    } else {
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Telefon raqam noto'g'ri formatda kiritildi ‼\uFE0F";
+                        else
+                            returnText = "Номер телефона введен в неверном формате ‼\uFE0F";
+
+                        final var messageCompletableFuture = buttonService.askPhoneNumberForAddingAdmin(update);
+                        final var sendMessage = messageCompletableFuture.join();
+                        final var replyMarkup = sendMessage.getReplyMarkup();
+
+                        return SendMessage.builder()
+                                .replyMarkup(replyMarkup)
+                                .text(returnText)
+                                .chatId(chatId)
+                                .build();
+                    }
                 }
         );
     }

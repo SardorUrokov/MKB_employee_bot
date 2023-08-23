@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.repository;
 import java.util.List;
 import java.util.Optional;
 import com.example.mkb_employee_bot.entity.User;
+import com.example.mkb_employee_bot.entity.enums.Role;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "UPDATE users SET language = :language, updated_at = CURRENT_TIMESTAMP WHERE user_chat_id = :userId", nativeQuery = true)
     void updateLanguageByUserId(Long userId, String language);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE users SET role = :role, updated_at = CURRENT_TIMESTAMP WHERE phone_number = :phoneNumber", nativeQuery = true)
+    void updateRoleToUSERByPhoneNumber(String role, String phoneNumber);
+
     @Query(value = "select language from users where user_chat_id = :userChatId", nativeQuery = true)
     String getUserLanguageByUserChatId(Long userChatId);
 
@@ -42,4 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select stage from users where user_chat_id = :userChatId", nativeQuery = true)
     String getUserStageByUserChatId (Long userChatId);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
+
+    @Query(value = "select u from users u where u.role = :userRole")
+    List<User> getUsersByRole(String userRole);
+
+    List<User> findAllByRole(Role role);
 }

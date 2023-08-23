@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.example.mkb_employee_bot.entity.Department;
 import com.example.mkb_employee_bot.entity.Management;
@@ -31,7 +32,7 @@ public class ButtonService {
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
-    private String back = "";
+    private final String back = "";
     private String mainMenu = "";
     private String returnText = "";
     private final String sighDown = "⬇\uFE0F";
@@ -1508,17 +1509,17 @@ public class ButtonService {
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-        for (String positionName : getPositionNames()) {
-            keyboardRowList.add(
-                    new KeyboardRow(
-                            List.of(
-                                    KeyboardButton.builder()
-                                            .text(positionName)
-                                            .build()
-                            )
-                    )
-            );
-        }
+        List<KeyboardRow> keyboardRows = getPositionNames().stream()
+                .map(positionName -> new KeyboardRow(
+                                List.of(
+                                        KeyboardButton.builder()
+                                                .text(positionName)
+                                                .build()
+                                )
+                        )
+                )
+                .toList();
+        keyboardRowList.addAll(keyboardRows);
     }
 
     public void setPositionListToButtonsByManagementId(Long managementId, List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
@@ -1528,17 +1529,17 @@ public class ButtonService {
         replyKeyboardMarkup.setOneTimeKeyboard(true);
         final var namesByManagementId = getPositionNamesByManagementId(managementId);
 
-        for (String positionName : namesByManagementId) {
-            keyboardRowList.add(
-                    new KeyboardRow(
-                            List.of(
-                                    KeyboardButton.builder()
-                                            .text(positionName)
-                                            .build()
-                            )
-                    )
-            );
-        }
+        List<KeyboardRow> newKeyboardRows = namesByManagementId.stream()
+                .map(positionName -> new KeyboardRow(
+                                List.of(
+                                        KeyboardButton.builder()
+                                                .text(positionName)
+                                                .build()
+                                )
+                        )
+                )
+                .toList();
+        keyboardRowList.addAll(newKeyboardRows);
     }
 
     public void setManagementListToButtonsByDepartmentId(Long departmentId, List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
@@ -1561,12 +1562,30 @@ public class ButtonService {
         }
     }
 
-    private List<String> getDepartmentEmployeesNames(Long department_id) {
-        List<String> employeeNames = new ArrayList<>();
-        for (Employee departmentEmployee : getDepartmentEmployees(department_id)) {
-            employeeNames.add(departmentEmployee.getFullName());
+    public void setAdminListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        for (User admin : adminList()) {
+            keyboardRowList.add(
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(admin.getRole() + " - " + admin.getPhoneNumber())
+                                            .build()
+                            )
+                    )
+            );
         }
-        return employeeNames;
+    }
+
+    private List<String> getDepartmentEmployeesNames(Long departmentId) {
+        return getDepartmentEmployees(departmentId)
+                .stream()
+                .map(Employee::getFullName)
+                .collect(Collectors.toList());
     }
 
     private List<String> getManagementNames() {
@@ -1868,6 +1887,125 @@ public class ButtonService {
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(chatId)
                             .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> adminInfoForSUPER_ADMIN(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    final var text = update.getMessage().getText();
+                    final var substring = text.substring(text.length() - 12);
+                    final var user = userRepository.findByPhoneNumber(substring).orElseThrow();
+                    final var adminInfo = setAdminInfo(user);
+
+                    final var sendMessageCompletableFuture = getAdminList(update);
+                    final var sendMessage = sendMessageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(adminInfo)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    public String setAdminInfo(User user) {
+        return "Role:  " + user.getRole() +
+                "\nPhone Number:  " + user.getPhoneNumber() +
+                "\nChat Id:  " + user.getUserChatId() +
+                "\nUsername:  @" + user.getUserName() +
+                "\nAdded at:  " + user.getCreatedAt();
+    }
+
+    public CompletableFuture<SendMessage> askSelectAdminForDeleting(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "O'chirish uchun Adminni tanlang";
+                        mainMenu = "Bosh Menu";
+                    } else {
+                        returnText = "Выберите Админстратора для удаления";
+                        mainMenu = "Главное Меню";
+                    }
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    setAdminListToButtons(keyboardRowList, replyKeyboardMarkup);
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            new KeyboardButton(
+                                                    mainMenu
+                                            )
+                                    )
+                            )
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.ADMIN_SELECTED_FOR_DELETING.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askPhoneNumberForAddingAdmin(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = """
+                                ADMIN yaratish uchun uning telefon raqamini kiriting
+                                                                
+                                ‼️ Namuna: 991234567
+                                99 - Aloqa operatori maxsus kodi;
+                                1234567 - Mobil raqam;
+                                """;
+                    else
+                        returnText = "Для создания АДМИНА введите его номер телефона\n" +
+                                "\n" +
+                                "‼\uFE0F Образец: 991234567\n" +
+                                "99 – Спецкод оператора связи;\n" +
+                                "1234567 – Номер мобильного;\n";
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_PHONE_NUMBER_FOR_CREATING_ADMIN.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+            return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
                             .build();
                 }
         );
