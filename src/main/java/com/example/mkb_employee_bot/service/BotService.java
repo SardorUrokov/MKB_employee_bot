@@ -653,17 +653,16 @@ public class BotService {
                     }
 
                     final var role = userRepository.getUserRoleByUserChatId(chatId);
-                    SendMessage sendMessage;
+                    final CompletableFuture<SendMessage> messageCompletableFuture;
 
-                    if (role.equals("USER")) {
-                        final var messageCompletableFuture = buttonService.userButtons(update);
-                        sendMessage = messageCompletableFuture.join();
-                    } else {
-                        final var messageCompletableFuture = buttonService.superAdminButtons(update);
-                        sendMessage = messageCompletableFuture.join();
-                    }
+                    if (role.equals("USER"))
+                        messageCompletableFuture = buttonService.userButtons(update);
+                    else
+                        messageCompletableFuture = buttonService.superAdminButtons(update);
 
+                    SendMessage sendMessage = messageCompletableFuture.join();
                     final var replyMarkup = sendMessage.getReplyMarkup();
+
                     return SendMessage.builder()
                             .replyMarkup(replyMarkup)
                             .text(returnText)
