@@ -12,15 +12,13 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-
-import static com.example.mkb_employee_bot.entity.enums.SkillType.HARD_SKILL;
-import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
 
 @Slf4j
 @Service
@@ -30,14 +28,13 @@ public class BotService {
     private final AuthService authService;
     private final ButtonService buttonService;
     private final PositionServiceImpl positionService;
+    private final EmployeeServiceImpl employeeService;
     private final DepartmentServiceImpl departmentService;
     private final ManagementServiceImpl managementService;
 
     private final UserRepository userRepository;
-    private final SkillRepository skillRepository;
     private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
-    private final EducationRepository educationRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
@@ -586,10 +583,28 @@ public class BotService {
     public CompletableFuture<SendMessage> deleteEmployee(Employee deletingEmployee, Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            chatId = update.getMessage().getChatId();
-            userLanguage = getUserLanguage(chatId);
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
 
-        });
+                    employeeService.deleteEmployee(deletingEmployee.getId());
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = "Xodim ro'yxatdan o'chirildi";
+                    else
+                        returnText = "Сотрудник удаленино ис список";
+
+            final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
+            final var sendMessage = messageCompletableFuture.join();
+            final var replyMarkup = sendMessage.getReplyMarkup();
+
+            return SendMessage.builder()
+                    .replyMarkup(replyMarkup)
+                    .text(returnText)
+                    .chatId(chatId)
+                    .build();
+
+                }
+        );
     }
 
 }

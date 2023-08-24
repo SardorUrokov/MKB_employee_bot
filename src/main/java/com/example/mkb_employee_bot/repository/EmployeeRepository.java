@@ -8,7 +8,9 @@ import com.example.mkb_employee_bot.entity.Employee;
 import com.example.mkb_employee_bot.entity.Skill;
 import com.example.mkb_employee_bot.entity.enums.SkillType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
@@ -32,4 +34,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> getEmployeesByPosition_Management_Id(Long management_id);
 
     List<Employee> getEmployeesByPosition_Id(Long position_id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
+    void updateEmployeeIsDeleted(Long id);
 }

@@ -10,4 +10,8 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+
+    public void deleteEmployee(Long id) {
+        employeeRepository.updateEmployeeIsDeleted(id);
+    }
 }
