@@ -51,8 +51,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByPhoneNumber(String phoneNumber);
 
-    @Query(value = "select u from users u where u.role = :userRole")
-    List<User> getUsersByRole(String userRole);
-
     List<User> findAllByRole(Role role);
 }

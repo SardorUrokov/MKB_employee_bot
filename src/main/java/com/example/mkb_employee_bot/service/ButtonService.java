@@ -6,31 +6,35 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import com.example.mkb_employee_bot.entity.Department;
-import com.example.mkb_employee_bot.entity.Management;
-import com.example.mkb_employee_bot.entity.User;
+import com.example.mkb_employee_bot.entity.*;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.entity.Employee;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+
+import static com.example.mkb_employee_bot.entity.enums.SkillType.HARD_SKILL;
+import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
 
 @Service
 @RequiredArgsConstructor
 public class ButtonService {
 
     private final UserRepository userRepository;
+    private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
-    private final DepartmentServiceImpl departmentService;
+    private final EducationRepository educationRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
+
+    private final DepartmentServiceImpl departmentService;
 
     private final String back = "";
     private String mainMenu = "";
@@ -478,39 +482,26 @@ public class ButtonService {
                             returnText = "Ro'yxatdan kerakli Lavozimni tanlang " + sighDown;
                         mainMenu = "Bosh Menu";
                     }
-
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
+
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    replyKeyboardMarkup.setSelective(true);
-                    replyKeyboardMarkup.setResizeKeyboard(true);
-                    replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-                    for (String positionName : positionNames) {
-                        keyboardRowList.add(
-                                new KeyboardRow(
-                                        Collections.singletonList(
-                                                KeyboardButton.builder()
-                                                        .text(positionName)
-                                                        .build()
-                                        )
-                                )
-                        );
-                    }
-
+                    setPositionListToButtons(keyboardRowList, replyKeyboardMarkup);
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
-                            .chatId(String.valueOf(chatId))
                             .text(returnText)
+                            .chatId(chatId)
                             .build();
                 }
         );
@@ -519,7 +510,7 @@ public class ButtonService {
     /***
      * USER role
      */
-    public CompletableFuture<SendMessage> employeeSectionUserRoleButtons(Update update) {
+    public CompletableFuture<SendMessage> employeeSectionUserRoleButtons(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -555,8 +546,10 @@ public class ButtonService {
                             ))
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
-
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
+                    if (forWhat.equals("forDeleting"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_DELETE_ROLE_USER.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(String.valueOf(chatId))
@@ -569,7 +562,7 @@ public class ButtonService {
     /***
      * USER role
      */
-    public CompletableFuture<SendMessage> findEmployeeSectionUserRoleButtons(Update update) {
+    public CompletableFuture<SendMessage> findEmployeeSectionUserRoleButtons(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -607,15 +600,21 @@ public class ButtonService {
                     }
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
+                    if (forWhat.equals("forDeleting"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_USER.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
+
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(String.valueOf(chatId))
@@ -2033,6 +2032,152 @@ public class ButtonService {
                             .text(returnText)
                             .chatId(chatId)
                             .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askConfirmationForDeletingEmployee(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String confirmationButton, cancelButton;
+                    final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow();
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = getEmployeeInfoForUserLanguage_UZ(employee);
+                        confirmationButton = "Tasdiqlash ✅";
+                        cancelButton = "Bekor qilish ❌";
+                    } else {
+                        returnText = getEmployeeInfoForUserLanguage_UZ(employee); // to do russian language info
+                        confirmationButton = "Потвердить ✅";
+                        cancelButton = "Отменить ❌";
+                    }
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    List.of(KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(confirmationButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.CONFIRMATION_FOR_DELETING_EMPLOYEE.name());
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+
+    public String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
+        return "Xodim" +
+                "\nIsm Familiyasi: " + employee.getFullName() +
+                "\nTug'ilgan sanasi: " + employee.getDateOfBirth() +
+                "\nYoshi: " + employee.getAge() +
+                "\nMillati: " + employee.getNationality() +
+                "\nLavozim: " + employee.getPosition().getName() +
+                "\nBo'lim: " + employee.getPosition().getManagement().getName() +
+                "\nDepartament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
+                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
+                "\nMalakasi\n" + getEmployeeSkills(employee);
+    }
+
+    public String getEmployeeSkills(Employee employee) {
+
+        String hardSkills = "", softSkills = "";
+        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder1 = new StringBuilder();
+        final var employeeSkillsIds = employeeRepository.getEmployeeSkillsIds(employee.getId());
+
+        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, HARD_SKILL)) {
+            hardSkills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
+        }
+
+        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, SOFT_SKILL)) {
+            softSkills = String.valueOf(stringBuilder1.append(skill.getName()).append(", "));
+        }
+
+        return checkCommas(hardSkills) + "\n" + checkCommas(softSkills) + " ;";
+    }
+
+    public String getEmployeeEducationsInfo(Employee employee) {
+
+        String educationInfo = "";
+        final var educations = employee.getEducations();
+        final var educationsIds = employeeRepository.getEmployeeEducationsIds(employee.getId());
+
+        for (Education ignored : educations) {
+
+            int value, preValue = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (Education education : educationRepository.findEducationByIdIn(educationsIds)) {
+                value = education.getType().getValue();
+
+                if (!(value < preValue))
+                    educationInfo = String.valueOf(stringBuilder.append(setEduInfos(education)).append(" "));
+
+                preValue = value;
+            }
+        }
+
+        return educationInfo;
+    }
+
+    public String checkCommas(String string) {
+
+        String substringed = "";
+        if (string.endsWith(", ")) {
+            final var length = string.length();
+            substringed = string.substring(0, length - 2);
+        }
+
+        return substringed;
+    }
+
+    public String setEduInfos(Education education) {
+        return "\nTa'lim muassasi: " + education.getName() +
+                "\nTa'lim yo'nalishi: " + education.getEducationField() +
+                "\n" + education.getType() +
+                "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
+    }
+
+    public CompletableFuture<SendMessage> cancelledConfirmation(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            chatId = update.getMessage().getChatId();
+            userLanguage = getUserLanguage(chatId);
+
+            if (userLanguage.equals("UZ"))
+                returnText = "O'chirish bekor qilindi!";
+            else
+                returnText = "Удаление отменено!";
+
+            final var messageCompletableFuture = employeeSectionButtons(update);
+            final var sendMessage = messageCompletableFuture.join();
+            final var replyMarkup = sendMessage.getReplyMarkup();
+
+            return SendMessage.builder()
+                    .replyMarkup(replyMarkup)
+                    .text(returnText)
+                    .chatId(chatId)
+                    .build();
                 }
         );
     }

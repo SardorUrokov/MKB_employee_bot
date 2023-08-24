@@ -1,12 +1,15 @@
 package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entity.Department;
+import com.example.mkb_employee_bot.entity.Employee;
 import com.example.mkb_employee_bot.entity.Management;
 import com.example.mkb_employee_bot.entity.Position;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import com.example.mkb_employee_bot.repository.*;
+import com.example.mkb_employee_bot.service.EmployeeServiceImpl;
 import lombok.Data;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
@@ -24,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 @Data
 @Component
 @RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeBot extends TelegramLongPollingBot {
 
@@ -43,6 +47,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Department prevDepartment = new Department();
     Management prevManagement = new Management();
     Position prevPosition = new Position();
+    Employee deletingEmployee = new Employee();
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -80,11 +85,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 CompletableFuture<Void> updateContactFuture = CompletableFuture.runAsync(() -> botService.setPhoneNumber(update));
                 updateContactFuture.join();
                 userRepository.updateUserStageByUserChatId(chatId, Stage.CONTACT_SHARED.name());
-
-                if (userLanguage.equals("UZ") && !userRole.equals("USER"))
-                    sendTextMessage(chatId.toString(), "Sizning rolingiz: " + userRole);
-                else if (userLanguage.equals("RU") && !userRole.equals("USER"))
-                    sendTextMessage(chatId.toString(), "Ваш роль: " + userRole);
             }
 
             if ("/start".equals(messageText)) {
@@ -204,7 +204,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if ((("Должности".equals(messageText) || "Lavozimlar".equals(messageText)) && isUser) || ("Список Должностов".equals(messageText) || "Lavozimlar ro'yhati".equals(messageText)) && (isAdmin || isSuperAdmin)) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.positionSectionUserRoleButtons(update);
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
-
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -221,7 +220,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
             } else if ((("Сотрудник".equals(messageText) || "Xodim".equals(messageText)) && isUser) || ("Найти сотрудника".equals(messageText) || "Xodimni qidirish".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update);
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update, "");
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -270,7 +269,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
             } else if (!isCaseContainingListEmpty && isUser && (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER"))) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.findEmployeeSectionUserRoleButtons(update);
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.findEmployeeSectionUserRoleButtons(update, "");
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -402,6 +401,95 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+
+                if ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))
+                    sendMessageCompletableFuture = botService.deleteEmployee(deletingEmployee, update);
+
+                else if ("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))
+                    sendMessageCompletableFuture = buttonService.cancelledConfirmation(update);
+
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_USER") && (isAdmin || isSuperAdmin)) {
+
+                deletingEmployee = employeeRepository.findByFullName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askConfirmationForDeletingEmployee(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId.toString(), "Подтвердить удаление ⁉️");
+                else
+                    sendTextMessage(chatId.toString(), "O'chirishni tasdiqlaysizmi ⁉️");
+
+            } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_DELETE_ROLE_USER") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.findEmployeeSectionUserRoleButtons(update, "forDeleting");
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Удалить Сотрудрик".equals(messageText) || "Xodimni o'chirish".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.employeeSectionUserRoleButtons(update, "forDeleting");
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if ("Добавить Департамент".equals(messageText) || "Departament qo'shish".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askNameForCreatingDepartment(update);
@@ -517,7 +605,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_CREATING_POSITION") && (isAdmin || isSuperAdmin)) {
 
-                prevManagement = managementRepository.findByName(messageText).get();
+                prevManagement = managementRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askNameForCreatingPosition(update, "forCreating");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
@@ -593,7 +681,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_UPDATING_POSITION") && (isAdmin || isSuperAdmin)) {
 
-                prevManagement = managementRepository.findByName(messageText).get();
+                prevManagement = managementRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectPositionForUpdating(prevManagement, update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
@@ -677,7 +765,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_UPDATING_MANAGEMENT") && (isAdmin || isSuperAdmin)) {
 
-                prevDepartment = departmentRepository.findByName(messageText).get();
+                prevDepartment = departmentRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForUpdating(prevDepartment, update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
@@ -716,7 +804,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_SAVING_UPDATED_MANAGEMENT") && (isAdmin || isSuperAdmin)) {
 
-                selectedDepartment = departmentRepository.findByName(messageText).get();
+                selectedDepartment = departmentRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askingNameForCreatingManagement(update, "forSaving");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
@@ -952,11 +1040,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 if (isAdmin) {
 
                     if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId.toString(), "ADMIN roli boshqa adminlar haqida to'liq ma'lumot olish huquqiga ega emas‼\uFE0F");
+                        sendTextMessage(chatId.toString(), "ADMIN roli boshqa adminlar haqida to'liq ma'lumot olish huquqiga ega emas ‼️");
                     else
-                        sendTextMessage(chatId.toString(), "Роль ADMIN не имеет полного доступа к информацию другим администраторам‼\uFE0F");
+                        sendTextMessage(chatId.toString(), "Роль ADMIN не имеет полного доступа к информацию другим администраторам ‼️");
 
-                } else if (userStage.equals("ADMIN_SELECTED_FOR_DELETING") && isSuperAdmin) {
+                } else if (userStage.equals("ADMIN_SELECTED_FOR_DELETING")) {
 
                     CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.deleteAdmin(update);
                     SendMessage sendMessage = setUserLanguageAndRequestContact.join();

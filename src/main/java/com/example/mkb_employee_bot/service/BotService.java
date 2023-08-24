@@ -12,7 +12,6 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -72,7 +71,6 @@ public class BotService {
 
     public CompletableFuture<SendMessage> setUserLanguage(Update update) {
         return CompletableFuture.supplyAsync(() -> {
-
                     registerUser(update);
 
                     final var updateMessage = update.getMessage();
@@ -148,31 +146,16 @@ public class BotService {
 
                     chatId = update.getMessage().getChatId();
                     final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
-                    final var info = getEmployeeInfoForUserLanguage_UZ(employee);
-                    String buttonText = getUserLanguage(chatId).equals("UZ") ? "Bosh Menu" : "Главное Меню";
-
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-                    replyKeyboardMarkup.setSelective(true);
-                    replyKeyboardMarkup.setResizeKeyboard(true);
-                    replyKeyboardMarkup.setOneTimeKeyboard(true);
-                    keyboardRowList.add(
-                            new KeyboardRow(
-                                    Collections.singleton(
-                                            KeyboardButton.builder()
-                                                    .text(buttonText)
-                                                    .build()
-                                    )
-                            )
-                    );
-                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    final var info = buttonService.getEmployeeInfoForUserLanguage_UZ(employee);
+                    final var messageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update, "");
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
 
                     return SendMessage.builder()
-                            .replyMarkup(replyKeyboardMarkup)
-                            .chatId(String.valueOf(chatId))
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
                             .text(info)
                             .build();
-
                 }
         );
     }
@@ -200,78 +183,6 @@ public class BotService {
         }
 
         return section;
-    }
-
-    private String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
-        return "Xodim" +
-                "\nIsm Familiyasi: " + employee.getFullName() +
-                "\nTug'ilgan sanasi: " + employee.getDateOfBirth() +
-                "\nYoshi: " + employee.getAge() +
-                "\nMillati: " + employee.getNationality() +
-                "\nLavozim: " + employee.getPosition().getName() +
-                "\nBo'lim: " + employee.getPosition().getManagement().getName() +
-                "\nDepartament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
-                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
-                "\nMalakasi\n" + getEmployeeSkills(employee);
-    }
-
-    private String getEmployeeSkills(Employee employee) {
-
-        String hardSkills = "", softSkills = "";
-        StringBuilder stringBuilder = new StringBuilder();
-        StringBuilder stringBuilder1 = new StringBuilder();
-        final var employeeSkillsIds = employeeRepository.getEmployeeSkillsIds(employee.getId());
-
-        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, HARD_SKILL)) {
-            hardSkills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
-        }
-
-        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, SOFT_SKILL)) {
-            softSkills = String.valueOf(stringBuilder1.append(skill.getName()).append(", "));
-        }
-
-        return checkCommas(hardSkills) + "\n" + checkCommas(softSkills) + " ;";
-    }
-
-    private String checkCommas(String string) {
-
-        String substringed = "";
-        if (string.endsWith(", ")) {
-            final var length = string.length();
-            substringed = string.substring(0, length - 2);
-        }
-        return substringed;
-    }
-
-    private String getEmployeeEducationsInfo(Employee employee) {
-
-        String educationInfo = "";
-        final var educations = employee.getEducations();
-        final var educationsIds = employeeRepository.getEmployeeEducationsIds(employee.getId());
-
-        for (Education ignored : educations) {
-
-            int value, preValue = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (Education education : educationRepository.findEducationByIdIn(educationsIds)) {
-
-                value = education.getType().getValue();
-                if (!(value < preValue)) {
-                    educationInfo = String.valueOf(stringBuilder.append(setEduInfos(education)).append(" "));
-                }
-                preValue = value;
-            }
-        }
-
-        return educationInfo;
-    }
-
-    private String setEduInfos(Education education) {
-        return "\nTa'lim muassasi: " + education.getName() +
-                "\nTa'lim yo'nalishi: " + education.getEducationField() +
-                "\n" + education.getType() +
-                "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
     }
 
     public CompletableFuture<SendMessage> getAdminInfo(Update update) {
@@ -614,13 +525,13 @@ public class BotService {
                         if (userLanguage.equals("UZ"))
                             returnText = """
                                     Telefon raqam noto'g'ri formatda kiritildi ‼️
-                                                                        
+
                                     Raqamni qaytadan kiriting
                                     """;
                         else
                             returnText = """
                                     Номер телефона введен в неверном формате ‼️
-                                                                        
+
                                     Введите номер повторно
                                     """;
 
@@ -671,4 +582,14 @@ public class BotService {
                 }
         );
     }
+
+    public CompletableFuture<SendMessage> deleteEmployee(Employee deletingEmployee, Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            chatId = update.getMessage().getChatId();
+            userLanguage = getUserLanguage(chatId);
+
+        });
+    }
+
 }
