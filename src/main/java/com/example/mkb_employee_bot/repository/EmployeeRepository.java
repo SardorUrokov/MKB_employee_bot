@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.example.mkb_employee_bot.entity.Department;
 import com.example.mkb_employee_bot.entity.Employee;
 import com.example.mkb_employee_bot.entity.Skill;
 import com.example.mkb_employee_bot.entity.enums.SkillType;
@@ -39,4 +40,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Modifying
     @Query(value = "UPDATE Employee SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
     void updateEmployeeIsDeleted(Long id);
+
+//    List<Employee> findByDateOfBirthAndDeletedFalse(String dateOfBirth);
+//
+//    List<Employee> findByPosition_Management_Department_Id(Long department_id);
 }

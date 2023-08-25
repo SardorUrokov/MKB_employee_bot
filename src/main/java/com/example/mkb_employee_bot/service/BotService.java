@@ -589,9 +589,9 @@ public class BotService {
                     employeeService.deleteEmployee(deletingEmployee.getId());
 
                     if (userLanguage.equals("UZ"))
-                        returnText = "Xodim ro'yxatdan o'chirildi";
+                        returnText = "Xodim ro'yxatdan olib tashlandi";
                     else
-                        returnText = "Сотрудник удаленино ис список";
+                        returnText = "Сотрудник удален из списка";
 
             final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
             final var sendMessage = messageCompletableFuture.join();

@@ -1785,6 +1785,10 @@ public class ButtonService {
 
                         if (forWhat.equals("forCreating"))
                             returnText = "Lavozim yaratiladigan Boshqarmani tanlang " + sighDown;
+
+                        else if (forWhat.equals("forCreatingEmployee"))
+                            returnText = "Xodim qo'shiladigan Boshqarmani tanlang " + sighDown;
+
                         else
                             returnText = "Lavozim tahrirlanadigan Boshqarmani tanlang " + sighDown;
 
@@ -1793,7 +1797,11 @@ public class ButtonService {
 
                         if (forWhat.equals("forCreating"))
                             returnText = "Выберите отдела, в которой будет создана Должность " + sighDown;
-                        else
+
+                        else if (forWhat.equals("forCreatingEmployee")) {
+                            returnText = "Выберите отдела, в которую будет добавлен сотрудник " + sighDown;
+
+                        } else
                             returnText = "Выберите отдела, в которой будет редактирована Должность " + sighDown;
 
                         mainMenu = "Главное меню";
@@ -1816,6 +1824,8 @@ public class ButtonService {
 
                     if (forWhat.equals("forCreating"))
                         userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_POSITION.name());
+                    else if (forWhat.equals("forCreatingEmployee"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_EMPLOYEE.name());
                     else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_POSITION.name());
 

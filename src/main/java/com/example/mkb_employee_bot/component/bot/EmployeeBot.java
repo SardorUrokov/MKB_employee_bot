@@ -401,6 +401,25 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if ("Xodim qo'shish".equals(messageText) || "Добавить Сотрудники".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forCreatingEmployee");
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
@@ -448,7 +467,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
                 if (userLanguage.equals("RU"))
-                    sendTextMessage(chatId.toString(), "Подтвердить удаление ⁉️");
+                    sendTextMessage(chatId.toString(), "Подтвердить удаление ️");
                 else
                     sendTextMessage(chatId.toString(), "O'chirishni tasdiqlaysizmi ⁉️");
 
