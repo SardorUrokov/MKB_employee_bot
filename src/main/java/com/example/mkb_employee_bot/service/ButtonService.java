@@ -43,32 +43,60 @@ public class ButtonService {
     private Long chatId;
     private String userLanguage = "";
 
-    private String getSteps(int index) {
-        List<String> steps_uz = new ArrayList<>();
+    private String getSteps_uz(int index) {
+        List<String> steps = new ArrayList<>();
 
-        steps_uz.add("Xodimning ism-familiyasini kiriting");
-        steps_uz.add("""
+        steps.add("Xodimning ism-familiyasini kiriting");
+        steps.add("""
                 Xodimning tug'ilgan sanasi:
 
                 ❗️Namuna: 1999-12-31 (yyyy-mm-dd)""");
 
-        steps_uz.add("Millati:");
-        steps_uz.add("Ta'lim bosqichini tanlang:" + sighDown);
-        steps_uz.add("Ta'lim muassasa nomi:");
-        steps_uz.add("Ta'lim yo'nalishi nomi:");
+        steps.add("Millati:");
+        steps.add("Ta'lim bosqichini tanlang:" + sighDown);
+        steps.add("Ta'lim muassasa nomi:");
+        steps.add("Ta'lim yo'nalishi nomi:");
 
-        steps_uz.add("""
-        Muddatlari:
-        
-        ❗️Namuna: (2018-2022);
-        ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
+        steps.add("""
+                Muddatlari:
+                        
+                ❗️Namuna: (2018-2022);
+                ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
 
-        steps_uz.add("""
-        Xodimning malakasini kiriting:
-        
-        ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
+        steps.add("""
+                Xodimning malakasini kiriting:
+                        
+                ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
 
-        return steps_uz.get(index);
+        return steps.get(index);
+    }
+
+    private String getSteps_ru(int index) {
+        List<String> steps = new ArrayList<>();
+
+        steps.add("Введите имя и фамилию сотрудника");
+        steps.add("""
+                Дата рождения сотрудника:
+
+                ❗️Образец: 1999-12-31 (гггг-мм-дд)""");
+
+        steps.add("Национальность:");
+        steps.add("Выберите уровень образования:" + sighDown);
+        steps.add("Название учебного заведения:");
+        steps.add("Название направления обучения:");
+
+        steps.add("""
+                Сроки выполнения:
+
+                ❗️Образец: (2018-2022);
+                ❗️Если в данный момент выполняется: (2020-Present)""");
+
+        steps.add("""
+                Введите навык сотрудника:
+                        
+                ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""");
+
+        return steps.get(index);
     }
 
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
@@ -2324,20 +2352,29 @@ public class ButtonService {
                     } else {
                         switch (step) {
                             case "personalInfo" -> returnText = "В первую очередь мы храним персональные данные сотрудника";
-                            case "educationalInfo" -> returnText = "Теперь начните вводить информацию об образовании сотрудника";
+                            case "educationalInfo" ->
+                                    returnText = "Теперь начните вводить информацию об образовании сотрудника";
                             case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
                         }
                         mainMenu = "Главное Меню";
                     }
 
-                    return null; //returns error
+                    return null; //returns error -> may not be null
                 }
         );
     }
 
-    public CompletableFuture<SendMessage> getStepsByStage(Update update){
+    public CompletableFuture<SendMessage> getStepsByStage(Update update) {
         return CompletableFuture.supplyAsync(() -> {
-            return null;
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var userStage = userRepository.getUserStageByUserChatId(chatId);
+
+//            if ()
+//                }
+                    return null;
+
                 }
         );
     }
