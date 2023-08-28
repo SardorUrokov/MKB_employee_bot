@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.example.mkb_employee_bot.entity.*;
-import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.repository.*;
+import com.example.mkb_employee_bot.entity.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.boot.CommandLineRunner;
@@ -95,7 +95,7 @@ public class Dataloader implements CommandLineRunner {
                     .userName("Sardor_Shukhratovich")
                     .role(Role.SUPER_ADMIN)
                     .stage(Stage.STARTED)
-                    .language(Language.RU)
+                    .language(Language.UZ)
                     .createdAt(new Date())
                     .updatedAt(new Date())
                     .build();

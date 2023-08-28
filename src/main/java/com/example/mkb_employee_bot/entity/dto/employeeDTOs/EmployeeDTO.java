@@ -1,6 +1,5 @@
-package com.example.mkb_employee_bot.entity.dto;
+package com.example.mkb_employee_bot.entity.dto.employeeDTOs;
 
-import com.example.mkb_employee_bot.entity.Education;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

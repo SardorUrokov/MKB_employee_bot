@@ -1884,34 +1884,81 @@ public class ButtonService {
         );
     }
 
-    public CompletableFuture<SendMessage> askSelectPositionForUpdating(Management prevManagement, Update update) {
+    public CompletableFuture<SendMessage> askSelectPositionForUpdating(Management prevManagement, Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-
-                    if (userLanguage.equals("RU")) {
-                        returnText = "Выберите Должность для редактирования " + sighDown;
-                        mainMenu = "Главное Меню";
-                    } else {
-                        returnText = "Tahrirlash uchun Lavozimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
-                    }
-
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     setPositionListToButtonsByManagementId(prevManagement.getId(), keyboardRowList, replyKeyboardMarkup);
 
-                    keyboardRowList.add(
-                            new KeyboardRow(
-                                    List.of(
-                                            KeyboardButton.builder()
-                                                    .text(mainMenu)
-                                                    .build()
+                    if (userLanguage.equals("RU")) {
+                        if (forWhat.equals("forCreatingEmployee")) {
+                            returnText = "Выберите должность, чтобы добавить сотрудника";
+
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(
+                                                    KeyboardButton.builder()
+                                                            .text(mainMenu)
+                                                            .build(),
+                                                    KeyboardButton.builder()
+                                                            .text("Создать должность")
+                                                            .build()
+                                            )
                                     )
-                            )
-                    );
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_UPDATING.name());
+                            );
+                        } else {
+                            returnText = "Выберите Должность для редактирования " + sighDown;
+
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(
+                                                    KeyboardButton.builder()
+                                                            .text(mainMenu)
+                                                            .build()
+                                            )
+                                    )
+                            );
+                        }
+                        mainMenu = "Главное Меню";
+                    } else {
+                        if (forWhat.equals("forCreatingEmployee")) {
+                            returnText = "Xodim qo'shish uchun Lavozim tanlang";
+
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(
+                                                    KeyboardButton.builder()
+                                                            .text(mainMenu)
+                                                            .build(),
+                                                    KeyboardButton.builder()
+                                                            .text("Lavozim yaratish")
+                                                            .build()
+                                            )
+                                    )
+                            );
+                        } else {
+                            returnText = "Tahrirlash uchun Lavozimni tanlang " + sighDown;
+
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(
+                                                    KeyboardButton.builder()
+                                                            .text(mainMenu)
+                                                            .build()
+                                            )
+                                    )
+                            );
+                        }
+                        mainMenu = "Bosh Menu";
+                    }
+
+                    if (forWhat.equals("forCreatingEmployee"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_UPDATING.name());
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
@@ -2171,23 +2218,74 @@ public class ButtonService {
     public CompletableFuture<SendMessage> cancelledConfirmation(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
-            chatId = update.getMessage().getChatId();
-            userLanguage = getUserLanguage(chatId);
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
 
-            if (userLanguage.equals("UZ"))
-                returnText = "O'chirish bekor qilindi!";
-            else
-                returnText = "Удаление отменено!";
+                    if (userLanguage.equals("UZ"))
+                        returnText = "O'chirish bekor qilindi!";
+                    else
+                        returnText = "Удаление отменено!";
 
-            final var messageCompletableFuture = employeeSectionButtons(update);
-            final var sendMessage = messageCompletableFuture.join();
-            final var replyMarkup = sendMessage.getReplyMarkup();
+                    final var messageCompletableFuture = employeeSectionButtons(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
 
-            return SendMessage.builder()
-                    .replyMarkup(replyMarkup)
-                    .text(returnText)
-                    .chatId(chatId)
-                    .build();
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askPositionNameForCreatingEmployee(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton;
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "Lavozim uchun nom kiriting";
+                        cancelButton = "Bekor qilish";
+                    } else {
+                        returnText = "Введите название должности";
+                        cancelButton = "Отменить";
+                    }
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setSelective(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_POSITION_NAME_FOR_CREATING_EMPLOYEE.name());
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+     public CompletableFuture<SendMessage> askInformationOfEmployeeForCreating(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            return null;
+
                 }
         );
     }

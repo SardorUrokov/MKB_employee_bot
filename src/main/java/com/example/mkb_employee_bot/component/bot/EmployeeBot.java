@@ -1,26 +1,25 @@
 package com.example.mkb_employee_bot.component.bot;
 
-import com.example.mkb_employee_bot.entity.Department;
-import com.example.mkb_employee_bot.entity.Employee;
-import com.example.mkb_employee_bot.entity.Management;
-import com.example.mkb_employee_bot.entity.Position;
-import com.example.mkb_employee_bot.entity.enums.Stage;
-import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.service.EmployeeServiceImpl;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import com.example.mkb_employee_bot.repository.*;
+import com.example.mkb_employee_bot.entity.Employee;
+import com.example.mkb_employee_bot.entity.Position;
+import com.example.mkb_employee_bot.entity.Department;
+import com.example.mkb_employee_bot.entity.Management;
+import com.example.mkb_employee_bot.entity.enums.Stage;
+import com.example.mkb_employee_bot.service.BotService;
+import com.example.mkb_employee_bot.service.ButtonService;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import com.example.mkb_employee_bot.service.ButtonService;
-import com.example.mkb_employee_bot.service.BotService;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -43,6 +42,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Long chatId;
     String userStage;
     String userLanguage;
+
     Department selectedDepartment = new Department();
     Department prevDepartment = new Department();
     Management prevManagement = new Management();
@@ -420,6 +420,85 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
+
+                prevManagement = managementRepository.findByName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askSelectPositionForUpdating(prevManagement, update, "forCreatingEmployee");
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if ("Lavozim yaratish".equals(messageText) || "Создать должность".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askPositionNameForCreatingEmployee(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (userStage.equals("ENTERED_POSITION_NAME_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
+
+                positionRepository.save(new Position(messageText, prevManagement));
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askSelectPositionForUpdating(prevManagement, update, "forCreatingEmployee");
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }  else if (userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
@@ -701,7 +780,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_UPDATING_POSITION") && (isAdmin || isSuperAdmin)) {
 
                 prevManagement = managementRepository.findByName(messageText).orElseThrow();
-                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectPositionForUpdating(prevManagement, update);
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectPositionForUpdating(prevManagement, update, "");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
