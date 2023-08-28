@@ -481,7 +481,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
             }  else if (userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
 
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update);
+                sendTextMessage(chatId.toString(), "Juda soz! \nEndi ma'lumotlarni kiritishni boshlaymiz!");
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, "personalInfo");
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
                 try {

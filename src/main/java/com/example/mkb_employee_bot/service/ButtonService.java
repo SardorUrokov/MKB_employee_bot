@@ -14,7 +14,6 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -43,6 +42,34 @@ public class ButtonService {
     private final String sighBack = "⬅\uFE0F";
     private Long chatId;
     private String userLanguage = "";
+
+    private String getSteps(int index) {
+        List<String> steps_uz = new ArrayList<>();
+
+        steps_uz.add("Xodimning ism-familiyasini kiriting");
+        steps_uz.add("""
+                Xodimning tug'ilgan sanasi:
+
+                ❗️Namuna: 1999-12-31 (yyyy-mm-dd)""");
+
+        steps_uz.add("Millati:");
+        steps_uz.add("Ta'lim bosqichini tanlang:" + sighDown);
+        steps_uz.add("Ta'lim muassasa nomi:");
+        steps_uz.add("Ta'lim yo'nalishi nomi:");
+
+        steps_uz.add("""
+        Muddatlari:
+        
+        ❗️Namuna: (2018-2022);
+        ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
+
+        steps_uz.add("""
+        Xodimning malakasini kiriting:
+        
+        ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
+
+        return steps_uz.get(index);
+    }
 
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
 
@@ -2281,11 +2308,36 @@ public class ButtonService {
         );
     }
 
-     public CompletableFuture<SendMessage> askInformationOfEmployeeForCreating(Update update) {
+    public CompletableFuture<SendMessage> askInformationOfEmployeeForCreating(Update update, String step) {
         return CompletableFuture.supplyAsync(() -> {
 
-            return null;
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
 
+                    if (userLanguage.equals("UZ")) {
+                        switch (step) {
+                            case "personalInfo" -> returnText = "Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz";
+                            case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
+                            case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
+                        }
+                        mainMenu = "Bosh Menu";
+                    } else {
+                        switch (step) {
+                            case "personalInfo" -> returnText = "В первую очередь мы храним персональные данные сотрудника";
+                            case "educationalInfo" -> returnText = "Теперь начните вводить информацию об образовании сотрудника";
+                            case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
+                        }
+                        mainMenu = "Главное Меню";
+                    }
+
+                    return null; //returns error
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> getStepsByStage(Update update){
+        return CompletableFuture.supplyAsync(() -> {
+            return null;
                 }
         );
     }
