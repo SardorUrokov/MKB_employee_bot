@@ -25,7 +25,8 @@ public class User {
 
     String fullName,
             userName,
-            phoneNumber;
+            phoneNumber,
+            step;
 
     Long userChatId;
 

@@ -1,5 +1,8 @@
 package com.example.mkb_employee_bot.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +17,7 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -37,66 +41,71 @@ public class ButtonService {
 
     private final String back = "";
     private String mainMenu = "";
+    private final String bosh_Menu = "Bosh Menu ↩️";
+    private final String главное_Меню = "Главное Меню ↩️";
     private String returnText = "";
     private final String sighDown = "⬇\uFE0F";
     private final String sighBack = "⬅\uFE0F";
     private Long chatId;
     private String userLanguage = "";
 
-    private String getSteps_uz(int index) {
-        List<String> steps = new ArrayList<>();
+    private int userStageIndex = 0; // Initialize with the starting stage index
+    List<String> steps_uz = new ArrayList<>();
+    List<String> steps_ru = new ArrayList<>();
+    public boolean moveToNext = true;
 
-        steps.add("Xodimning ism-familiyasini kiriting");
-        steps.add("""
+    private String getSteps_uz(int index) {
+
+        steps_uz.add("Xodimning ism-familiyasini kiriting");
+        steps_uz.add("""
                 Xodimning tug'ilgan sanasi:
 
                 ❗️Namuna: 1999-12-31 (yyyy-mm-dd)""");
 
-        steps.add("Millati:");
-        steps.add("Ta'lim bosqichini tanlang:" + sighDown);
-        steps.add("Ta'lim muassasa nomi:");
-        steps.add("Ta'lim yo'nalishi nomi:");
+        steps_uz.add("Millati:");
+        steps_uz.add("Ta'lim bosqichini tanlang:" + sighDown);
+        steps_uz.add("Ta'lim muassasa nomi:");
+        steps_uz.add("Ta'lim yo'nalishi nomi:");
 
-        steps.add("""
+        steps_uz.add("""
                 Muddatlari:
                         
                 ❗️Namuna: (2018-2022);
                 ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
 
-        steps.add("""
+        steps_uz.add("""
                 Xodimning malakasini kiriting:
                         
                 ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
 
-        return steps.get(index);
+        return steps_uz.get(index);
     }
 
     private String getSteps_ru(int index) {
-        List<String> steps = new ArrayList<>();
 
-        steps.add("Введите имя и фамилию сотрудника");
-        steps.add("""
+        steps_ru.add("Введите имя и фамилию сотрудника");
+        steps_ru.add("""
                 Дата рождения сотрудника:
 
                 ❗️Образец: 1999-12-31 (гггг-мм-дд)""");
 
-        steps.add("Национальность:");
-        steps.add("Выберите уровень образования:" + sighDown);
-        steps.add("Название учебного заведения:");
-        steps.add("Название направления обучения:");
+        steps_ru.add("Национальность:");
+        steps_ru.add("Выберите уровень образования:" + sighDown);
+        steps_ru.add("Название учебного заведения:");
+        steps_ru.add("Название направления обучения:");
 
-        steps.add("""
+        steps_ru.add("""
                 Сроки выполнения:
 
                 ❗️Образец: (2018-2022);
                 ❗️Если в данный момент выполняется: (2020-Present)""");
 
-        steps.add("""
+        steps_ru.add("""
                 Введите навык сотрудника:
                         
                 ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""");
 
-        return steps.get(index);
+        return steps_ru.get(index);
     }
 
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
@@ -222,13 +231,13 @@ public class ButtonService {
                             returnText = "Список пустой, сотрудников на данной Должности нет в списке.";
                         else
                             returnText = "Выберите нужного Сотрудника из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (managementEmployees.isEmpty())
                             returnText = "Ro'yhat bo'sh, ushbu Bo'limdagi xodimlar ro'yxatda yo'q.";
                         else
                             returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
@@ -284,13 +293,13 @@ public class ButtonService {
                             returnText = "Список пустой, Сотрудников этого Отдела нет в списке.";
                         else
                             returnText = "Выберите нужного Сотрудника из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (managementEmployees.isEmpty())
                             returnText = "Ro'yhat bo'sh, ushbu Bo'limdagi xodimlar ro'yxatda yo'q.";
                         else
                             returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
@@ -346,13 +355,13 @@ public class ButtonService {
                             returnText = "Список пустой, Сотрудников этого Департамента нет в списке.";
                         else
                             returnText = "Выберите нужного Сотрудника из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (departmentEmployees.isEmpty())
                             returnText = "Ro'yhat bo'sh, ushbu Departamentdagi xodimlar ro'yxatda yo'q.";
                         else
                             returnText = "Ro'yxatdan kerakli xodimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
@@ -407,13 +416,13 @@ public class ButtonService {
                             returnText = "Список пустой, Департаментов нет";
                         else
                             returnText = "Выберите нужный Департамент из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (departmentNames.isEmpty())
                             returnText = "Ro'yxat bo'sh, Departamentlar yo'q";
                         else
                             returnText = "Ro'yxatdan kerakli Departamentni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
@@ -468,13 +477,13 @@ public class ButtonService {
                             returnText = "Список пустой, отделов нет";
                         else
                             returnText = "Выберите нужный Отдел из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (managementNames.isEmpty())
                             returnText = "Ro'yxat bo'sh, Boshqarmalar yo'q";
                         else
                             returnText = "Ro'yxatdan kerakli Bo'limni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
@@ -529,13 +538,13 @@ public class ButtonService {
                             returnText = "Список пустой, Должности нет";
                         else
                             returnText = "Выберите нужный Должность из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (positionNames.isEmpty())
                             returnText = "Ro'yxat bo'sh, Lavozimlar yo'q";
                         else
                             returnText = "Ro'yxatdan kerakli Lavozimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
 
@@ -577,13 +586,13 @@ public class ButtonService {
                             returnText = "Список пустой, Сотрудники нет";
                         else
                             returnText = "Введите имя и фамилию сотрудника " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (employees.isEmpty())
                             returnText = "Ro'yxat bo'sh, Xodimlar yo'q";
                         else
                             returnText = "Xodimning ism familiyasini kiriting " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
@@ -628,10 +637,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите нужного сотрудника из списка " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Kerakli xodimni ro'yhatdan tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -773,12 +782,12 @@ public class ButtonService {
                         returnText = "Нажмите одну из следующих кнопок, чтобы выполнить следующее действие " + sighDown;
                         button1 = "Инфо Администратора";
                         button2 = "Список Админов ";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Keyingi amalni bajarish uchun quyidagi tugmalardan birini bosing " + sighDown;
                         button1 = "Admin ma'lumotlari";
                         button2 = "Adminlar ro'yxati";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -830,14 +839,14 @@ public class ButtonService {
                         button2 = "Список Админов ";
                         button3 = "Инфо Администратора";
                         button4 = "Удалить Админ";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Keyingi amalni bajarish uchun quyidagi tugmalardan birini bosing " + sighDown;
                         button1 = "Admin qo'shish";
                         button2 = "Adminlar ro'yxati";
                         button3 = "Admin ma'lumotlari";
                         button4 = "Admin o'chirish";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -900,14 +909,14 @@ public class ButtonService {
                         button2 = "Найти Сотрудника";
                         button3 = "Редактировать Сотрудник";
                         button4 = "Удалить Сотрудрик";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Xodimlar bo'limidagi kerakli amalni tanlang " + sighDown;
                         button1 = "Xodim qo'shish";
                         button2 = "Xodimni qidirish";
                         button3 = "Xodimni tahrirlash";
                         button4 = "Xodimni o'chirish";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -969,14 +978,14 @@ public class ButtonService {
                         button2 = "Список Должностов";
                         button3 = "Редактировать Должность";
                         button4 = "Удалить Должность";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Lavozimlar bo'limidagi kerakli amalni tanlang " + sighDown;
                         button1 = "Lavozim qo'shish";
                         button2 = "Lavozimlar ro'yhati";
                         button3 = "Lavozimni tahrirlash";
                         button4 = "Lavozimni o'chirish";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1039,14 +1048,14 @@ public class ButtonService {
                         button2 = "Список Департаменты";
                         button3 = "Редактировать Департамент";
                         button4 = "Удалить Департамент";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Departamentlar bo'limidagi kerakli amalni tanlang " + sighDown;
                         button1 = "Departament qo'shish";
                         button2 = "Departamentlar ro'yhati";
                         button3 = "Departamentni tahrirlash";
                         button4 = "Departamentni o'chirish";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1104,10 +1113,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Введите название для создания Департамента " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Departament yaratish uchun nomini kiriting  " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1144,10 +1153,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("UZ")) {
                         returnText = "Boshqarma yaratiladigan Departamentni tanlang";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     } else {
                         returnText = "Выберите Департамент, в котором будет создан Отдель";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1185,10 +1194,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Департамент для удаления " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "O'chirish uchun Departamentni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1226,10 +1235,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Отдель для удаления " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "O'chirish uchun Boshqarmani tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1268,10 +1277,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Отдель для редактирования " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Tahrirlash uchun Boshqarmani tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1312,10 +1321,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Департамент для редактирования " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Tahrirlash uchun Departamentni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1366,10 +1375,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Чтобы изменить название Департамента, введите новое имя " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Departament nomini tahrirlash uchun yangi nom kiriting  " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1416,14 +1425,14 @@ public class ButtonService {
                         button2 = "Список Отделы";
                         button3 = "Редактировать Отдел";
                         button4 = "Удалить Отдел";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Boshqarmalar bo'limidagi kerakli amalni tanlang " + sighDown;
                         button1 = "Boshqarma qo'shish";
                         button2 = "Boshqarmalar ro'yhati";
                         button3 = "Boshqarmalarni tahrirlash";
                         button4 = "Boshqarmani o'chirish";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1481,10 +1490,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Введите имя для Отдела" + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Boshqarma uchun nom kiriting  " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1703,9 +1712,9 @@ public class ButtonService {
                     returnText = "List of Admins";
 
                     if (userLanguage.equals("UZ")) {
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     } else {
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     }
                     for (User admin : adminList) {
                         keyboardRowList.add(
@@ -1754,7 +1763,7 @@ public class ButtonService {
                             returnText = "Выберите Департамент Отдела для редактирования " + sighDown;
                         else
                             returnText = "Выберите Департамент для Отдела " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
 
                     } else {
 
@@ -1763,7 +1772,7 @@ public class ButtonService {
                         else
                             returnText = "Boshqarma uchun Departamentni tanlang " + sighDown;
 
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
                     setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
 
@@ -1800,10 +1809,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Выберите Должность для удаления " + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "O'chirish uchun Lavozimni tanlang " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1847,7 +1856,7 @@ public class ButtonService {
                         else
                             returnText = "Lavozim tahrirlanadigan Boshqarmani tanlang " + sighDown;
 
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     } else {
 
                         if (forWhat.equals("forCreating"))
@@ -1859,7 +1868,7 @@ public class ButtonService {
                         } else
                             returnText = "Выберите отдела, в которой будет редактирована Должность " + sighDown;
 
-                        mainMenu = "Главное меню";
+                        mainMenu = главное_Меню;
                     }
 
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -1901,10 +1910,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("RU")) {
                         returnText = "Введите название должности" + sighDown;
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         returnText = "Lavozim uchun nom kiriting  " + sighDown;
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -1977,7 +1986,7 @@ public class ButtonService {
                                     )
                             );
                         }
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     } else {
                         if (forWhat.equals("forCreatingEmployee")) {
                             returnText = "Xodim qo'shish uchun Lavozim tanlang";
@@ -2007,12 +2016,13 @@ public class ButtonService {
                                     )
                             );
                         }
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     }
 
-                    if (forWhat.equals("forCreatingEmployee"))
+                    if (forWhat.equals("forCreatingEmployee")) {
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
-                    else
+                        userRepository.updateUserStepByUserChatId(chatId, "personalInfo");
+                    } else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_UPDATING.name());
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -2063,10 +2073,10 @@ public class ButtonService {
 
                     if (userLanguage.equals("UZ")) {
                         returnText = "O'chirish uchun Adminni tanlang";
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                     } else {
                         returnText = "Выберите Админстратора для удаления";
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                     }
 
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -2103,7 +2113,7 @@ public class ButtonService {
                     userLanguage = getUserLanguage(chatId);
 
                     if (userLanguage.equals("UZ")) {
-                        mainMenu = "Bosh Menu";
+                        mainMenu = bosh_Menu;
                         returnText = """
                                 ADMIN yaratish uchun uning telefon raqamini kiriting
                                                                 
@@ -2112,7 +2122,7 @@ public class ButtonService {
                                 1234567 - Mobil raqam;
                                 """;
                     } else {
-                        mainMenu = "Главное Меню";
+                        mainMenu = главное_Меню;
                         returnText = """
                                 Для создания АДМИНА введите его номер телефона
                                                                 
@@ -2341,41 +2351,135 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
+                    String stopButton = "";
 
                     if (userLanguage.equals("UZ")) {
-                        switch (step) {
-                            case "personalInfo" -> returnText = "Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz";
-                            case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
-                            case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
-                        }
-                        mainMenu = "Bosh Menu";
+                        stopButton = "To'xtatish 🛑";
+                        mainMenu = bosh_Menu;
                     } else {
-                        switch (step) {
-                            case "personalInfo" -> returnText = "В первую очередь мы храним персональные данные сотрудника";
-                            case "educationalInfo" ->
-                                    returnText = "Теперь начните вводить информацию об образовании сотрудника";
-                            case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
-                        }
-                        mainMenu = "Главное Меню";
+                        stopButton = "Остановить 🛑";
+                        mainMenu = главное_Меню;
                     }
+//                    if (userLanguage.equals("UZ")) {
+//                        switch (step) {
+//                            case "personalInfo" -> returnText = """
+//                                    Juda soz! Endi ma'lumotlarni kiritishni boshlaymiz!
+//                                    Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz.""";
+//
+//                            case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
+//                            case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
+//                        }
+//                        mainMenu = bosh_Menu;
+//                    } else {
+//                        switch (step) {
+//                            case "personalInfo" -> returnText = """
+//                                    Отлично! Теперь начнем вводить данные!
+//                                    В первую очередь мы храним персональные данные сотрудника""";
+//
+//                            case "educationalInfo" ->
+//                                    returnText = "Теперь начните вводить информацию об образовании сотрудника";
+//                            case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
+//                        }
+//                        mainMenu = главное_Меню;
+//                    }
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
 
-                    return null; //returns error -> may not be null
+                    final var userStepsByStage = getUserStepsByStage(update, moveToNext);
+                    SendMessage sendMessage = userStepsByStage.join();
+                    final var text = sendMessage.getText();
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(stopButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .text(text)
+                            .build();
                 }
         );
     }
 
-    public CompletableFuture<SendMessage> getStepsByStage(Update update) {
+    public CompletableFuture<SendMessage> getUserStepsByStage(Update update) {
         return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    userLanguage = getUserLanguage(chatId);
-                    final var userStage = userRepository.getUserStageByUserChatId(chatId);
-
-//            if ()
-//                }
                     return null;
-
                 }
         );
+    }
+
+    public CompletableFuture<SendMessage> getUserStepsByStage(Update update, boolean moveToNext) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    String messageText = "";
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+
+                    if (moveToNext) {
+                        if (userStageIndex == 2) {
+                            String userInputDate = update.getMessage().getText();
+                            if (isValidDateFormat(userInputDate)) {
+                                incrementUserStage();
+                            } else {
+                                messageText = "❌ Sana formati noto'g'ri kiritilgan. Sana formatini to'g'ri kiriting:\n\n❗️Namuna: 1999-12-31 (yyyy-mm-dd)";
+                            }
+                        } else
+                            incrementUserStage();
+                    } else {
+                        decrementUserStage();
+                    }
+
+                    if (userLanguage.equals("UZ"))
+                        messageText = getSteps_uz(userStageIndex);
+                    else
+                        messageText = getSteps_ru(userStageIndex);
+
+                    return SendMessage.builder()
+                            .text(messageText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    private boolean isValidDateFormat(String inputDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = dateFormat.parse(inputDate);
+            return inputDate.equals(dateFormat.format(date));
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    private void incrementUserStage() {
+        if (userStageIndex < steps_uz.size() - 1) {
+            userStageIndex++;
+        }
+    }
+
+    private void decrementUserStage() {
+        if (userStageIndex > 0) {
+            userStageIndex--;
+        }
+    }
+
+    public void retryUserSteps() {
+        userStageIndex = 0;
     }
 }

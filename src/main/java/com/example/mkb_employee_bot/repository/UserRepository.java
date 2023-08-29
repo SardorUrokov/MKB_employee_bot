@@ -46,8 +46,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "UPDATE users SET stage = :newStage, updated_At = CURRENT_TIMESTAMP WHERE users.user_chat_id = :userChatId", nativeQuery = true)
     void updateUserStageByUserChatId (Long userChatId, String newStage);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE users SET step = :step, updated_At = CURRENT_TIMESTAMP WHERE users.user_chat_id = :chatId", nativeQuery = true)
+    void updateUserStepByUserChatId(Long chatId, String step);
+
     @Query(value = "select stage from users where user_chat_id = :userChatId", nativeQuery = true)
     String getUserStageByUserChatId (Long userChatId);
+
+    @Query(value = "select step from users where user_chat_id = :userChatId", nativeQuery = true)
+    String getUserStepByUserChatId (Long userChatId);
 
     Optional<User> findByPhoneNumber(String phoneNumber);
 

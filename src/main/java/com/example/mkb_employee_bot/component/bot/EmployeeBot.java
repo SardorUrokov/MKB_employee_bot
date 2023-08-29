@@ -66,6 +66,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
             userLanguage = botService.getUserLanguage(chatId);
             userStage = userRepository.getUserStageByUserChatId(chatId);
 
+            String userStepByUserChatId = userRepository.getUserStepByUserChatId(chatId);
+            String userStep = userStepByUserChatId == null ? "" : userStepByUserChatId;
             final var userRole = botService.getUserRole(chatId);
             final var isSuperAdmin = userRole.equals("SUPER_ADMIN");
             final var isAdmin = userRole.equals("ADMIN");
@@ -74,15 +76,17 @@ public class EmployeeBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("userStage: " + userStage);
+            System.out.println("userStep: " + userStep);
             System.out.println("messageText: " + messageText);
 
             final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContaining(messageText);
             final var isCaseContainingListEmpty = caseContainingList.isEmpty();
-
             final var messageSection = botService.getMessageSection(messageText);
 
             if (message.hasContact()) {
-                CompletableFuture<Void> updateContactFuture = CompletableFuture.runAsync(() -> botService.setPhoneNumber(update));
+                CompletableFuture<Void> updateContactFuture = CompletableFuture.runAsync(
+                        () -> botService.setPhoneNumber(update)
+                );
                 updateContactFuture.join();
                 userRepository.updateUserStageByUserChatId(chatId, Stage.CONTACT_SHARED.name());
             }
@@ -125,10 +129,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if ("Bosh Menu".equals(messageText) || "Главное Меню".equals(messageText)) {
+            } else if ("Bosh Menu ↩️".equals(messageText) || "Главное Меню ↩️".equals(messageText)) {
+
                 CompletableFuture<SendMessage> messageCompletableFuture;
-                if (isAdmin || isSuperAdmin) messageCompletableFuture = buttonService.superAdminButtons(update);
-                else messageCompletableFuture = buttonService.userButtons(update);
+                if (isAdmin || isSuperAdmin)
+                    messageCompletableFuture = buttonService.superAdminButtons(update);
+                else
+                    messageCompletableFuture = buttonService.userButtons(update);
 
                 SendMessage sendMessage = messageCompletableFuture.join();
 
@@ -479,10 +486,56 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }  else if (userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
+            } else if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText) && (isAdmin || isSuperAdmin)){
 
-                sendTextMessage(chatId.toString(), "Juda soz! \nEndi ma'lumotlarni kiritishni boshlaymiz!");
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, "personalInfo");
+                if (userLanguage.equals("UZ"))
+                    sendTextMessage(chatId.toString(), "Jarayon to'xtatildi❗️");
+                else
+                    sendTextMessage(chatId.toString(), "Процесс остановлен❗️");
+
+                buttonService.retryUserSteps();
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.employeeSectionButtons(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
+//                String returnText = "";
+//                if (userLanguage.equals("UZ")) {
+//                    switch (userStep) {
+//                        case "personalInfo" -> returnText = """
+//                                Juda soz! Endi ma'lumotlarni kiritishni boshlaymiz!
+//                                Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz.""";
+//
+//                        case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
+//                        case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
+//                    }
+//                } else {
+//                    switch (userStep) {
+//                        case "personalInfo" -> returnText = """
+//                                Отлично! Теперь начнем вводить данные!
+//                                В первую очередь мы храним персональные данные сотрудника""";
+//
+//                        case "educationalInfo" ->
+//                                returnText = "Теперь начните вводить информацию об образовании сотрудника";
+//                        case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
+//                    }
+//                }
+//                sendTextMessage(chatId.toString(), returnText);
+                final var selectedPosition = positionRepository.findByName(messageText);
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
                 try {
