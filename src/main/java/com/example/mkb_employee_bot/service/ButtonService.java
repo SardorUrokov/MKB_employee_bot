@@ -70,7 +70,7 @@ public class ButtonService {
         steps_uz.add("""
                 Muddatlari:
                         
-                ❗️Namuna: (2018-2022);
+                ❗️Namuna: 2018-2022;
                 ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
 
         steps_uz.add("""
@@ -98,7 +98,7 @@ public class ButtonService {
         steps_ru.add("""
                 Сроки выполнения:
 
-                ❗️Образец: (2018-2022);
+                ❗️Образец: 2018-2022;
                 ❗️Если в данный момент продолжается: (2020-Present)""");
 
         steps_ru.add("""
@@ -2453,13 +2453,13 @@ public class ButtonService {
                                     messageText = """
                                             ❌Muddat oralig'i noto'g'ri kiritildi. Sana formatini to'g'ri kiriting:
 
-                                            ❗️Namuna: (2018-2022);
+                                            ❗️Namuna: 2018-2022;
                                             ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""";
                                 else
                                     messageText = """
                                             ❌Неверно введен сроки выполнения. Введите правильный формат даты:
                                                                                          
-                                            ❗️Образец: (2018-2022);
+                                            ❗️Образец: 2018-2022;
                                             ❗️Если в настоящее время продолжается: (с 2020 г. по настоящее время)""";
                             }
                         } else
