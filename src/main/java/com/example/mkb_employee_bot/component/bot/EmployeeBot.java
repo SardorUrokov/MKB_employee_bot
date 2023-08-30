@@ -492,8 +492,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendTextMessage(chatId.toString(), "Jarayon to'xtatildi❗️");
                 else
                     sendTextMessage(chatId.toString(), "Процесс остановлен❗️");
-
                 buttonService.retryUserSteps();
+
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.employeeSectionButtons(update);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
@@ -512,32 +512,10 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
-//                String returnText = "";
-//                if (userLanguage.equals("UZ")) {
-//                    switch (userStep) {
-//                        case "personalInfo" -> returnText = """
-//                                Juda soz! Endi ma'lumotlarni kiritishni boshlaymiz!
-//                                Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz.""";
-//
-//                        case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
-//                        case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
-//                    }
-//                } else {
-//                    switch (userStep) {
-//                        case "personalInfo" -> returnText = """
-//                                Отлично! Теперь начнем вводить данные!
-//                                В первую очередь мы храним персональные данные сотрудника""";
-//
-//                        case "educationalInfo" ->
-//                                returnText = "Теперь начните вводить информацию об образовании сотрудника";
-//                        case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
-//                    }
-//                }
-//                sendTextMessage(chatId.toString(), returnText);
+
                 final var selectedPosition = positionRepository.findByName(messageText);
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
-
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -552,9 +530,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
-
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
                 if ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))

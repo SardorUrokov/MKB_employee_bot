@@ -2,14 +2,15 @@ package com.example.mkb_employee_bot.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.example.mkb_employee_bot.entity.*;
+import com.example.mkb_employee_bot.entity.enums.EduType;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
@@ -17,7 +18,6 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -44,8 +44,8 @@ public class ButtonService {
     private final String bosh_Menu = "Bosh Menu ↩️";
     private final String главное_Меню = "Главное Меню ↩️";
     private String returnText = "";
-    private final String sighDown = "⬇\uFE0F";
-    private final String sighBack = "⬅\uFE0F";
+    private final String sighDown = "⬇️";
+    private final String sighBack = "⬅️";
     private Long chatId;
     private String userLanguage = "";
 
@@ -63,7 +63,7 @@ public class ButtonService {
                 ❗️Namuna: 1999-12-31 (yyyy-mm-dd)""");
 
         steps_uz.add("Millati:");
-        steps_uz.add("Ta'lim bosqichini tanlang:" + sighDown);
+        steps_uz.add("Ta'lim bosqichini tanlang " + sighDown);
         steps_uz.add("Ta'lim muassasa nomi:");
         steps_uz.add("Ta'lim yo'nalishi nomi:");
 
@@ -78,6 +78,7 @@ public class ButtonService {
                         
                 ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
 
+        steps_uz.add("Kiritish uchun rasm yoki resumeni tanlang ⬇️");
         return steps_uz.get(index);
     }
 
@@ -98,13 +99,14 @@ public class ButtonService {
                 Сроки выполнения:
 
                 ❗️Образец: (2018-2022);
-                ❗️Если в данный момент выполняется: (2020-Present)""");
+                ❗️Если в данный момент продолжается: (2020-Present)""");
 
         steps_ru.add("""
                 Введите навык сотрудника:
                         
                 ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""");
 
+        steps_ru.add("Выберите изображение или резюме для вложения ⬇️");
         return steps_ru.get(index);
     }
 
@@ -2353,35 +2355,12 @@ public class ButtonService {
                     userLanguage = getUserLanguage(chatId);
                     String stopButton = "";
 
-                    if (userLanguage.equals("UZ")) {
+                    if (userLanguage.equals("UZ"))
                         stopButton = "To'xtatish 🛑";
-                        mainMenu = bosh_Menu;
-                    } else {
+                    else
                         stopButton = "Остановить 🛑";
-                        mainMenu = главное_Меню;
-                    }
-//                    if (userLanguage.equals("UZ")) {
-//                        switch (step) {
-//                            case "personalInfo" -> returnText = """
-//                                    Juda soz! Endi ma'lumotlarni kiritishni boshlaymiz!
-//                                    Birinchi navbatda xodimning shaxsiy ma'lumotlarini saqlaymiz.""";
-//
-//                            case "educationalInfo" -> returnText = "Endi ta'lim haqidagi ma'lumotlarni kiritishni boshlang";
-//                            case "skillInfo" -> returnText = "Endi malaka xaqidagi ma'lumotlarni kiriting";
-//                        }
-//                        mainMenu = bosh_Menu;
-//                    } else {
-//                        switch (step) {
-//                            case "personalInfo" -> returnText = """
-//                                    Отлично! Теперь начнем вводить данные!
-//                                    В первую очередь мы храним персональные данные сотрудника""";
-//
-//                            case "educationalInfo" ->
-//                                    returnText = "Теперь начните вводить информацию об образовании сотрудника";
-//                            case "skillInfo" -> returnText = "Теперь введите детали навыков сотрудника";
-//                        }
-//                        mainMenu = главное_Меню;
-//                    }
+
+
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
@@ -2392,12 +2371,30 @@ public class ButtonService {
                     SendMessage sendMessage = userStepsByStage.join();
                     final var text = sendMessage.getText();
 
+                    if (text.equals("Ta'lim bosqichini tanlang ⬇️") || text.equals("Выберите уровень образования: ⬇️")) {
+                        final var eduTypes = EduType.values();
+
+                        for (int i = 0; i < eduTypes.length; i += 2) {
+                            EduType eduType1 = eduTypes[i];
+                            EduType eduType2 = (i + 1 < eduTypes.length) ? eduTypes[i + 1] : null;
+
+                            KeyboardButton button1 = KeyboardButton.builder()
+                                    .text(eduType1.name())
+                                    .build();
+                            KeyboardButton button2 = KeyboardButton.builder()
+                                    .text(eduType2.name())
+                                    .build();
+
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(button1, button2)
+                                    )
+                            );
+                        }
+                    }
                     keyboardRowList.add(
                             new KeyboardRow(
                                     List.of(
-                                            KeyboardButton.builder()
-                                                    .text(mainMenu)
-                                                    .build(),
                                             KeyboardButton.builder()
                                                     .text(stopButton)
                                                     .build()
@@ -2408,17 +2405,9 @@ public class ButtonService {
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
-                            .text(returnText)
                             .chatId(chatId)
                             .text(text)
                             .build();
-                }
-        );
-    }
-
-    public CompletableFuture<SendMessage> getUserStepsByStage(Update update) {
-        return CompletableFuture.supplyAsync(() -> {
-                    return null;
                 }
         );
     }
@@ -2430,24 +2419,53 @@ public class ButtonService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
 
-                    if (moveToNext) {
-                        if (userStageIndex == 2) {
-                            String userInputDate = update.getMessage().getText();
-                            if (isValidDateFormat(userInputDate)) {
-                                incrementUserStage();
-                            } else {
-                                messageText = "❌ Sana formati noto'g'ri kiritilgan. Sana formatini to'g'ri kiriting:\n\n❗️Namuna: 1999-12-31 (yyyy-mm-dd)";
-                            }
-                        } else
-                            incrementUserStage();
-                    } else {
-                        decrementUserStage();
-                    }
-
                     if (userLanguage.equals("UZ"))
                         messageText = getSteps_uz(userStageIndex);
                     else
                         messageText = getSteps_ru(userStageIndex);
+
+                    if (moveToNext) {
+                        if (userStageIndex == 2) {
+                            String userInputDate = update.getMessage().getText();
+
+                            if (isValidDateFormat(userInputDate))
+                                incrementUserStage();
+                            else {
+                                if (userLanguage.equals("UZ"))
+                                    messageText = """
+                                            ❌Sana noto'g'ri kiritilgan. Sanani to'g'ri kiriting:
+
+                                            ❗️Namuna: 1999-12-31 (yyyy-mm-dd)""";
+                                else
+                                    messageText = """
+                                            ❌Дата введен неверно. Введите правильную дату:
+
+                                            ❗Образец: 1999-12-31 (yyyy-mm-dd)""";
+                            }
+                        } else if (userStageIndex == 7) {
+                            String userInputDate = update.getMessage().getText();
+                            final var checkedEduPeriod = checkEduPeriod(userInputDate);
+
+                            if (checkedEduPeriod)
+                                incrementUserStage();
+                            else {
+                                if (userLanguage.equals("UZ"))
+                                    messageText = """
+                                            ❌Muddat oralig'i noto'g'ri kiritildi. Sana formatini to'g'ri kiriting:
+
+                                            ❗️Namuna: (2018-2022);
+                                            ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""";
+                                else
+                                    messageText = """
+                                            ❌Неверно введен сроки выполнения. Введите правильный формат даты:
+                                                                                         
+                                            ❗️Образец: (2018-2022);
+                                            ❗️Если в настоящее время продолжается: (с 2020 г. по настоящее время)""";
+                            }
+                        } else
+                            incrementUserStage();
+                    } else
+                        decrementUserStage();
 
                     return SendMessage.builder()
                             .text(messageText)
@@ -2458,13 +2476,71 @@ public class ButtonService {
     }
 
     private boolean isValidDateFormat(String inputDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            Date date = dateFormat.parse(inputDate);
-            return inputDate.equals(dateFormat.format(date));
-        } catch (ParseException e) {
+
+        String[] parts = inputDate.split("-");
+
+        if (parts.length != 3) {
+            System.out.println("Invalid format. Please use yyyy-MM-dd.");
             return false;
         }
+
+        try {
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            int day = Integer.parseInt(parts[2]);
+
+            LocalDate birthdate = LocalDate.of(year, month, day);
+            LocalDate currentDate = LocalDate.now();
+
+            if (birthdate.isBefore(currentDate)) {
+                System.out.println("Valid birthdate.");
+                return true;
+            } else {
+                System.out.println("Invalid birthdate.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number format.");
+            return false;
+        } catch (Exception e) {
+            System.out.println("Invalid date values.");
+            return false;
+        }
+    }
+
+    private boolean checkEduPeriod(String period) {
+        boolean isValuable;
+        String[] years = period.split("-");
+
+        if (years.length != 2)
+            return false;
+
+        try {
+            int startYear = Integer.parseInt(years[0]);
+            int endYear;
+            boolean isPresent = years[1].equalsIgnoreCase("Present");
+
+            if (isPresent) {
+                endYear = Year.now().getValue();
+            } else {
+                endYear = Integer.parseInt(years[1]);
+            }
+
+            int currentYear = Year.now().getValue();
+
+            if (startYear <= currentYear && (isPresent || (endYear >= startYear && endYear <= currentYear))) {
+                System.out.println("Valid education time period.");
+                isValuable = true;
+            } else {
+                System.out.println("Invalid education time period.");
+                isValuable = false;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid year format.");
+            isValuable = false;
+        }
+
+        return isValuable;
     }
 
     private void incrementUserStage() {
@@ -2474,9 +2550,8 @@ public class ButtonService {
     }
 
     private void decrementUserStage() {
-        if (userStageIndex > 0) {
+        if (userStageIndex > 0)
             userStageIndex--;
-        }
     }
 
     public void retryUserSteps() {
