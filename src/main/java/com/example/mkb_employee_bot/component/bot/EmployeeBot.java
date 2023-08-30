@@ -76,8 +76,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("userStage: " + userStage);
-            System.out.println("userStep: " + userStep);
             System.out.println("messageText: " + messageText);
+            System.out.println("userStep: " + userStep);
 
             final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContaining(messageText);
             final var isCaseContainingListEmpty = caseContainingList.isEmpty();

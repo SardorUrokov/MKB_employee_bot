@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.EduType;
+import com.example.mkb_employee_bot.entity.enums.FileType;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
@@ -71,7 +72,7 @@ public class ButtonService {
                 Muddatlari:
                         
                 ❗️Namuna: 2018-2022;
-                ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""");
+                ❗️Agar hozirda davom etayotgan bo'lsa: 2020-Present""");
 
         steps_uz.add("""
                 Xodimning malakasini kiriting:
@@ -99,7 +100,7 @@ public class ButtonService {
                 Сроки выполнения:
 
                 ❗️Образец: 2018-2022;
-                ❗️Если в данный момент продолжается: (2020-Present)""");
+                ❗️Если в данный момент продолжается: 2020-Present""");
 
         steps_ru.add("""
                 Введите навык сотрудника:
@@ -653,10 +654,9 @@ public class ButtonService {
 
                     for (Employee employee : employees) {
                         final var fullName = employee.getFullName();
-
                         keyboardRowList.add(
                                 new KeyboardRow(
-                                        Collections.singletonList(
+                                        List.of(
                                                 KeyboardButton.builder()
                                                         .text(fullName)
                                                         .build()
@@ -667,7 +667,7 @@ public class ButtonService {
 
                     keyboardRowList.add(
                             new KeyboardRow(
-                                    List.of(
+                                    Collections.singletonList(
                                             KeyboardButton.builder()
                                                     .text(mainMenu)
                                                     .build()
@@ -2360,7 +2360,6 @@ public class ButtonService {
                     else
                         stopButton = "Остановить 🛑";
 
-
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
@@ -2382,7 +2381,7 @@ public class ButtonService {
                                     .text(eduType1.name())
                                     .build();
                             KeyboardButton button2 = KeyboardButton.builder()
-                                    .text(eduType2.name())
+                                    .text(Objects.requireNonNull(eduType2).name())
                                     .build();
 
                             keyboardRowList.add(
@@ -2390,6 +2389,38 @@ public class ButtonService {
                                             List.of(button1, button2)
                                     )
                             );
+                        }
+                    } else if (text.equals("Kiritish uchun rasm yoki resumeni tanlang ⬇️") || text.equals("Выберите изображение или резюме для вложения ⬇️")) {
+                        final var fileTypes = FileType.values();
+                        int totalFileTypes = fileTypes.length;
+
+                        for (int i = 0; i < totalFileTypes; i += 2) {
+                            FileType fileType1 = fileTypes[i];
+                            FileType fileType2 = (i + 1 < totalFileTypes) ? fileTypes[i + 1] : null;
+
+                            KeyboardButton button1 = KeyboardButton.builder()
+                                    .text(fileType1.name())
+                                    .build();
+                            KeyboardButton button2 = (fileType2 != null) ? KeyboardButton.builder()
+                                    .text(fileType2.name())
+                                    .build() : null;
+
+                            keyboardRowList.add(new KeyboardRow(List.of(button1, Objects.requireNonNull(button2))));
+                        }
+
+                        if (totalFileTypes % 2 == 1) {
+                            FileType lastFileType = fileTypes[totalFileTypes - 1];
+                            keyboardRowList.add(new KeyboardRow(
+                                    Collections.singleton(KeyboardButton.builder()
+                                            .text(lastFileType.name())
+                                            .build())
+                            ));
+
+                            keyboardRowList.add(new KeyboardRow(
+                                    Collections.singleton(KeyboardButton.builder()
+                                            .text(lastFileType.name())
+                                            .build())
+                            ));
                         }
                     }
                     keyboardRowList.add(
@@ -2454,7 +2485,7 @@ public class ButtonService {
                                             ❌Muddat oralig'i noto'g'ri kiritildi. Sana formatini to'g'ri kiriting:
 
                                             ❗️Namuna: 2018-2022;
-                                            ❗️Agar hozirda davom etayotgan bo'lsa: (2020-Present)""";
+                                            ❗️Agar hozirda davom etayotgan bo'lsa: 2020-Present""";
                                 else
                                     messageText = """
                                             ❌Неверно введен сроки выполнения. Введите правильный формат даты:
@@ -2466,6 +2497,26 @@ public class ButtonService {
                             incrementUserStage();
                     } else
                         decrementUserStage();
+
+                    switch (userStageIndex) {
+                        case 0 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name());
+                        case 1 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
+                        case 2 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name());
+                        case 3 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
+                        case 4 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
+                        case 5 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
+                        case 6 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
+                        case 7 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
+                        case 8 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                        case 9 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                    }
 
                     return SendMessage.builder()
                             .text(messageText)
