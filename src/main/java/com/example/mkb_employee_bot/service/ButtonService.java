@@ -2390,6 +2390,7 @@ public class ButtonService {
                                     )
                             );
                         }
+
                     } else if (text.equals("Kiritish uchun rasm yoki resumeni tanlang ⬇️") || text.equals("Выберите изображение или резюме для вложения ⬇️")) {
                         final var fileTypes = FileType.values();
                         int totalFileTypes = fileTypes.length;
@@ -2405,22 +2406,33 @@ public class ButtonService {
                                     .text(fileType2.name())
                                     .build() : null;
 
-                            keyboardRowList.add(new KeyboardRow(List.of(button1, Objects.requireNonNull(button2))));
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(button1, Objects.requireNonNull(button2)
+                                            )
+                                    )
+                            );
                         }
 
                         if (totalFileTypes % 2 == 1) {
                             FileType lastFileType = fileTypes[totalFileTypes - 1];
-                            keyboardRowList.add(new KeyboardRow(
-                                    Collections.singleton(KeyboardButton.builder()
-                                            .text(lastFileType.name())
-                                            .build())
-                            ));
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            Collections.singleton(
+                                                    KeyboardButton.builder()
+                                                            .text(lastFileType.name())
+                                                            .build()
+                                            )
+                                    )
+                            );
 
                             keyboardRowList.add(new KeyboardRow(
-                                    Collections.singleton(KeyboardButton.builder()
-                                            .text(lastFileType.name())
-                                            .build())
-                            ));
+                                            Collections.singleton(
+                                                    KeyboardButton.builder()
+                                                            .text(lastFileType.name())
+                                                            .build())
+                                    )
+                            );
                         }
                     }
                     keyboardRowList.add(
