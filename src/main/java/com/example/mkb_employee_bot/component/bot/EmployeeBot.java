@@ -48,6 +48,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Management prevManagement = new Management();
     Position prevPosition = new Position();
     Employee deletingEmployee = new Employee();
+    Employee creatingEmployee = new Employee();
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -511,6 +512,30 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (("O'tkazib yuborish ⏩".equals(messageText) || "Пропустить ⏩".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+
+                if (userLanguage.equals("UZ"))
+                    sendTextMessage(chatId.toString(), "Quyida xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
+                else
+                    sendTextMessage(chatId.toString(), "Подтвердить данные о сотруднике ниже? ⬇️");
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.completeAddingEmployeeInfo(update, creatingEmployee);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 final var selectedPosition = positionRepository.findByName(messageText);
@@ -530,6 +555,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 

@@ -1,9 +1,6 @@
 package com.example.mkb_employee_bot.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -79,7 +76,7 @@ public class ButtonService {
                         
                 ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""");
 
-        steps_uz.add("Kiritish uchun rasm yoki resumeni tanlang ⬇️");
+        steps_uz.add("Fayl ko'rinishidagi ma'lumot kiritish uchun quyidagilardan birini tanlang ⬇️");
         return steps_uz.get(index);
     }
 
@@ -107,7 +104,7 @@ public class ButtonService {
                         
                 ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""");
 
-        steps_ru.add("Выберите изображение или резюме для вложения ⬇️");
+        steps_ru.add("Выберите один из следующих вариантов для ввода данных в формате файла ⬇️");
         return steps_ru.get(index);
     }
 
@@ -1180,7 +1177,6 @@ public class ButtonService {
                             .chatId(chatId)
                             .text(returnText)
                             .build();
-
                 }
         );
     }
@@ -1207,11 +1203,13 @@ public class ButtonService {
                     setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_DELETING.name());
@@ -1265,7 +1263,6 @@ public class ButtonService {
                             .build();
                 }
         );
-
     }
 
     /**
@@ -2370,7 +2367,7 @@ public class ButtonService {
                     SendMessage sendMessage = userStepsByStage.join();
                     final var text = sendMessage.getText();
 
-                    if (text.equals("Ta'lim bosqichini tanlang ⬇️") || text.equals("Выберите уровень образования: ⬇️")) {
+                    if (text.equals("Ta'lim bosqichini tanlang ⬇️") || text.equals("Выберите уровень образования:⬇️")) {
                         final var eduTypes = EduType.values();
 
                         for (int i = 0; i < eduTypes.length; i += 2) {
@@ -2391,9 +2388,38 @@ public class ButtonService {
                             );
                         }
 
-                    } else if (text.equals("Kiritish uchun rasm yoki resumeni tanlang ⬇️") || text.equals("Выберите изображение или резюме для вложения ⬇️")) {
+                    } else if (step.equals("ENTERED_EMPLOYEE_SKILLS")) {
+
+                        chatId = update.getMessage().getChatId();
+                        userLanguage = getUserLanguage(chatId);
+                        String addEducationElse = "";
+
+                        if (userLanguage.equals("RU"))
+                            addEducationElse = "Еще одну образовательную информацию ➕";
+                        else
+                            addEducationElse = "Yana ta'lim ma'lumoti qo'shish";
+
+                        KeyboardButton button = KeyboardButton.builder()
+                                .text(addEducationElse)
+                                .build();
+
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(button)
+                                )
+                        );
+
+                    } else if (text.equals("Fayl ko'rinishidagi ma'lumot kiritish uchun quyidagilardan birini tanlang ⬇️") || text.equals("Выберите один из следующих вариантов для ввода данных в формате файла ⬇️")) {
+
                         final var fileTypes = FileType.values();
                         int totalFileTypes = fileTypes.length;
+                        userLanguage = getUserLanguage(chatId);
+                        String skipButton;
+
+                        if (userLanguage.equals("UZ"))
+                            skipButton = "O'tkazib yuborish ⏩";
+                        else
+                            skipButton = "Пропустить ⏩";
 
                         for (int i = 0; i < totalFileTypes; i += 2) {
                             FileType fileType1 = fileTypes[i];
@@ -2426,14 +2452,26 @@ public class ButtonService {
                                     )
                             );
 
-                            keyboardRowList.add(new KeyboardRow(
-                                            Collections.singleton(
+                            keyboardRowList.add(
+                                    new KeyboardRow(
+                                            List.of(
                                                     KeyboardButton.builder()
                                                             .text(lastFileType.name())
-                                                            .build())
+                                                            .build()
+                                            )
                                     )
                             );
                         }
+
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(
+                                                KeyboardButton.builder()
+                                                        .text(skipButton)
+                                                        .build()
+                                        )
+                                )
+                        );
                     }
                     keyboardRowList.add(
                             new KeyboardRow(
@@ -2619,5 +2657,51 @@ public class ButtonService {
 
     public void retryUserSteps() {
         userStageIndex = 0;
+    }
+
+    public CompletableFuture<SendMessage> completeAddingEmployeeInfo(Update update, Employee employee) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String confirmationAboutCreating, cancelCreating;
+
+                    if (userLanguage.equals("UZ")) {
+                        confirmationAboutCreating = "Tasdiqlash ✅";
+                        cancelCreating = "Bekor Qilish ❌";
+                    } else {
+                        confirmationAboutCreating = "Подтвердить ✅";
+                        cancelCreating = "Отменить ❌";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(confirmationAboutCreating)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(cancelCreating)
+                                                    .build()
+                                    )
+                            )
+                    );
+
+                    final var info = getEmployeeInfoForUserLanguage_UZ(employee);
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(info)
+                            .build();
+                }
+        );
     }
 }

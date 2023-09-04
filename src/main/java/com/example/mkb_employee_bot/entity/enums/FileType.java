@@ -4,5 +4,6 @@ public enum FileType {
 
     EMPLOYEE_PHOTO,
     OBYEKTIVKA,
-    CERTIFICATE
+    CERTIFICATE,
+    RESUME
 }
