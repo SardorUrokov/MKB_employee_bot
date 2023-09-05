@@ -1,15 +1,13 @@
 package com.example.mkb_employee_bot.component.bot;
 
+import com.example.mkb_employee_bot.entity.*;
+import com.example.mkb_employee_bot.entity.enums.EduType;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.entity.Employee;
-import com.example.mkb_employee_bot.entity.Position;
-import com.example.mkb_employee_bot.entity.Department;
-import com.example.mkb_employee_bot.entity.Management;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import com.example.mkb_employee_bot.service.BotService;
 import com.example.mkb_employee_bot.service.ButtonService;
@@ -21,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -50,6 +49,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Employee deletingEmployee = new Employee();
     Employee creatingEmployee = new Employee();
     Position selectedPosition = new Position();
+    Education education = new Education();
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -471,7 +471,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
             } else if (userStage.equals("ENTERED_POSITION_NAME_FOR_CREATING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
 
-                positionRepository.save(new Position(messageText, prevManagement));
+                selectedPosition = positionRepository.save(new Position(messageText, prevManagement));
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askSelectPositionForUpdating(prevManagement, update, "forCreatingEmployee");
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
@@ -539,16 +539,31 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                if ("personalInfo".equals(messageText))
-                    selectedPosition = positionRepository.findByName(messageText).orElseThrow();
-                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep))
+                if ("personalInfo".equals(userStep))
+                    selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
+                else if ("ENTERED_EMPLOYEE_NAME_ROLE_ADMIN".equals(userStep))
                     creatingEmployee.setFullName(messageText);
                 else if ("ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN".equals(userStep))
-                    creatingEmployee.setDateOfBirth(messageText);
-                else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(messageText)) {
                     creatingEmployee.setPhoneNumber(messageText);
-                }
+                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep))
+                    creatingEmployee.setDateOfBirth(messageText);
+                else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(userStep))
+                    creatingEmployee.setNationality(messageText);
+                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
+                    education.setType(EduType.valueOf(messageText));
+                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
+                    education.setName(messageText);
+                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
+                    education.setEducationField(messageText);
+                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
 
+                    String[] dateFromPeriod = buttonService.getDateFromPeriod(messageText);
+                    education.setStartedDate(dateFromPeriod[0]);
+                    education.setEndDate(dateFromPeriod[1]);
+
+                } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(messageText)) {
+                    creatingEmployee.setSkills(Collections.singletonList(new Skill(messageText)));
+                }
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {

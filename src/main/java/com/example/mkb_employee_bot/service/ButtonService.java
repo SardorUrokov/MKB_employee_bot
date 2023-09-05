@@ -55,7 +55,10 @@ public class ButtonService {
     private String getSteps_uz(int index) {
 
         steps_uz.add("Xodimning ism-familiyasini kiriting");
-        steps_uz.add("Xodimning telefon raqamini kiriting");
+        steps_uz.add("""
+                Xodimning telefon raqamini kiriting
+                        
+                ️❗️Namuna: 998XXXXXXXXX""");
         steps_uz.add("""
                 Xodimning tug'ilgan sanasi:
 
@@ -84,7 +87,10 @@ public class ButtonService {
     private String getSteps_ru(int index) {
 
         steps_ru.add("Введите имя и фамилию сотрудника");
-        steps_ru.add("Введите номер телефона сотрудника");
+        steps_ru.add("""
+                Введите номер телефона сотрудника
+                        
+                ❗️Образец: 998XXXXXXXXX""");
         steps_ru.add("""
                 Дата рождения сотрудника:
 
@@ -2551,26 +2557,23 @@ public class ButtonService {
                         decrementUserStage();
 
                     switch (userStageIndex) {
-                        case 0 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name());
                         case 1 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name());
                         case 2 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name());
                         case 3 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
-                        case 4 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
+                        case 4 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
                         case 5 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
                         case 6 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
                         case 7 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
-                        case 8 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
+                        case 8 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
                         case 9 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                        case 10 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
                     }
 
                     return SendMessage.builder()
@@ -2708,5 +2711,9 @@ public class ButtonService {
                             .build();
                 }
         );
+    }
+
+    public String[] getDateFromPeriod(String eduPeriod) {
+        return eduPeriod.split("-");
     }
 }

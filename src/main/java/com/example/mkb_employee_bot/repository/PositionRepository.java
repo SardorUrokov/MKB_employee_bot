@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.mkb_employee_bot.entity.Management;
 import com.example.mkb_employee_bot.entity.Position;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,7 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
 
     @Query(value = "select p.name from Position p where p.management.id = :management_id")
     List<String> getPositionNamesByManagementId(@Param("management_id") Long id);
+
+    @Query(value = "select p from Position p where  p.name = :name and p.management.id = :management_id")
+    Optional<Position> findByNameAndManagement(String name, @Param("management_id") Long id);
 }
