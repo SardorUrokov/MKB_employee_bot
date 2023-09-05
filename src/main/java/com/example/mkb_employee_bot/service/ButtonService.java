@@ -55,6 +55,7 @@ public class ButtonService {
     private String getSteps_uz(int index) {
 
         steps_uz.add("Xodimning ism-familiyasini kiriting");
+        steps_uz.add("Xodimning telefon raqamini kiriting");
         steps_uz.add("""
                 Xodimning tug'ilgan sanasi:
 
@@ -83,6 +84,7 @@ public class ButtonService {
     private String getSteps_ru(int index) {
 
         steps_ru.add("Введите имя и фамилию сотрудника");
+        steps_ru.add("Введите номер телефона сотрудника");
         steps_ru.add("""
                 Дата рождения сотрудника:
 
@@ -101,7 +103,7 @@ public class ButtonService {
 
         steps_ru.add("""
                 Введите навык сотрудника:
-                        
+
                 ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""");
 
         steps_ru.add("Выберите один из следующих вариантов для ввода данных в формате файла ⬇️");
@@ -2388,7 +2390,7 @@ public class ButtonService {
                             );
                         }
 
-                    } else if (step.equals("ENTERED_EMPLOYEE_SKILLS")) {
+                    } else if (step.equals("ENTERED_EMPLOYEE_EDUCATION_PERIOD")) {
 
                         chatId = update.getMessage().getChatId();
                         userLanguage = getUserLanguage(chatId);
@@ -2397,7 +2399,7 @@ public class ButtonService {
                         if (userLanguage.equals("RU"))
                             addEducationElse = "Еще одну образовательную информацию ➕";
                         else
-                            addEducationElse = "Yana ta'lim ma'lumoti qo'shish";
+                            addEducationElse = "Yana ta'lim ma'lumoti qo'shish ➕";
 
                         KeyboardButton button = KeyboardButton.builder()
                                 .text(addEducationElse)
@@ -2506,7 +2508,7 @@ public class ButtonService {
                         messageText = getSteps_ru(userStageIndex);
 
                     if (moveToNext) {
-                        if (userStageIndex == 2) {
+                        if (userStageIndex == 3) {
                             String userInputDate = update.getMessage().getText();
 
                             if (isValidDateFormat(userInputDate))
@@ -2523,7 +2525,7 @@ public class ButtonService {
 
                                             ❗Образец: 1999-12-31 (yyyy-mm-dd)""";
                             }
-                        } else if (userStageIndex == 7) {
+                        } else if (userStageIndex == 8) {
                             String userInputDate = update.getMessage().getText();
                             final var checkedEduPeriod = checkEduPeriod(userInputDate);
 
@@ -2552,20 +2554,23 @@ public class ButtonService {
                         case 0 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name());
                         case 1 ->
-                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
-                        case 2 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name());
-                        case 3 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
+                        case 2 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
+                        case 3 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
                         case 4 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
                         case 5 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
                         case 6 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
-                        case 7 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
+                        case 7 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
                         case 8 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
-                        case 9 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                        case 9 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
                     }
 
                     return SendMessage.builder()

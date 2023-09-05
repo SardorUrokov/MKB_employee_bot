@@ -56,7 +56,6 @@ public enum Stage {
     SELECTED_EMPLOYEE_FILE_TYPE(9),
     ATTACHMENT_SHARED(10);
 
-
     private int value;
 
     Stage(int value) {

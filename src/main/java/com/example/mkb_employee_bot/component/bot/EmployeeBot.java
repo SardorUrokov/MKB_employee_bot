@@ -49,6 +49,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     Position prevPosition = new Position();
     Employee deletingEmployee = new Employee();
     Employee creatingEmployee = new Employee();
+    Position selectedPosition = new Position();
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -487,7 +488,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText) && (isAdmin || isSuperAdmin)){
+            } else if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
                 if (userLanguage.equals("UZ"))
                     sendTextMessage(chatId.toString(), "Jarayon to'xtatildi❗️");
@@ -515,9 +516,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (("O'tkazib yuborish ⏩".equals(messageText) || "Пропустить ⏩".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 if (userLanguage.equals("UZ"))
-                    sendTextMessage(chatId.toString(), "Quyida xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
+                    sendTextMessage(chatId.toString(), "Saqlash uchun xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
                 else
-                    sendTextMessage(chatId.toString(), "Подтвердить данные о сотруднике ниже? ⬇️");
+                    sendTextMessage(chatId.toString(), "Подтвердите информацию о сотруднике для сохранения? ⬇️");
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.completeAddingEmployeeInfo(update, creatingEmployee);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
@@ -538,7 +539,16 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                final var selectedPosition = positionRepository.findByName(messageText);
+                if ("personalInfo".equals(messageText))
+                    selectedPosition = positionRepository.findByName(messageText).orElseThrow();
+                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep))
+                    creatingEmployee.setFullName(messageText);
+                else if ("ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN".equals(userStep))
+                    creatingEmployee.setDateOfBirth(messageText);
+                else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(messageText)) {
+                    creatingEmployee.setPhoneNumber(messageText);
+                }
+
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
