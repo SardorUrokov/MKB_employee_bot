@@ -2215,7 +2215,6 @@ public class ButtonService {
         );
     }
 
-
     public String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
         return "Xodim" +
                 "\nIsm Familiyasi: " + employee.getFullName() +

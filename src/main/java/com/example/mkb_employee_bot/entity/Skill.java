@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,18 +22,13 @@ public class Skill {
     Long id;
     String name;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
-
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
 
-    public Skill(String name, Employee employee) {
+    public Skill(String name) {
         this.name = name;
-        this.employee = employee;
     }
 }

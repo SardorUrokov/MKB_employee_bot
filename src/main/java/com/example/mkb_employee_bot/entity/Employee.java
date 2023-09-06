@@ -32,7 +32,7 @@ public class Employee {
     @ManyToOne
     Position position;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     List<Education> educations;
 
     @OneToMany

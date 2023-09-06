@@ -569,7 +569,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     List<Skill> skillList = new ArrayList<>();
                     for (String s : buttonService.splitSkills(messageText)) {
                         Skill skill = new Skill();
-                        skill.setEmployee(creatingEmployee);
                         skill.setName(s);
                         skillList.add(skill);
                     }
