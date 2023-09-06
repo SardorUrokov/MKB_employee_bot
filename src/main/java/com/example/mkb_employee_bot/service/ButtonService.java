@@ -1,5 +1,7 @@
 package com.example.mkb_employee_bot.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
@@ -2229,34 +2231,32 @@ public class ButtonService {
 
     public String getEmployeeSkills(Employee employee) {
 
-        String hardSkills = "", softSkills = "";
+        String skills = "";
         StringBuilder stringBuilder = new StringBuilder();
-        StringBuilder stringBuilder1 = new StringBuilder();
         final var employeeSkillsIds = employeeRepository.getEmployeeSkillsIds(employee.getId());
 
-        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, HARD_SKILL)) {
-            hardSkills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
+        for (Skill skill : employee.getSkills()) {
+            skills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
         }
 
-        for (Skill skill : skillRepository.findSkillsByIdsAndSkillType(employeeSkillsIds, SOFT_SKILL)) {
-            softSkills = String.valueOf(stringBuilder1.append(skill.getName()).append(", "));
-        }
+//        for (Skill skill : skillRepository.findSkillsByIds(employeeSkillsIds)) {
+//            skills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
+//        }
 
-        return checkCommas(hardSkills) + "\n" + checkCommas(softSkills) + " ;";
+        return checkCommas(skills) + ";";
     }
 
     public String getEmployeeEducationsInfo(Employee employee) {
 
         String educationInfo = "";
         final var educations = employee.getEducations();
-        final var educationsIds = employeeRepository.getEmployeeEducationsIds(employee.getId());
 
         for (Education ignored : educations) {
 
             int value, preValue = 0;
             StringBuilder stringBuilder = new StringBuilder();
 
-            for (Education education : educationRepository.findEducationByIdIn(educationsIds)) {
+            for (Education education : educations) {
                 value = education.getType().getValue();
 
                 if (!(value < preValue))
@@ -2287,17 +2287,23 @@ public class ButtonService {
                 "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
     }
 
-    public CompletableFuture<SendMessage> cancelledConfirmation(Update update) {
+    public CompletableFuture<SendMessage> cancelledConfirmation(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
 
-                    if (userLanguage.equals("UZ"))
-                        returnText = "O'chirish bekor qilindi!";
-                    else
-                        returnText = "Удаление отменено!";
-
+                    if (userLanguage.equals("UZ")) {
+                        if (forWhat.equals("forCreatingEmployee"))
+                            returnText = "Xodimni saqlash bekor qilindi ❗️";
+                        else
+                            returnText = "O'chirish bekor qilindi ❗️";
+                    }else {
+                        if (forWhat.equals("forCreatingEmployee"))
+                            returnText = "Сохранение сотрудника отменено ❗️";
+                        else
+                            returnText = "Удаление отменено ❗️";
+                    }
                     final var messageCompletableFuture = employeeSectionButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
                     final var replyMarkup = sendMessage.getReplyMarkup();
@@ -2570,9 +2576,9 @@ public class ButtonService {
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
                         case 7 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
-                        case 8 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
-                        case 9 ->
+                        case 8 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                        case 9 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
                         case 10 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
                     }
 
@@ -2713,7 +2719,43 @@ public class ButtonService {
         );
     }
 
+    public int getAgeFromBirthDate(String birthdateStr) {
+        int age = 0;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date currentDate = new Date();
+        try {
+            // Parse the user's input to a Date object
+            Date birthdate = dateFormat.parse(birthdateStr);
+
+            // Check if the birthdate has occurred for the current year
+            if (birthdate.getMonth() > currentDate.getMonth() || (birthdate.getMonth() == currentDate.getMonth() && birthdate.getDate() > currentDate.getDate())) {
+
+                // If not, subtract one year from the age
+                currentDate.setYear(currentDate.getYear() - 1);
+            }
+            age = currentDate.getYear() - birthdate.getYear();
+        } catch (ParseException e) {
+            System.out.println("Invalid date format. Please enter birthdate in yyyy-MM-dd format!");
+        }
+        return age;
+    }
+
+
     public String[] getDateFromPeriod(String eduPeriod) {
         return eduPeriod.split("-");
     }
+
+    public List<String> splitSkills(String input) {
+        List<String> words = new ArrayList<>();
+        String[] parts = input.split(",");
+
+        for (String part : parts) {
+            String trimmedPart = part.trim();
+            if (!trimmedPart.isEmpty()) {
+                words.add(trimmedPart);
+            }
+        }
+        return words;
+    }
+
 }

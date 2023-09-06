@@ -34,6 +34,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         return String.valueOf(period.getYears());
     }
 
+    public Employee createEmployee(Employee creatingEmployee) {
+        return employeeRepository.save(creatingEmployee);
+    }
+
 //    public List<Employee> getEmployeesWithBirthday(String today) {
 //        return employeeRepository.findByDateOfBirthAndDeletedFalse(today);
 //    }

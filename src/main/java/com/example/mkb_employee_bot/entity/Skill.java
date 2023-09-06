@@ -1,13 +1,14 @@
 package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entity.enums.SkillType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @NoArgsConstructor
@@ -20,10 +21,6 @@ public class Skill {
     Long id;
     String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "skill_type")
-    SkillType skillType;
-
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
@@ -33,4 +30,9 @@ public class Skill {
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
+
+    public Skill(String name, Employee employee) {
+        this.name = name;
+        this.employee = employee;
+    }
 }

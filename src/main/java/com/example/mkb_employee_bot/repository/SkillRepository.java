@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface SkillRepository extends JpaRepository<Skill, Long> {
 
-    @Query("SELECT s FROM Skill s WHERE s.id IN :skillIds AND s.skillType = :skillType")
-    List<Skill> findSkillsByIdsAndSkillType(Set<Long> skillIds, SkillType skillType);
+    @Query("SELECT s FROM Skill s WHERE s.id IN :skillIds")
+    List<Skill> findSkillsByIds(Set<Long> skillIds);
 }

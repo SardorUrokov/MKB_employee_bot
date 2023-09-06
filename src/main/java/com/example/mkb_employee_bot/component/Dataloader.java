@@ -60,15 +60,21 @@ public class Dataloader implements CommandLineRunner {
             final var skillList = List.of(
                     Skill.builder()
                             .name("Java")
-                            .skillType(SkillType.HARD_SKILL)
                             .build(),
                     Skill.builder()
                             .name("OOP")
-                            .skillType(SkillType.HARD_SKILL)
                             .build(),
                     Skill.builder()
                             .name("Problem Solving")
-                            .skillType(SkillType.SOFT_SKILL)
+                            .build(),
+                    Skill.builder()
+                            .name("Miscellaneous")
+                            .build(),
+                    Skill.builder()
+                            .name("Spring Framework")
+                            .build(),
+                    Skill.builder()
+                            .name("Maven")
                             .build()
             );
             final List<Skill> skills = skillRepository.saveAll(skillList);

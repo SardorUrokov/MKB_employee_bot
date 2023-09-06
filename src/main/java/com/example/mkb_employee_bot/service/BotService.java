@@ -593,18 +593,41 @@ public class BotService {
                     else
                         returnText = "Сотрудник удален из списка";
 
-            final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
-            final var sendMessage = messageCompletableFuture.join();
-            final var replyMarkup = sendMessage.getReplyMarkup();
+                    final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
 
-            return SendMessage.builder()
-                    .replyMarkup(replyMarkup)
-                    .text(returnText)
-                    .chatId(chatId)
-                    .build();
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
 
                 }
         );
     }
 
+    public CompletableFuture<SendMessage> createEmployee(Employee creatingEmployee, Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var employee = employeeService.createEmployee(creatingEmployee);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = employee.getPosition() + " lavozimli xodim " + employee.getId() + "-id bilan saqlandi";
+                    else
+                        returnText = "Сотрудник с должностом " + employee.getPosition() + " сохранен с " + employee.getId() + " id";
+
+                    final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
+                    final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
 }

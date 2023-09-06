@@ -8,7 +8,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @NoArgsConstructor
@@ -34,9 +36,11 @@ public class Employee {
     List<Education> educations;
 
     @OneToMany
+    @ToString.Exclude
     List<Skill> skills;
 
     @OneToMany
+    @ToString.Exclude
     Set<Attachment> attachments;
 
     boolean isDeleted = false;

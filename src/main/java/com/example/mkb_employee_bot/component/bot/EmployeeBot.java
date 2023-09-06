@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -539,15 +541,17 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                if ("personalInfo".equals(userStep))
+                if ("personalInfo".equals(userStep)) {
                     selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
-                else if ("ENTERED_EMPLOYEE_NAME_ROLE_ADMIN".equals(userStep))
+                    creatingEmployee.setPosition(selectedPosition);
+                } else if ("ENTERED_EMPLOYEE_NAME_ROLE_ADMIN".equals(userStep))
                     creatingEmployee.setFullName(messageText);
                 else if ("ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN".equals(userStep))
                     creatingEmployee.setPhoneNumber(messageText);
-                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep))
+                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep)) {
                     creatingEmployee.setDateOfBirth(messageText);
-                else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(userStep))
+                    creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
+                } else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(userStep))
                     creatingEmployee.setNationality(messageText);
                 else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
                     education.setType(EduType.valueOf(messageText));
@@ -556,14 +560,48 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
                     education.setEducationField(messageText);
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
-
                     String[] dateFromPeriod = buttonService.getDateFromPeriod(messageText);
                     education.setStartedDate(dateFromPeriod[0]);
                     education.setEndDate(dateFromPeriod[1]);
+                    creatingEmployee.setEducations(List.of(education));
+                } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(userStep)) {
 
-                } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(messageText)) {
-                    creatingEmployee.setSkills(Collections.singletonList(new Skill(messageText)));
+                    List<Skill> skillList = new ArrayList<>();
+                    for (String s : buttonService.splitSkills(messageText)) {
+                        Skill skill = new Skill();
+                        skill.setEmployee(creatingEmployee);
+                        skill.setName(s);
+                        skillList.add(skill);
+                    }
+                    creatingEmployee.setSkills(skillList);
+                } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
+
+                    CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+
+                    if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText)))
+                        sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
+                    else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText)))
+                        sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
+                    else {
+                        sendMessageCompletableFuture = null;
+                    }
+                    SendMessage sendMessage = sendMessageCompletableFuture.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
@@ -588,7 +626,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendMessageCompletableFuture = botService.deleteEmployee(deletingEmployee, update);
 
                 else if ("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))
-                    sendMessageCompletableFuture = buttonService.cancelledConfirmation(update);
+                    sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forDeletingEmployee");
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
