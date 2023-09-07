@@ -570,16 +570,18 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 if ("personalInfo".equals(userStep)) {
-                    selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
-                    creatingEmployee.setPosition(selectedPosition);
-                } else if ("ENTERED_EMPLOYEE_NAME_ROLE_ADMIN".equals(userStep))
+                    if (creatingEmployee.getPosition() == null) {
+                        selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
+                        creatingEmployee.setPosition(selectedPosition);
+                    }
+                } else if (Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name().equals(userStep))
                     creatingEmployee.setFullName(messageText);
-                else if ("ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN".equals(userStep))
+                else if (Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name().equals(userStep))
                     creatingEmployee.setPhoneNumber(messageText);
-                else if ("ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN".equals(userStep)) {
+                else if (Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name().equals(userStep)) {
                     creatingEmployee.setDateOfBirth(messageText);
                     creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
-                } else if ("ENTERED_EMPLOYEE_NATIONALITY".equals(userStep))
+                } else if (Stage.ENTERED_EMPLOYEE_NATIONALITY.name().equals(userStep))
                     creatingEmployee.setNationality(messageText);
                 else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
                     education.setType(EduType.valueOf(messageText));

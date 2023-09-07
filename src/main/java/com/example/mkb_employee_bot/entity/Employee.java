@@ -32,10 +32,10 @@ public class Employee {
     @ManyToOne
     Position position;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     List<Education> educations;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     List<Skill> skills;
 

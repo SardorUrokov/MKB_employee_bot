@@ -623,6 +623,7 @@ public class BotService {
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     userRepository.updateUserStepByUserChatId(chatId, "");
+                    buttonService.userStageIndex = 0;
 
                     return SendMessage.builder()
                             .replyMarkup(replyMarkup)

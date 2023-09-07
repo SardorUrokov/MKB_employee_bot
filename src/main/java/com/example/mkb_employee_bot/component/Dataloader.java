@@ -44,15 +44,19 @@ public class Dataloader implements CommandLineRunner {
                     .name("TSUE")
                     .educationField("Soliqlar va soliqqa tortish")
                     .type(EduType.BAKALAVRIAT)
-                    .startedDate("2021-08-03")
+                    .startedDate("2021")
                     .endDate("Present")
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
                     .build();
             final var education1 = Education.builder()
                     .name("TUIT")
                     .educationField("Dasturiy Injiniring")
                     .type(EduType.MAGISTRATURA)
-                    .startedDate("2026-08-03")
+                    .startedDate("2026")
                     .endDate("Present")
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
                     .build();
 
             educationRepository.saveAll(List.of(education, education1));
@@ -91,6 +95,8 @@ public class Dataloader implements CommandLineRunner {
                     .attachments(
                             Collections.emptySet()
                     )
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
                     .build();
             employeeRepository.save(employee);
 
@@ -99,7 +105,7 @@ public class Dataloader implements CommandLineRunner {
                     .fullName("Сардор")
                     .phoneNumber("998914525468")
                     .userName("Sardor_Shukhratovich")
-                    .role(Role.ADMIN)
+                    .role(Role.USER)
                     .stage(Stage.STARTED)
                     .language(Language.UZ)
                     .createdAt(new Date())

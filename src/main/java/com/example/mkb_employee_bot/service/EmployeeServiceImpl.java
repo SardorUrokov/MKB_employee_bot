@@ -31,7 +31,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private String getEmployeeAge(String birthDate) {
-
         LocalDate parsedBirthDate = LocalDate.parse(birthDate);
         LocalDate currentDate = LocalDate.now();
 
@@ -45,13 +44,4 @@ public class EmployeeServiceImpl implements EmployeeService {
         skillRepository.saveAll(creatingEmployee.getSkills());
         return employeeRepository.save(creatingEmployee);
     }
-
-//    public List<Employee> getEmployeesWithBirthday(String today) {
-//        return employeeRepository.findByDateOfBirthAndDeletedFalse(today);
-//    }
-//
-//    public List<Employee> getColleaguesInSameDepartment(Employee employee) {
-//        final var departmentId = employee.getPosition().getManagement().getDepartment().getId();
-//        return employeeRepository.findByPosition_Management_Department_Id(departmentId);
-//    }
 }

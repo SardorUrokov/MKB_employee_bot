@@ -22,9 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 
-import static com.example.mkb_employee_bot.entity.enums.SkillType.HARD_SKILL;
-import static com.example.mkb_employee_bot.entity.enums.SkillType.SOFT_SKILL;
-
 @Service
 @RequiredArgsConstructor
 public class ButtonService {
@@ -49,7 +46,7 @@ public class ButtonService {
     private Long chatId;
     private String userLanguage = "";
 
-    private int userStageIndex = 0; // Initialize with the starting stage index
+    public int userStageIndex = 0; // Initialize with the starting stage index
     List<String> steps_uz = new ArrayList<>();
     List<String> steps_ru = new ArrayList<>();
     public boolean moveToNext = true;
@@ -2218,6 +2215,7 @@ public class ButtonService {
     public String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
         return "Xodim" +
                 "\nIsm Familiyasi: " + employee.getFullName() +
+                "\nTelefon raqami: " + employee.getPhoneNumber() +
                 "\nTug'ilgan sanasi: " + employee.getDateOfBirth() +
                 "\nYoshi: " + employee.getAge() +
                 "\nMillati: " + employee.getNationality() +
@@ -2232,16 +2230,9 @@ public class ButtonService {
 
         String skills = "";
         StringBuilder stringBuilder = new StringBuilder();
-        final var employeeSkillsIds = employeeRepository.getEmployeeSkillsIds(employee.getId());
-
         for (Skill skill : employee.getSkills()) {
             skills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
         }
-
-//        for (Skill skill : skillRepository.findSkillsByIds(employeeSkillsIds)) {
-//            skills = String.valueOf(stringBuilder.append(skill.getName()).append(", "));
-//        }
-
         return checkCommas(skills) + ";";
     }
 
@@ -2306,6 +2297,7 @@ public class ButtonService {
                     if (forWhat.equals("forCreatingEmployee")) {
                         userRepository.updateUserStepByUserChatId(chatId, "");
                         userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                        userStageIndex = 0;
                     }
                     final var messageCompletableFuture = employeeSectionButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
@@ -2572,7 +2564,8 @@ public class ButtonService {
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name());
                         case 3 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name());
-                        case 4 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
+                        case 4 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NATIONALITY.name());
                         case 5 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
                         case 6 ->
@@ -2581,8 +2574,10 @@ public class ButtonService {
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
                         case 8 ->
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
-                        case 9 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
-                        case 10 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                        case 9 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
+                        case 10 ->
+                                userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
                     }
 
                     return SendMessage.builder()
@@ -2743,7 +2738,6 @@ public class ButtonService {
         return age;
     }
 
-
     public String[] getDateFromPeriod(String eduPeriod) {
         return eduPeriod.split("-");
     }
@@ -2760,5 +2754,4 @@ public class ButtonService {
         }
         return words;
     }
-
 }
