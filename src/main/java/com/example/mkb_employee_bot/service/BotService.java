@@ -615,12 +615,14 @@ public class BotService {
                     final var employee = employeeService.createEmployee(creatingEmployee);
 
                     if (userLanguage.equals("UZ"))
-                        returnText = employee.getPosition().getName() + " lavozimli xodim " + employee.getId() + "-id bilan saqlandi";
+                        returnText = employee.getPosition().getName().toUpperCase() + " lavozimli xodim " + employee.getFullName().toUpperCase() + "  " + employee.getId() + "-id bilan saqlandi";
                     else
-                        returnText = "Сотрудник с должностом " + employee.getPosition() + " сохранен с " + employee.getId() + " id";
+                        returnText = "Сотрудник " + employee.getFullName().toUpperCase() + " с должностом " + employee.getPosition().getName().toUpperCase() + " сохранен с " + employee.getId() + " id";
 
                     final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                    userRepository.updateUserStepByUserChatId(chatId, "");
 
                     return SendMessage.builder()
                             .replyMarkup(replyMarkup)

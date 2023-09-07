@@ -539,6 +539,34 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture;
+
+                if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
+                    sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
+                    creatingEmployee = new Employee();
+                } else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
+                    sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
+                    creatingEmployee = new Employee();
+                } else
+                    sendMessageCompletableFuture = new CompletableFuture<>();
+
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 if ("personalInfo".equals(userStep)) {
@@ -573,32 +601,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         skillList.add(skill);
                     }
                     creatingEmployee.setSkills(skillList);
-                } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
-
-                    CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
-
-                    if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText)))
-                        sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
-                    else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText)))
-                        sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
-                    else {
-                        sendMessageCompletableFuture = null;
-                    }
-                    SendMessage sendMessage = sendMessageCompletableFuture.join();
-                    try {
-                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                    try {
-                                        execute(sendMessage);
-                                    } catch (TelegramApiException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                        );
-                        executeFuture.join();
-
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
                 }
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
@@ -613,7 +615,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

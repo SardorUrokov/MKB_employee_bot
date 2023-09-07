@@ -54,8 +54,8 @@ public enum Stage {
     ENTERED_EMPLOYEE_EDUCATION_PERIOD(7),
     ENTERED_EMPLOYEE_SKILLS(8),
     SELECTED_EMPLOYEE_FILE_TYPE(9),
-    ATTACHMENT_SHARED(10);
-
+    ATTACHMENT_SHARED(10),
+    EMPLOYEE_CREATED;
     private int value;
 
     Stage(int value) {

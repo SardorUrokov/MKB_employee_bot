@@ -2297,11 +2297,15 @@ public class ButtonService {
                             returnText = "Xodimni saqlash bekor qilindi ❗️";
                         else
                             returnText = "O'chirish bekor qilindi ❗️";
-                    }else {
+                    } else {
                         if (forWhat.equals("forCreatingEmployee"))
                             returnText = "Сохранение сотрудника отменено ❗️";
                         else
                             returnText = "Удаление отменено ❗️";
+                    }
+                    if (forWhat.equals("forCreatingEmployee")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "");
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     }
                     final var messageCompletableFuture = employeeSectionButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
@@ -2681,7 +2685,7 @@ public class ButtonService {
 
                     if (userLanguage.equals("UZ")) {
                         confirmationAboutCreating = "Tasdiqlash ✅";
-                        cancelCreating = "Bekor Qilish ❌";
+                        cancelCreating = "Bekor qilish ❌";
                     } else {
                         confirmationAboutCreating = "Подтвердить ✅";
                         cancelCreating = "Отменить ❌";
