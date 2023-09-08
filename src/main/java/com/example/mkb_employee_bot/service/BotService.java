@@ -115,6 +115,7 @@ public class BotService {
 
     public void setPhoneNumber(Update update) {
         CompletableFuture.runAsync(() -> {
+
                     String phoneNumber = update.getMessage().getContact().getPhoneNumber();
                     chatId = update.getMessage().getChatId();
                     final var exists = userRepository.existsByUserChatId(chatId);
@@ -142,9 +143,19 @@ public class BotService {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
                     final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
-                    final var info = buttonService.getEmployeeInfoForUserLanguage_UZ(employee);
-                    final var messageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update, "");
+
+                    final var info = userLanguage.equals("UZ")
+                            ? buttonService.getEmployeeInfoForUserLanguage_UZ(employee)
+                            : buttonService.getEmployeeInfoForUserLanguage_RU(employee);
+
+                    final CompletableFuture<SendMessage> messageCompletableFuture;
+                    if (userRepository.getUserRoleByUserChatId(chatId).equals("USER"))
+                        messageCompletableFuture = buttonService.employeeSectionUserRoleButtons(update, "");
+                    else
+                        messageCompletableFuture = buttonService.employeeSectionButtons(update);
+
                     final var sendMessage = messageCompletableFuture.join();
                     final var replyMarkup = sendMessage.getReplyMarkup();
 
@@ -590,9 +601,9 @@ public class BotService {
                     employeeService.deleteEmployee(deletingEmployee.getId());
 
                     if (userLanguage.equals("UZ"))
-                        returnText = "Xodim ro'yxatdan olib tashlandi";
+                        returnText = "Xodim " + deletingEmployee.getFullName().toUpperCase() + " ro'yxatdan olib tashlandi";
                     else
-                        returnText = "Сотрудник удален из списка";
+                        returnText = "Сотрудник " + deletingEmployee.getFullName().toUpperCase() + " удален из списка";
 
                     final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
@@ -624,7 +635,7 @@ public class BotService {
                     final var replyMarkup = messageCompletableFuture.join().getReplyMarkup();
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     userRepository.updateUserStepByUserChatId(chatId, "");
-                    buttonService.userStageIndex = 0;
+                    buttonService.retryUserSteps();
 
                     return SendMessage.builder()
                             .replyMarkup(replyMarkup)

@@ -601,26 +601,31 @@ public class ButtonService {
                             returnText = "Xodimning ism familiyasini kiriting " + sighDown;
                         mainMenu = bosh_Menu;
                     }
-
                     userRepository.updateUserStageByUserChatId(chatId, Stage.SECTION_SELECTED.name());
+
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setSelective(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
-
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
+
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
                     if (forWhat.equals("forDeleting"))
                         userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_DELETE_ROLE_USER.name());
+                    else if (forWhat.equals("forUpdating"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN.name());
                     else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
+
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(String.valueOf(chatId))
@@ -682,6 +687,8 @@ public class ButtonService {
 
                     if (forWhat.equals("forDeleting"))
                         userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_ADMIN.name());
+                    else if (forWhat.equals("forUpdating"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN.name());
                     else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
 
@@ -2170,7 +2177,7 @@ public class ButtonService {
         );
     }
 
-    public CompletableFuture<SendMessage> askConfirmationForDeletingEmployee(Update update) {
+    public CompletableFuture<SendMessage> askConfirmationForDeletingEmployee(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -2179,12 +2186,22 @@ public class ButtonService {
                     final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow();
 
                     if (userLanguage.equals("UZ")) {
-                        returnText = getEmployeeInfoForUserLanguage_UZ(employee);
-                        confirmationButton = "Tasdiqlash ✅";
+                        if (forWhat.equals("forUpdating")) {
+                            returnText = getEmployeeInfoForUserLanguage_UZ(employee);
+                            confirmationButton = "Tahrirlashni boshlash ✅";
+                        } else {
+                            returnText = getEmployeeInfoForUserLanguage_UZ(employee);
+                            confirmationButton = "Tasdiqlash ✅";
+                        }
                         cancelButton = "Bekor qilish ❌";
                     } else {
-                        returnText = getEmployeeInfoForUserLanguage_UZ(employee); // to do russian language info
-                        confirmationButton = "Потвердить ✅";
+                        if (forWhat.equals("forUpdating")) {
+                            returnText = getEmployeeInfoForUserLanguage_RU(employee);
+                            confirmationButton = "Начать редактирование ✅";
+                        } else {
+                            returnText = getEmployeeInfoForUserLanguage_RU(employee); // to do russian language info
+                            confirmationButton = "Потвердить ✅";
+                        }
                         cancelButton = "Отменить ❌";
                     }
 
@@ -2230,6 +2247,20 @@ public class ButtonService {
                 "\nDepartament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
                 "\nMalakasi\n" + getEmployeeSkills(employee);
+    }
+
+    public String getEmployeeInfoForUserLanguage_RU(Employee employee) {
+        return "Содрудник" +
+                "\nИмя Фамилия: " + employee.getFullName() +
+                "\nНомер телефона: " + employee.getPhoneNumber() +
+                "\nДень рождения: " + employee.getDateOfBirth() +
+                "\nВозраст: " + employee.getAge() +
+                "\nНациональность: " + employee.getNationality() +
+                "\nДолжность: " + employee.getPosition().getName() +
+                "\nОтдел: " + employee.getPosition().getManagement().getName() +
+                "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
+                "\nОбразование " + getEmployeeEducationsInfo(employee) +
+                "\nНавыки и умения\n" + getEmployeeSkills(employee);
     }
 
     public String getEmployeeSkills(Employee employee) {
@@ -2303,7 +2334,7 @@ public class ButtonService {
                     if (forWhat.equals("forCreatingEmployee")) {
                         userRepository.updateUserStepByUserChatId(chatId, "");
                         userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
-                        userStageIndex = 0;
+                        retryUserSteps();
                     }
                     final var messageCompletableFuture = employeeSectionButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
@@ -2679,14 +2710,16 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String confirmationAboutCreating, cancelCreating;
+                    String confirmationAboutCreating, cancelCreating, info;
 
                     if (userLanguage.equals("UZ")) {
                         confirmationAboutCreating = "Tasdiqlash ✅";
                         cancelCreating = "Bekor qilish ❌";
+                        info = getEmployeeInfoForUserLanguage_UZ(employee);
                     } else {
                         confirmationAboutCreating = "Подтвердить ✅";
                         cancelCreating = "Отменить ❌";
+                        info = getEmployeeInfoForUserLanguage_RU(employee);
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -2708,7 +2741,6 @@ public class ButtonService {
                             )
                     );
 
-                    final var info = getEmployeeInfoForUserLanguage_UZ(employee);
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
