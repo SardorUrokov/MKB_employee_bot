@@ -500,13 +500,14 @@ public class BotService {
                     final var updateText = update.getMessage().getText();
 
                     if (updateText.length() == 9) {
-                        User user = new User(updateText, Role.ADMIN);
+                        final var phoneNumber = "998" + updateText;
+                        User user = new User(phoneNumber, Role.ADMIN);
                         authService.register(user);
 
                         if (userLanguage.equals("UZ"))
                             returnText = updateText + " telefon raqami bilan ADMIN yaratildi✅";
                         else
-                            returnText = "✅ АДМИН создан с номером телефона 123 " + updateText;
+                            returnText = "✅ АДМИН создан с номером телефона " + updateText;
 
                         final var messageCompletableFuture = buttonService.adminSectionSuperAdminRoleButtons(update);
                         final var sendMessage = messageCompletableFuture.join();

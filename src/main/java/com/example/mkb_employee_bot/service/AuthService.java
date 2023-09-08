@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.mkb_employee_bot.entity.enums.Language;
 import com.example.mkb_employee_bot.entity.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,16 @@ public class AuthService {
 
     public void register(User user) {
 
+        final var userRole = user.getRole();
         User saving = User.builder()
                 .userChatId(user.getUserChatId())
+                .phoneNumber(user.getPhoneNumber())
                 .fullName(user.getFullName())
                 .userName(user.getUserName())
                 .createdAt(new Date())
-                .role(Role.USER)
-                .language(user.getLanguage())
+                .updatedAt(new Date())
+                .role(userRole == null ? Role.USER : userRole)
+                .language(Language.UZ)
                 .build();
 
         final User saved = userRepository.save(saving);
