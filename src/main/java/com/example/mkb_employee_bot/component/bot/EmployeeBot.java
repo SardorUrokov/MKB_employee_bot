@@ -46,14 +46,18 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String userStage;
     String userLanguage;
 
-    Department selectedDepartment = new Department();
     Department prevDepartment = new Department();
-    Management prevManagement = new Management();
-    Position prevPosition = new Position();
-    Employee deletingEmployee = new Employee();
-    Employee creatingEmployee = new Employee();
-    Position selectedPosition = new Position();
+    Department selectedDepartment = new Department();
+
     Education education = new Education();
+    Management prevManagement = new Management();
+
+    Position prevPosition = new Position();
+    Position selectedPosition = new Position();
+
+    Employee deletingEmployee = new Employee();
+    Employee updatingEmployee = new Employee();
+    Employee creatingEmployee = new Employee();
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
@@ -495,6 +499,51 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
+            } else if (("Начать редактирование ✅".equals(messageText) || "Tahrirlashni boshlash ✅".equals(messageText) && (isAdmin || isSuperAdmin))) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askSectionForUpdatingEmployee(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
+
+                updatingEmployee = employeeRepository.findByFullName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askConfirmationForDeletingEmployee(update, "forUpdating");
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId.toString(), "Начать редактирование ⁉️");
+                else
+                    sendTextMessage(chatId.toString(), "Tahrirlashni boshlaysizmi ⁉️");
 
             } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
