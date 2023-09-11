@@ -44,9 +44,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.save(creatingEmployee);
     }
 
-    public Employee updateEmployee(String step, Employee updatingEmployee) {
-        Employee updatedEmployee;
-        switch (step) {
+    public Employee updateEmployee(Employee updatingEmployee) {
+        return employeeRepository.save(updatingEmployee);
+    }
+
+    /*
+            switch (step) {
             case "fullname":
 
                 break;
@@ -79,6 +82,5 @@ public class EmployeeServiceImpl implements EmployeeService {
                 break;
         }
 
-
-    }
+     */
 }

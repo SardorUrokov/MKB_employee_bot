@@ -522,7 +522,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (!userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                System.out.println(updatingEmployee.toString());
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
@@ -539,6 +538,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId.toString(), "Информация о сотруднике изменена ❗️");
+                else
+                    sendTextMessage(chatId.toString(), "Xodim ma'lumotlari o'zgartirildi ❗️");
+
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 

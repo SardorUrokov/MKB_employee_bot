@@ -649,13 +649,54 @@ public class BotService {
     public CompletableFuture<SendMessage> updateEmployee(Update update, Employee updatingEmployee) {
         return CompletableFuture.supplyAsync(() -> {
 
-            chatId = update.getMessage().getChatId();
-            userLanguage = getUserLanguage(chatId);
-            final var userStep = userRepository.getUserStepByUserChatId(chatId);
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var text = update.getMessage().getText();
+                    final var userStep = userRepository.getUserStepByUserChatId(chatId);
 
-            return SendMessage.builder()
-                    .chatId(chatId)
-                    .build();
+                    switch (userStep) {
+                        case "fullname":
+                            updatingEmployee.setFullName(text);
+                            break;
+                        case "phoneNumber":
+                            updatingEmployee.setPhoneNumber(text);
+                            break;
+                        case "dateOfBirth":
+                            updatingEmployee.setDateOfBirth(text);
+                            break;
+                        case "nationality":
+                            updatingEmployee.setNationality(text);
+                            break;
+                        case "position":
+//                            updatingEmployee.setPosition();
+                            break;
+                        case "eduName":
+//                            updatingEmployee.getEducations() //the first iterate edus and set name
+                            break;
+                        case "eduField":
+
+                            break;
+                        case "eduType":
+
+                            break;
+                        case "eduPeriod":
+
+                            break;
+                        case "skills":
+
+                            break;
+                    }
+                    final var updatedEmployee = employeeService.updateEmployee(updatingEmployee);
+
+                    String info = switch (userLanguage) {
+                        case "UZ" -> buttonService.getEmployeeInfoForUserLanguage_UZ(updatedEmployee);
+                        default -> buttonService.getEmployeeInfoForUserLanguage_UZ(updatedEmployee);
+                    };
+
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text(info)
+                            .build();
                 }
         );
     }
