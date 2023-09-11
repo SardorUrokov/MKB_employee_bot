@@ -1,23 +1,20 @@
 package com.example.mkb_employee_bot.repository;
 
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import com.example.mkb_employee_bot.entity.Department;
-import com.example.mkb_employee_bot.entity.Employee;
-import com.example.mkb_employee_bot.entity.Skill;
+import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.SkillType;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findByFullNameIgnoreCaseContaining(String employeeName);
-
-    boolean existsByPhoneNumber(String phoneNumber);
 
     Optional<Employee> findByFullName(String fullName);
 
@@ -38,10 +35,69 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Transactional
     @Modifying
+    @Query(value = "UPDATE Employee set full_name = fullName, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeFull_name(@Param("fullName")String full_name, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set dateOfBirth = birthDate, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeBirthDate(@Param("birthDate")String dateOfBirth, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set phone_number = phoneNumber, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeePhoneNumber(@Param("phoneNumber")String number, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set nationality = employeeNationality, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeNationality(String employeeNationality, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set age = newAge, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeAge(Integer newAge, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set position = NewPosition, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeePosition(Position NewPosition, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set educations = newEducations, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeEducations(List<Education> newEducations, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set skills = newSkills, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeSkills(List<Skill> newSkills, Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee set attachments = newAttachments, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+            , nativeQuery = true
+    )
+    Optional<Employee> updateEmployeeAttachments(List<Attachment> newAttachments, Long id);
+
+    @Transactional
+    @Modifying
     @Query(value = "UPDATE Employee SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
     void updateEmployeeIsDeleted(Long id);
-
-//    List<Employee> findByDateOfBirthAndDeletedFalse(String dateOfBirth);
-//
-//    List<Employee> findByPosition_Management_Department_Id(Long department_id);
 }

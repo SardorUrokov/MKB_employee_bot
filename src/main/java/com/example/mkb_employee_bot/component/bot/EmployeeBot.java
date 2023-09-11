@@ -520,6 +520,45 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (!userStep.equals("")) && (isAdmin || isSuperAdmin)) {
+
+                System.out.println(updatingEmployee.toString());
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInfoForSelectedSection(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
                 updatingEmployee = employeeRepository.findByFullName(messageText).orElseThrow();

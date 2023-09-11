@@ -645,4 +645,18 @@ public class BotService {
                 }
         );
     }
+
+    public CompletableFuture<SendMessage> updateEmployee(Update update, Employee updatingEmployee) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            chatId = update.getMessage().getChatId();
+            userLanguage = getUserLanguage(chatId);
+            final var userStep = userRepository.getUserStepByUserChatId(chatId);
+
+            return SendMessage.builder()
+                    .chatId(chatId)
+                    .build();
+                }
+        );
+    }
 }

@@ -183,14 +183,16 @@ public class ButtonService {
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button1)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button2)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button1)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button2)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
                             new KeyboardRow(List.of(
@@ -212,6 +214,7 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
@@ -771,6 +774,7 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
@@ -2801,10 +2805,10 @@ public class ButtonService {
                         returnText = "Xodimning qaysi ma'lumotini tahrirlamoqchisiz?";
                         cancelButton = "Bekor qilish ❌";
                         section1 = "Ism Familiyasi";
-                        section2 = "Telefon raqam";
-                        section3 = "Tug'ilgan sana";
+                        section2 = "Telefon raqami";
+                        section3 = "Tug'ilgan sanasi";
                         section4 = "Millati";
-                        section5 = "Lavozim";
+                        section5 = "Lavozimi";
                         section6 = "Ta'lim muassasasi";
                         section7 = "Ta'lim yo'nalishi";
                         section8 = "Ta'lim bosqichi";
@@ -2818,9 +2822,9 @@ public class ButtonService {
                         section3 = "Дата рождения";
                         section4 = "Национальность";
                         section5 = "Должность";
-                        section6 = "Образовательное учреждение";
+                        section6 = "Учебное заведение";
                         section7 = "Образовательная сфера";
-                        section8 = "Этап образования";
+                        section8 = "Уровень образования";
                         section9 = "Периоды обучения";
                         section10 = "Навыки";
                     }
@@ -2831,57 +2835,189 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setSelective(true);
 
-                    KeyboardRow row1 = new KeyboardRow(List.of(
-                            KeyboardButton.builder()
-                                    .text(section1)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section2)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section3)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section4)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section5)
-                                    .build()
-                    ));
+                    KeyboardRow row1 = new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(section1)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section2)
+                                            .build()
+                            )
+                    );
+                    KeyboardRow row2 = new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(section3)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section4)
+                                            .build()
+                            )
+                    );
+                    KeyboardRow row3 = new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(section5)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section6)
+                                            .build()
+                            )
+                    );
+                    KeyboardRow row4 = new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(section7)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section8)
+                                            .build()
+                            )
+                    );
+                    KeyboardRow row5 = new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(section9)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section10)
+                                            .build()
+                            )
+                    );
 
-                    KeyboardRow row2 = new KeyboardRow(List.of(
-                            KeyboardButton.builder()
-                                    .text(section6)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section7)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section8)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section9)
-                                    .build(),
-                            KeyboardButton.builder()
-                                    .text(section10)
-                                    .build()
-                    ));
+                    keyboardRowList.add(row1);
+                    keyboardRowList.add(row2);
+                    keyboardRowList.add(row3);
+                    keyboardRowList.add(row4);
+                    keyboardRowList.add(row5);
                     keyboardRowList.add(
                             new KeyboardRow(
                                     Collections.singletonList(
                                             KeyboardButton.builder()
-                                                    .text(cancelButton).build()
+                                                    .text(cancelButton)
+                                                    .build()
                                     )
                             )
                     );
-                    keyboardRowList.add(row2);
-                    keyboardRowList.add(row1);
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(chatId)
                             .text(returnText)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> askInfoForSelectedSection(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var text = update.getMessage().getText();
+                    String cancelButton;
+
+                    if (text.equals("Bekor qilish ❌") || text.equals("Отменить ❌")) {
+
+                    } else if (text.equals("Ism Familiyasi") || text.equals("Имя Фамилия")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "fullname");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning ism-familiyani qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+
+                    } else if (text.equals("Telefon raqami") || text.equals("Номер телефона")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "phoneNumber");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning telefon raqamini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите номер телефона сотрудника" + sighDown;
+
+                    } else if (text.equals("Tug'ilgan sanasi") || text.equals("Дата рождения")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "dateOfBirth");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning tug'ilgan sanasini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите дату рождения сотрудника" + sighDown;
+
+                    } else if (text.equals("Millati") || text.equals("Национальность")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "nationality");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning millatini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+
+                    } else if (text.equals("Lavozimi") || text.equals("Должность")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "position");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning lavozimini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите должность сотрудника" + sighDown;
+
+                    } else if (text.equals("Ta'lim muassasasi") || text.equals("Учебное заведение")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "eduName");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning ta'lim muassasasini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите учебное заведение сотрудника" + sighDown;
+
+                    } else if (text.equals("Ta'lim yo'nalishi") || text.equals("Образовательная сфера")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "eduField");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning ta'lim yo'nalishini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите сферу обучения сотрудника" + sighDown;
+
+                    } else if (text.equals("Ta'lim bosqichi") || text.equals("Уровень образования")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "eduType");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning ta'lim bosqichini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите уровень образования сотрудника" + sighDown;
+
+                    } else if (text.equals("O'quv Muddatlari") || text.equals("Периоды обучения")) {
+                        userRepository.updateUserStepByUserChatId(chatId, "eduPeriod");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning o'quv muddatlarini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Заново введите периоды обучения сотрудника" + sighDown;
+
+                    } else if ((text.equals("Malakasi") || text.equals("Навыки"))) {
+                        userRepository.updateUserStepByUserChatId(chatId, "skills");
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Xodimning malakasini qaytadan kiriting " + sighDown;
+                        else
+                            returnText = "Введите заново навыки сотрудника" + sighDown;
+                    }
+
+                    if (userLanguage.equals("UZ"))
+                        cancelButton = "To'xtatish 🛑";
+                    else
+                        cancelButton = "Остановить 🛑";
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
                             .build();
                 }
         );
