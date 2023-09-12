@@ -1,10 +1,11 @@
 package com.example.mkb_employee_bot.entity;
 
-import com.example.mkb_employee_bot.entity.enums.AttachmentType;
 import com.example.mkb_employee_bot.entity.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Date;
 
 @Data
 @Entity
@@ -20,9 +21,14 @@ public class Attachment {
 
     byte[] bytes;
 
+    String name, filePath, minioObjectPath;
+
     @Enumerated(EnumType.STRING)
     FileType fileType;
 
-    @Enumerated(EnumType.STRING)
-    AttachmentType attachmentType;
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date updatedAt = new Date();
 }

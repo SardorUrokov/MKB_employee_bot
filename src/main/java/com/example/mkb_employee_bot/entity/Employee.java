@@ -41,7 +41,7 @@ public class Employee {
 
     @OneToMany
     @ToString.Exclude
-    Set<Attachment> attachments;
+    List<Attachment> attachments;
 
     boolean isDeleted = false;
 
@@ -51,7 +51,7 @@ public class Employee {
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
 
-    public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, Set<Attachment> attachments) {
+    public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, List<Attachment> attachments) {
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.phoneNumber = phoneNumber;

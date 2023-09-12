@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class BotService {
+    private final SkillRepository skillRepository;
 
     private final AuthService authService;
     private final ButtonService buttonService;
@@ -665,10 +666,10 @@ public class BotService {
                         final var userStep = userRepository.getUserStepByUserChatId(chatId);
 
                         switch (userStep) {
-                            case "cancelled":
-                                userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
-                                userRepository.updateUserStepByUserChatId(chatId, "");
-                                break;
+//                            case "cancelled":
+//                                userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+//                                userRepository.updateUserStepByUserChatId(chatId, "");
+//                                break;
                             case "fullname":
                                 updatingEmployee.setFullName(text);
                                 break;
@@ -685,7 +686,7 @@ public class BotService {
 //                            updatingEmployee.setPosition();
                                 break;
                             case "eduName":
-//                            updatingEmployee.getEducations() //the first iterate edus and set name
+//                            updatingEmployee.getEducations() //the first iterate edu s and set name
                                 break;
                             case "eduField":
 
@@ -697,9 +698,15 @@ public class BotService {
 
                                 break;
                             case "skills":
+                                final var skills = updatingEmployee.getSkills();
+                                skills.add(skillRepository.save(new Skill(text)));
+                                updatingEmployee.setSkills(skills);
+                                break;
+                            case "attachments":
 
                                 break;
                         }
+                        userRepository.updateUserStepByUserChatId(chatId, "");
                         final var updatedEmployee = employeeService.updateEmployee(updatingEmployee);
 
                         returnText = switch (userLanguage) {

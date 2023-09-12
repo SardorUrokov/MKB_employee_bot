@@ -1,5 +1,10 @@
 package com.example.mkb_employee_bot.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -11,17 +16,23 @@ import java.util.stream.Collectors;
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.EduType;
 import com.example.mkb_employee_bot.entity.enums.FileType;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Document;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import static org.springframework.jdbc.datasource.init.DatabasePopulatorUtils.execute;
 
 @Service
 @RequiredArgsConstructor
@@ -2401,7 +2412,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String stopButton = "";
+                    String stopButton;
 
                     if (userLanguage.equals("UZ"))
                         stopButton = "To'xtatish 🛑";
@@ -2757,6 +2768,16 @@ public class ButtonService {
         );
     }
 
+    public boolean checkPhone(String input) {
+        int i = 0;
+
+        for (char c : input.toCharArray()) {
+            if (!Character.isDigit(c))
+                i++; // If any character is not a digit, i + 1;
+        }
+        return i == 0;
+    }
+
     public int getAgeFromBirthDate(String birthdateStr) {
         int age = 0;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -2800,7 +2821,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String cancelButton, section1, section2, section3, section4, section5, section6, section7, section8, section9, section10;
+                    String cancelButton, section1, section2, section3, section4, section5, section6, section7, section8, section9, section10, section11;
 
                     if (userLanguage.equals("UZ")) {
                         returnText = "Xodimning qaysi ma'lumotini tahrirlamoqchisiz?";
@@ -2815,6 +2836,7 @@ public class ButtonService {
                         section8 = "Ta'lim bosqichi";
                         section9 = "O'quv Muddatlari";
                         section10 = "Malakasi";
+                        section11 = "Fayl ma'lumotlari";
                     } else {
                         returnText = "Какую информацию о сотруднике вы хотите изменить?";
                         cancelButton = "Отменить ❌";
@@ -2828,6 +2850,7 @@ public class ButtonService {
                         section8 = "Уровень образования";
                         section9 = "Периоды обучения";
                         section10 = "Навыки";
+                        section11 = "Вложения.";
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -2883,6 +2906,9 @@ public class ButtonService {
                                             .build(),
                                     KeyboardButton.builder()
                                             .text(section10)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(section11)
                                             .build()
                             )
                     );
@@ -2923,7 +2949,7 @@ public class ButtonService {
 
                     if (text.equals("Bekor qilish ❌") || text.equals("Отменить ❌")) {
 
-                        userRepository.updateUserStepByUserChatId(chatId, "cancelled");
+                        userRepository.updateUserStepByUserChatId(chatId, "");
                         userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                         if (userLanguage.equals("UZ"))
                             returnText = "Tahrirlash to'xtatildi ❗️";
@@ -3011,6 +3037,13 @@ public class ButtonService {
                                 else
                                     returnText = "Введите заново навыки сотрудника" + sighDown;
                             }
+                            case "Fayl Ma'lumotlari", "Данные в виде файла" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "attachments");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning fayl ko'rinishidagi ma'lumotlarini kiriting " + sighDown;
+                                else
+                                    returnText = "Введите информацию о сотруднике в виде файла " + sighDown;
+                            }
                         }
 
                         if (userLanguage.equals("UZ"))
@@ -3045,4 +3078,109 @@ public class ButtonService {
                 }
         );
     }
+
+    public CompletableFuture<SendMessage> saveDocument(Update update, Employee creatingEmployee) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            chatId = update.getMessage().getChatId();
+            final var document = update.getMessage().getDocument();
+
+                }
+        );
+    }
+
+    public File downloadAndSaveDocument(Document document) {
+        try {
+            MinioClient minioClient;
+            // Get the file ID from the document
+            String fileId = document.getFileId();
+
+            // Use the Telegram Bot API to get the file information
+            File file = execute();
+
+            // Get the URL of the file
+            String fileUrl = file.getFileUrl(getBotToken());
+
+            // Open a connection to the file URL and get the input stream
+            InputStream inputStream = new URL(fileUrl).openStream();
+
+            // Define the MinIO bucket and object name
+            String bucketName = "your-bucket-name"; // Replace with your MinIO bucket name
+            String objectName = "path/to/save/" + document.getFileName(); // Change the path as needed
+
+            // Upload the document to MinIO
+            try {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .stream(inputStream, -1, PutObjectArgs.MIN_MULTIPART_SIZE)
+                                .contentType("application/octet-stream") // Set the appropriate content type
+                                .build()
+                );
+            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Close the input stream
+            inputStream.close();
+
+            // Return the saved file path in MinIO
+            return new File();
+
+        } catch (TelegramApiException | IOException | io.minio.errors.MinioException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+
+//    private File downloadFile(String fileId) {
+//        GetFile getFile = new GetFile();
+//        getFile.setFileId(fileId);
+//        try {
+//            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+//            java.io.File localFile = new java.io.File("path/to/save/" + file.getFilePath());
+//            downloadFileFromTelegram(file.getFilePath(), localFile);
+//            return localFile;
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    private void downloadFileFromTelegram(String filePath, File destination) {
+//        try {
+//            byte[] fileBytes = downloadFileBytes(filePath);
+//            Files.write(destination.toPath(), fileBytes);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private byte[] downloadFileBytes(String filePath) {
+//        GetFile getFileMethod = new GetFile();
+//        getFileMethod.setFileId(filePath);
+//        try {
+//            File file = execute(getFileMethod);
+//            return downloadFileBytes(file.getFilePath());
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    private byte[] downloadFileBytes(String filePath) {
+//        GetFile getFileMethod = new GetFile();
+//        getFileMethod.setFileId(filePath);
+//        try {
+//            org.telegram.telegrambots.meta.api.objects.File file = execute(getFileMethod);
+//            return downloadFileBytes(file.getFilePath());
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 }

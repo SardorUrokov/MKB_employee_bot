@@ -22,13 +22,13 @@ public class Department {
 
     boolean isDeleted = false;
 
-    public Department(String name) {
-        this.name = name;
-    }
-
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
+
+    public Department(String name) {
+        this.name = name;
+    }
 }

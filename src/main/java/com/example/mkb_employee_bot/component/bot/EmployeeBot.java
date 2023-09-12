@@ -16,12 +16,15 @@ import com.example.mkb_employee_bot.service.ButtonService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.telegram.telegrambots.meta.api.objects.Document;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -680,7 +683,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture;
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
                 if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
                     sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
@@ -689,8 +692,23 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
                     creatingEmployee = new Employee();
-                } else
-                    sendMessageCompletableFuture = new CompletableFuture<>();
+
+                } else {
+                    if (userLanguage.equals("UZ"))
+                        sendTextMessage(chatId.toString(), "Saqlash uchun faylni yuboring");
+                    else
+                        sendTextMessage(chatId.toString(), "Отправьте файл для сохранения");
+
+
+                    if (message.hasDocument()) {
+                        sendMessageCompletableFuture = buttonService.saveDocument(update, creatingEmployee);
+
+                    } else if (message.hasPhoto()) {
+                        final var photo = message.getPhoto();
+
+                        // to do add
+                    }
+                }
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
