@@ -18,6 +18,7 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -2922,103 +2923,125 @@ public class ButtonService {
 
                     if (text.equals("Bekor qilish ❌") || text.equals("Отменить ❌")) {
 
-                    } else if (text.equals("Ism Familiyasi") || text.equals("Имя Фамилия")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "fullname");
+                        userRepository.updateUserStepByUserChatId(chatId, "cancelled");
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                         if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning ism-familiyani qaytadan kiriting " + sighDown;
+                            returnText = "Tahrirlash to'xtatildi ❗️";
                         else
-                            returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+                            returnText = "Редактирование остановлено ❗️";
 
-                    } else if (text.equals("Telefon raqami") || text.equals("Номер телефона")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "phoneNumber");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning telefon raqamini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите номер телефона сотрудника" + sighDown;
+                        final var messageCompletableFuture = employeeSectionButtons(update);
+                        final var sendMessage = messageCompletableFuture.join();
+                        final var replyMarkup = sendMessage.getReplyMarkup();
 
-                    } else if (text.equals("Tug'ilgan sanasi") || text.equals("Дата рождения")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "dateOfBirth");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning tug'ilgan sanasini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите дату рождения сотрудника" + sighDown;
+                        return SendMessage.builder()
+                                .replyMarkup(replyMarkup)
+                                .text(returnText)
+                                .chatId(chatId)
+                                .build();
+                    } else {
+                        switch (text) {
+                            case "Ism Familiyasi", "Имя Фамилия" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "fullname");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning ism-familiyani qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+                            }
+                            case "Telefon raqami", "Номер телефона" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "phoneNumber");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning telefon raqamini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите номер телефона сотрудника" + sighDown;
+                            }
+                            case "Tug'ilgan sanasi", "Дата рождения" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "dateOfBirth");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning tug'ilgan sanasini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите дату рождения сотрудника" + sighDown;
+                            }
+                            case "Millati", "Национальность" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "nationality");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning millatini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+                            }
+                            case "Lavozimi", "Должность" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "position");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning lavozimini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите должность сотрудника" + sighDown;
+                            }
+                            case "Ta'lim muassasasi", "Учебное заведение" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "eduName");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning ta'lim muassasasini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите учебное заведение сотрудника" + sighDown;
+                            }
+                            case "Ta'lim yo'nalishi", "Образовательная сфера" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "eduField");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning ta'lim yo'nalishini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите сферу обучения сотрудника" + sighDown;
+                            }
+                            case "Ta'lim bosqichi", "Уровень образования" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "eduType");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning ta'lim bosqichini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите уровень образования сотрудника" + sighDown;
+                            }
+                            case "O'quv Muddatlari", "Периоды обучения" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "eduPeriod");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning o'quv muddatlarini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Заново введите периоды обучения сотрудника" + sighDown;
+                            }
+                            case "Malakasi", "Навыки" -> {
+                                userRepository.updateUserStepByUserChatId(chatId, "skills");
+                                if (userLanguage.equals("UZ"))
+                                    returnText = "Xodimning malakasini qaytadan kiriting " + sighDown;
+                                else
+                                    returnText = "Введите заново навыки сотрудника" + sighDown;
+                            }
+                        }
 
-                    } else if (text.equals("Millati") || text.equals("Национальность")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "nationality");
                         if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning millatini qaytadan kiriting " + sighDown;
+                            cancelButton = "To'xtatish 🛑";
                         else
-                            returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
+                            cancelButton = "Остановить 🛑";
 
-                    } else if (text.equals("Lavozimi") || text.equals("Должность")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "position");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning lavozimini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите должность сотрудника" + sighDown;
+                        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                        List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                        replyKeyboardMarkup.setOneTimeKeyboard(true);
+                        replyKeyboardMarkup.setResizeKeyboard(true);
+                        replyKeyboardMarkup.setSelective(true);
 
-                    } else if (text.equals("Ta'lim muassasasi") || text.equals("Учебное заведение")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "eduName");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning ta'lim muassasasini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите учебное заведение сотрудника" + sighDown;
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(
+                                                KeyboardButton.builder()
+                                                        .text(cancelButton)
+                                                        .build()
+                                        )
+                                )
+                        );
+                        replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-                    } else if (text.equals("Ta'lim yo'nalishi") || text.equals("Образовательная сфера")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "eduField");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning ta'lim yo'nalishini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите сферу обучения сотрудника" + sighDown;
-
-                    } else if (text.equals("Ta'lim bosqichi") || text.equals("Уровень образования")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "eduType");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning ta'lim bosqichini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите уровень образования сотрудника" + sighDown;
-
-                    } else if (text.equals("O'quv Muddatlari") || text.equals("Периоды обучения")) {
-                        userRepository.updateUserStepByUserChatId(chatId, "eduPeriod");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning o'quv muddatlarini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Заново введите периоды обучения сотрудника" + sighDown;
-
-                    } else if ((text.equals("Malakasi") || text.equals("Навыки"))) {
-                        userRepository.updateUserStepByUserChatId(chatId, "skills");
-                        if (userLanguage.equals("UZ"))
-                            returnText = "Xodimning malakasini qaytadan kiriting " + sighDown;
-                        else
-                            returnText = "Введите заново навыки сотрудника" + sighDown;
+                        return SendMessage.builder()
+                                .replyMarkup(replyKeyboardMarkup)
+                                .text(returnText)
+                                .chatId(chatId)
+                                .build();
                     }
 
-                    if (userLanguage.equals("UZ"))
-                        cancelButton = "To'xtatish 🛑";
-                    else
-                        cancelButton = "Остановить 🛑";
-
-                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    replyKeyboardMarkup.setOneTimeKeyboard(true);
-                    replyKeyboardMarkup.setResizeKeyboard(true);
-                    replyKeyboardMarkup.setSelective(true);
-                    keyboardRowList.add(
-                            new KeyboardRow(
-                                    Collections.singletonList(
-                                            KeyboardButton.builder()
-                                                    .text(cancelButton)
-                                                    .build()
-                                    )
-                            )
-                    );
-                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyKeyboardMarkup)
-                            .text(returnText)
-                            .chatId(chatId)
-                            .build();
                 }
         );
     }

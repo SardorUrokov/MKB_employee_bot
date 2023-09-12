@@ -539,11 +539,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-                if (userLanguage.equals("RU"))
-                    sendTextMessage(chatId.toString(), "Информация о сотруднике изменена ❗️");
-                else
-                    sendTextMessage(chatId.toString(), "Xodim ma'lumotlari o'zgartirildi ❗️");
-
+                if (!("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
+                    if (userLanguage.equals("RU"))
+                        sendTextMessage(chatId.toString(), "Информация о сотруднике изменена ❗️");
+                    else
+                        sendTextMessage(chatId.toString(), "Xodim ma'lumotlari o'zgartirildi ❗️");
+                }
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 

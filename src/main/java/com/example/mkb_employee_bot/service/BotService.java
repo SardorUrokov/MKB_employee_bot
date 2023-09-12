@@ -12,7 +12,6 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -485,9 +484,9 @@ public class BotService {
                             returnText = "Пользователь номер " + substring + " удален из списка АДМИНов.";
                     } else {
                         if (userLanguage.equals("UZ"))
-                            returnText = "⚠\uFE0F Tizimda SUPER_ADMIN soni 1ta bo'lganligi uchun User Adminlar ro'yxatidan o'chirilmadi ‼\uFE0F";
+                            returnText = "⚠️ Tizimda SUPER_ADMIN soni 1ta bo'lganligi uchun User Adminlar ro'yxatidan o'chirilmadi ‼️";
                         else
-                            returnText = "⚠\uFE0F Поскольку количество SUPER_ADMIN в системе было 1, он не был удален из списка администраторов пользователей ‼\uFE0F";
+                            returnText = "⚠️ Поскольку количество SUPER_ADMIN в системе было 1, он не был удален из списка администраторов пользователей ‼️";
                     }
                     final var messageCompletableFuture = buttonService.adminSectionSuperAdminRoleButtons(update);
                     final var sendMessage = messageCompletableFuture.join();
@@ -652,50 +651,71 @@ public class BotService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     final var text = update.getMessage().getText();
-                    final var userStep = userRepository.getUserStepByUserChatId(chatId);
 
-                    switch (userStep) {
-                        case "fullname":
-                            updatingEmployee.setFullName(text);
-                            break;
-                        case "phoneNumber":
-                            updatingEmployee.setPhoneNumber(text);
-                            break;
-                        case "dateOfBirth":
-                            updatingEmployee.setDateOfBirth(text);
-                            break;
-                        case "nationality":
-                            updatingEmployee.setNationality(text);
-                            break;
-                        case "position":
+                    if ("Bekor qilish ❌".equals(text) || "Отменить ❌".equals(text)) {
+
+                        userRepository.updateUserStepByUserChatId(chatId, "cancelled");
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Tahrirlash to'xtatildi ❗️";
+                        else
+                            returnText = "Редактирование остановлено ❗️";
+
+                    } else {
+                        final var userStep = userRepository.getUserStepByUserChatId(chatId);
+
+                        switch (userStep) {
+                            case "cancelled":
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                                userRepository.updateUserStepByUserChatId(chatId, "");
+                                break;
+                            case "fullname":
+                                updatingEmployee.setFullName(text);
+                                break;
+                            case "phoneNumber":
+                                updatingEmployee.setPhoneNumber(text);
+                                break;
+                            case "dateOfBirth":
+                                updatingEmployee.setDateOfBirth(text);
+                                break;
+                            case "nationality":
+                                updatingEmployee.setNationality(text);
+                                break;
+                            case "position":
 //                            updatingEmployee.setPosition();
-                            break;
-                        case "eduName":
+                                break;
+                            case "eduName":
 //                            updatingEmployee.getEducations() //the first iterate edus and set name
-                            break;
-                        case "eduField":
+                                break;
+                            case "eduField":
 
-                            break;
-                        case "eduType":
+                                break;
+                            case "eduType":
 
-                            break;
-                        case "eduPeriod":
+                                break;
+                            case "eduPeriod":
 
-                            break;
-                        case "skills":
+                                break;
+                            case "skills":
 
-                            break;
+                                break;
+                        }
+                        final var updatedEmployee = employeeService.updateEmployee(updatingEmployee);
+
+                        returnText = switch (userLanguage) {
+                            case "UZ" -> buttonService.getEmployeeInfoForUserLanguage_UZ(updatedEmployee);
+                            default -> buttonService.getEmployeeInfoForUserLanguage_RU(updatedEmployee);
+                        };
                     }
-                    final var updatedEmployee = employeeService.updateEmployee(updatingEmployee);
 
-                    String info = switch (userLanguage) {
-                        case "UZ" -> buttonService.getEmployeeInfoForUserLanguage_UZ(updatedEmployee);
-                        default -> buttonService.getEmployeeInfoForUserLanguage_UZ(updatedEmployee);
-                    };
+                    final var messageCompletableFuture = buttonService.askSectionForUpdatingEmployee(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
 
                     return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .text(returnText)
                             .chatId(chatId)
-                            .text(info)
                             .build();
                 }
         );
