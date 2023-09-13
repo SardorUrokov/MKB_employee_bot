@@ -1,31 +1,20 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.component.bot.EmployeeBot;
 import com.example.mkb_employee_bot.entity.Attachment;
 import com.example.mkb_employee_bot.entity.Employee;
-import com.example.mkb_employee_bot.entity.enums.FileType;
 import com.example.mkb_employee_bot.repository.AttachmentRepository;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -52,13 +41,12 @@ public class AttachmentService {
 //        return null;
 //    }
 
-    public Attachment createAttachment(Employee employee, File userFile) {
+    public void createAttachment(Employee employee, Document userDoc) {
 
         Attachment attachment = new Attachment();
         try {
-            byte[] fileBytes = Files.readAllBytes(Path.of(userFile.getPath()));
+            byte[] fileBytes = Files.readAllBytes(Path.of(userDoc.getThumb().getFilePath()));
             attachment.setBytes(fileBytes);
-            attachment.setFilePath(userFile.getPath());
             attachment.setName(employee.getFullName() + "_" + attachment.getFileType().name());
             attachment.setCreatedAt(new Date());
             attachment.setUpdatedAt(new Date());
@@ -67,7 +55,7 @@ public class AttachmentService {
         }
 
         employee.setAttachments(Collections.singletonList(attachment));
-        return attachmentRepository.save(attachment);
+        attachmentRepository.save(attachment);
     }
 
     public void saveAttachmentToMinIO(Attachment attachment) {

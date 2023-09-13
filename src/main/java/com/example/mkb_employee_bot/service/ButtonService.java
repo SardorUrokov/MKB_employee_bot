@@ -27,6 +27,7 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -47,6 +48,7 @@ public class ButtonService {
     private final ManagementRepository managementRepository;
 
     private final DepartmentServiceImpl departmentService;
+    private final AttachmentService attachmentService;
 
     private final String back = "";
     private String mainMenu = "";
@@ -3082,105 +3084,19 @@ public class ButtonService {
     public CompletableFuture<SendMessage> saveDocument(Update update, Employee creatingEmployee) {
         return CompletableFuture.supplyAsync(() -> {
 
-            chatId = update.getMessage().getChatId();
-            final var document = update.getMessage().getDocument();
+                    chatId = update.getMessage().getChatId();
+                    final var document = update.getMessage().getDocument();
 
+                    attachmentService.createAttachment(creatingEmployee, document);
+                    final var messageCompletableFuture = completeAddingEmployeeInfo(update, creatingEmployee);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .build();
                 }
         );
     }
-
-    public File downloadAndSaveDocument(Document document) {
-        try {
-            MinioClient minioClient;
-            // Get the file ID from the document
-            String fileId = document.getFileId();
-
-            // Use the Telegram Bot API to get the file information
-            File file = execute();
-
-            // Get the URL of the file
-            String fileUrl = file.getFileUrl(getBotToken());
-
-            // Open a connection to the file URL and get the input stream
-            InputStream inputStream = new URL(fileUrl).openStream();
-
-            // Define the MinIO bucket and object name
-            String bucketName = "your-bucket-name"; // Replace with your MinIO bucket name
-            String objectName = "path/to/save/" + document.getFileName(); // Change the path as needed
-
-            // Upload the document to MinIO
-            try {
-                minioClient.putObject(
-                        PutObjectArgs.builder()
-                                .bucket(bucketName)
-                                .object(objectName)
-                                .stream(inputStream, -1, PutObjectArgs.MIN_MULTIPART_SIZE)
-                                .contentType("application/octet-stream") // Set the appropriate content type
-                                .build()
-                );
-            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-
-            // Close the input stream
-            inputStream.close();
-
-            // Return the saved file path in MinIO
-            return new File();
-
-        } catch (TelegramApiException | IOException | io.minio.errors.MinioException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-
-
-//    private File downloadFile(String fileId) {
-//        GetFile getFile = new GetFile();
-//        getFile.setFileId(fileId);
-//        try {
-//            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-//            java.io.File localFile = new java.io.File("path/to/save/" + file.getFilePath());
-//            downloadFileFromTelegram(file.getFilePath(), localFile);
-//            return localFile;
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    private void downloadFileFromTelegram(String filePath, File destination) {
-//        try {
-//            byte[] fileBytes = downloadFileBytes(filePath);
-//            Files.write(destination.toPath(), fileBytes);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private byte[] downloadFileBytes(String filePath) {
-//        GetFile getFileMethod = new GetFile();
-//        getFileMethod.setFileId(filePath);
-//        try {
-//            File file = execute(getFileMethod);
-//            return downloadFileBytes(file.getFilePath());
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    private byte[] downloadFileBytes(String filePath) {
-//        GetFile getFileMethod = new GetFile();
-//        getFileMethod.setFileId(filePath);
-//        try {
-//            org.telegram.telegrambots.meta.api.objects.File file = execute(getFileMethod);
-//            return downloadFileBytes(file.getFilePath());
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 }

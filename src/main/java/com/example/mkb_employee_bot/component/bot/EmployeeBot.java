@@ -699,7 +699,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     else
                         sendTextMessage(chatId.toString(), "Отправьте файл для сохранения");
 
-
                     if (message.hasDocument()) {
                         sendMessageCompletableFuture = buttonService.saveDocument(update, creatingEmployee);
 
