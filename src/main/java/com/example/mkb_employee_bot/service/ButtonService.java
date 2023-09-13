@@ -1,10 +1,5 @@
 package com.example.mkb_employee_bot.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -16,50 +11,37 @@ import java.util.stream.Collectors;
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.EduType;
 import com.example.mkb_employee_bot.entity.enums.FileType;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import static org.springframework.jdbc.datasource.init.DatabasePopulatorUtils.execute;
 
 @Service
 @RequiredArgsConstructor
 public class ButtonService {
 
     private final UserRepository userRepository;
-    private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
-    private final EducationRepository educationRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
-    private final DepartmentServiceImpl departmentService;
     private final AttachmentService attachmentService;
+    private final DepartmentServiceImpl departmentService;
 
-    private final String back = "";
     private String mainMenu = "";
     private final String bosh_Menu = "Bosh Menu ↩️";
     private final String главное_Меню = "Главное Меню ↩️";
     private String returnText = "";
     private final String sighDown = "⬇️";
-    private final String sighBack = "⬅️";
     private Long chatId;
     private String userLanguage = "";
-
     public int userStageIndex = 0; // Initialize with the starting stage index
     List<String> steps_uz = new ArrayList<>();
     List<String> steps_ru = new ArrayList<>();
@@ -132,20 +114,24 @@ public class ButtonService {
     public CompletableFuture<SendMessage> selectLanguageButtons(Update update) {
 
         return CompletableFuture.supplyAsync(() -> {
+
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setSelective(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
+
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text("\uD83C\uDDFA\uD83C\uDDFF")
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text("\uD83C\uDDF7\uD83C\uDDFA")
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text("\uD83C\uDDFA\uD83C\uDDFF")
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text("\uD83C\uDDF7\uD83C\uDDFA")
+                                                    .build()
+                                    )
+                            )
                     );
                     returnText = """
                             Iltimos, botdan foydalanish uchun tilni tanlang\uD83C\uDDFA\uD83C\uDDFF\s
@@ -209,14 +195,16 @@ public class ButtonService {
                             )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button3)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button4)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button3)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button4)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
                             new KeyboardRow(
@@ -284,11 +272,13 @@ public class ButtonService {
                     }
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -346,11 +336,13 @@ public class ButtonService {
                     }
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -408,11 +400,13 @@ public class ButtonService {
                     }
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -530,11 +524,13 @@ public class ButtonService {
                     }
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -636,6 +632,7 @@ public class ButtonService {
                     );
 
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
                     if (forWhat.equals("forDeleting"))
                         userRepository.updateUserStageByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_NAME_FOR_DELETE_ROLE_USER.name());
                     else if (forWhat.equals("forUpdating"))
@@ -1032,31 +1029,37 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button1)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button2)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button1)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button2)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button3)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button4)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button3)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button4)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -1102,24 +1105,28 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button1)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button2)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button1)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button2)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button3)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button4)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button3)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button4)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
                             new KeyboardRow(List.of(
@@ -1163,11 +1170,13 @@ public class ButtonService {
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.ENTER_NAME_FOR_CREATE_DEPARTMENT.name());
@@ -1201,11 +1210,13 @@ public class ButtonService {
                     setDepartmentListToButtons(keyboardRowList, replyKeyboardMarkup);
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     userRepository.updateUserStageByUserChatId(chatId, Stage.DEPARTMENT_SELECTED_FOR_CREATING_MANAGEMENT.name());
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
@@ -1242,10 +1253,9 @@ public class ButtonService {
 
                     keyboardRowList.add(
                             new KeyboardRow(
-                                    List.of(
-                                            KeyboardButton.builder()
-                                                    .text(mainMenu)
-                                                    .build()
+                                    Collections.singletonList(KeyboardButton.builder()
+                                            .text(mainMenu)
+                                            .build()
                                     )
                             )
                     );
@@ -1284,11 +1294,13 @@ public class ButtonService {
                     setManagementListToButtons(keyboardRowList, replyKeyboardMarkup);
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_DELETING.name());
@@ -1479,31 +1491,37 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button1)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button2)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button1)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button2)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(button3)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(button4)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(button3)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(button4)
+                                                    .build()
+                                    )
+                            )
                     );
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
@@ -1540,11 +1558,13 @@ public class ButtonService {
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
 
                     keyboardRowList.add(
-                            new KeyboardRow(List.of(
-                                    KeyboardButton.builder()
-                                            .text(mainMenu)
-                                            .build()
-                            ))
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(mainMenu)
+                                                    .build()
+                                    )
+                            )
                     );
 
                     if (forWhat.equals("forSaving"))
@@ -2630,6 +2650,7 @@ public class ButtonService {
                                 userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
                         case 9 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
                         case 10 -> userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                        case 11 -> userRepository.updateUserStepByUserChatId(chatId, Stage.ATTACHMENT_SHARED.name());
                     }
 
                     return SendMessage.builder()
@@ -3098,5 +3119,48 @@ public class ButtonService {
                             .build();
                 }
         );
+    }
+
+    public CompletableFuture<SendMessage> askSendAttachment(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton;
+
+                    if (userLanguage.equals("UZ")) {
+                        cancelButton = "To'xtatish 🛑";
+                        returnText = "Saqlash uchun faylni yuboring";
+                    } else {
+                        cancelButton = "Остановить 🛑";
+                        returnText = "Отправьте файл для сохранения";
+                    }
+                    userRepository.updateUserStepByUserChatId(chatId, Stage.ATTACHMENT_SHARED.name());
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+
     }
 }

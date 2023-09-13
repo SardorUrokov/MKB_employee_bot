@@ -1,5 +1,7 @@
 package com.example.mkb_employee_bot.component.bot;
 
+import com.example.mkb_employee_bot.entity.enums.LinkType;
+import com.example.mkb_employee_bot.service.FileService;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -16,15 +18,12 @@ import com.example.mkb_employee_bot.service.ButtonService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +37,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
     private static BotService botService;
     private static ButtonService buttonService;
+    private static FileService fileService;
 
     private static UserRepository userRepository;
     private static PositionRepository positionRepository;
@@ -47,6 +47,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
     Long chatId;
     String userStage;
+    String userStep;
     String userLanguage;
 
     Department prevDepartment = new Department();
@@ -64,11 +65,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
-    String welcomeMessage = """
-            MKBank Xodimlari botiga xush kelibsiz!
-                        
-            Добро пожаловать в бот для сотрудников МКБанк!
-            """;
+
+//    @Value("${token}")
+//    private String botToken;
+//
+//    @Value("${username}")
+//    private String botUsername;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -78,9 +80,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
             chatId = update.getMessage().getChatId();
             userLanguage = botService.getUserLanguage(chatId);
             userStage = userRepository.getUserStageByUserChatId(chatId);
-
             String userStepByUserChatId = userRepository.getUserStepByUserChatId(chatId);
-            String userStep = userStepByUserChatId == null ? "" : userStepByUserChatId;
+            userStep = userStepByUserChatId == null ? "" : userStepByUserChatId;
+
             final var userRole = botService.getUserRole(chatId);
             final var isSuperAdmin = userRole.equals("SUPER_ADMIN");
             final var isAdmin = userRole.equals("ADMIN");
@@ -106,9 +108,15 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             if ("/start".equals(messageText)) {
 
+                String welcomeMessage = """
+                        MKBank Xodimlari botiga xush kelibsiz!
+                                    
+                        Добро пожаловать в бот для сотрудников МКБанк!
+                        """;
+
                 sendTextMessage(String.valueOf(chatId), welcomeMessage);
-                CompletableFuture<SendMessage> welcomeMessage = buttonService.selectLanguageButtons(update);
-                SendMessage sendMessage = welcomeMessage.join();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.selectLanguageButtons(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -499,6 +507,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
+
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -681,6 +690,34 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (Stage.ATTACHMENT_SHARED.name().equals(userStep)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+
+                if (message.hasDocument()) {
+                    sendMessageCompletableFuture = fileService.processDoc(update, creatingEmployee);
+
+                } else if (message.hasPhoto()) {
+                    final var photo = message.getPhoto();
+
+                    // to do add
+                }
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
@@ -694,19 +731,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     creatingEmployee = new Employee();
 
                 } else {
-                    if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId.toString(), "Saqlash uchun faylni yuboring");
-                    else
-                        sendTextMessage(chatId.toString(), "Отправьте файл для сохранения");
-
-                    if (message.hasDocument()) {
-                        sendMessageCompletableFuture = buttonService.saveDocument(update, creatingEmployee);
-
-                    } else if (message.hasPhoto()) {
-                        final var photo = message.getPhoto();
-
-                        // to do add
-                    }
+                    sendMessageCompletableFuture = buttonService.askSendAttachment(update);
                 }
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
@@ -1581,6 +1606,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     @Autowired
     public void setButtonService(ButtonService service) {
         EmployeeBot.buttonService = service;
+    }
+
+    @Autowired
+    public void setFileService(FileService service) {
+        EmployeeBot.fileService = service;
     }
 
     @Autowired
