@@ -317,8 +317,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
             } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER")) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = botService.getSelectedEmployeeInfo(update);
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                CompletableFuture<SendPhoto> sendMessageCompletableFuture = botService.getSelectedEmployeeInfo(update);
+                SendPhoto sendMessage = sendMessageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -694,7 +694,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) || ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
 
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+                CompletableFuture<SendMessage> sendMessageCompletableFuture;
 
                 if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
                     sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);

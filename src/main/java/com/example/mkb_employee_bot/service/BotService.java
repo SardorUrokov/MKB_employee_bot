@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.service;
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.dto.ManagementDTO;
 import com.example.mkb_employee_bot.entity.dto.PositionDTO;
+import com.example.mkb_employee_bot.entity.enums.FileType;
 import com.example.mkb_employee_bot.entity.enums.Role;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -23,9 +26,11 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class BotService {
+    private final EmployeePhotoRepository employeePhotoRepository;
     private final SkillRepository skillRepository;
 
     private final AuthService authService;
+    private final FileService fileService;
     private final ButtonService buttonService;
     private final PositionServiceImpl positionService;
     private final EmployeeServiceImpl employeeService;
@@ -139,7 +144,7 @@ public class BotService {
         return userRepository.getUserRoleByUserChatId(userChatId);
     }
 
-    public CompletableFuture<SendMessage> getSelectedEmployeeInfo(Update update) {
+    public CompletableFuture<SendPhoto> getSelectedEmployeeInfo(Update update) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -156,14 +161,18 @@ public class BotService {
                     else
                         messageCompletableFuture = buttonService.employeeSectionButtons(update);
 
+                    final var employeePhoto = employeePhotoRepository.findByEmployee_Id(employee.getId());
+                    final var fileAsArrayOfBytes = employeePhoto.get().getAppPhoto().getFileAsArrayOfBytes();
+
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     final var sendMessage = messageCompletableFuture.join();
                     final var replyMarkup = sendMessage.getReplyMarkup();
 
-                    return SendMessage.builder()
+                    return SendPhoto.builder()
                             .replyMarkup(replyMarkup)
                             .chatId(chatId)
-                            .text(info)
+                            .photo(new InputFile(Arrays.toString(fileAsArrayOfBytes)))
+                            .caption(info)
                             .build();
                 }
         );
@@ -626,6 +635,7 @@ public class BotService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     final var employee = employeeService.createEmployee(creatingEmployee);
+                    fileService.saveEmployee_Photo(employee);
 
                     if (userLanguage.equals("UZ"))
                         returnText = employee.getPosition().getName().toUpperCase() + " lavozimli xodim " + employee.getFullName().toUpperCase() + "  " + employee.getId() + "-id bilan saqlandi";

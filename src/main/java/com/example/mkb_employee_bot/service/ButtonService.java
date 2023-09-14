@@ -2286,8 +2286,7 @@ public class ButtonService {
                 "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nMa'lumoti " + getEmployeeEducationsInfo(employee) + "\n" +
                 "Malakasi\n" + getEmployeeSkills(employee) + "\n" +
-                "\nFayl ma'lumotlari\n" +
-                employee.getDocuments().get(0).getFileType() + " uchun link: " + employee.getDocuments().get(0).getLinkForDownloading().toString();
+                "\nFayl ma'lumotlari\n" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
     public String getEmployeeInfoForUserLanguage_RU(Employee employee) {

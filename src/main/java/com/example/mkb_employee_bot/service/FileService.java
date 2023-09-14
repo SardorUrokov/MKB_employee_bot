@@ -5,10 +5,7 @@ import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.FileType;
 import com.example.mkb_employee_bot.entity.enums.LinkType;
 import com.example.mkb_employee_bot.exceptions.UploadFileException;
-import com.example.mkb_employee_bot.repository.AppDocumentRepository;
-import com.example.mkb_employee_bot.repository.AppPhotoRepository;
-import com.example.mkb_employee_bot.repository.BinaryContentRepository;
-import com.example.mkb_employee_bot.repository.EmployeePhotoRepository;
+import com.example.mkb_employee_bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -18,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -47,6 +43,7 @@ public class FileService {
     private final ButtonService buttonService;
     private final AppPhotoRepository appPhotoRepository;
     private final AppDocumentRepository appDocumentRepository;
+    private final EmployeeRepository employeeRepository;
     private final EmployeePhotoRepository employeePhotoRepository;
     private final BinaryContentRepository binaryContentRepository;
 
@@ -63,6 +60,7 @@ public class FileService {
                         var transientAppDoc = buildTransientAppDoc(fileType, telegramDoc, persistentBinaryContent);
                         final var appDocument = appDocumentRepository.save(transientAppDoc);
                         employee.setDocuments(List.of(appDocument));
+                        employeeRepository.save(employee);
 
                         final var messageCompletableFuture = buttonService.completeAddingEmployeeInfo(update, employee);
                         final var sendMessage = messageCompletableFuture.join();
@@ -94,10 +92,8 @@ public class FileService {
                     if (response.getStatusCode() == HttpStatus.OK) {
                         var persistentBinaryContent = getPersistentBinaryContent(response);
                         var transientAppPhoto = buildTransientAppPhoto(fileType, telegramPhoto, persistentBinaryContent);
-                        appPhotoRepository.save(transientAppPhoto);
-                        if (fileType.name().equals(FileType.EMPLOYEE_PHOTO.name())){
-                            employeePhotoRepository.save(new EmployeePhoto(employee, transientAppPhoto));
-                        }
+                        final var saved = appPhotoRepository.save(transientAppPhoto);
+
                     } else
                         throw new UploadFileException("Bad response from telegram service: " + response);
 
@@ -114,6 +110,14 @@ public class FileService {
         );
     }
 
+    public void saveEmployee_Photo(Employee employee) {
+        for (AppPhoto appPhoto : employee.getAppPhotos()) {
+            if (appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())) {
+                employeePhotoRepository.save(new EmployeePhoto(employee, appPhoto));
+                return;
+            }
+        }
+    }
 
     private record downloadDTO(URL link, byte[] bytes) {
     }
