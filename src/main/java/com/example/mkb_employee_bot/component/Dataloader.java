@@ -92,7 +92,8 @@ public class Dataloader implements CommandLineRunner {
                     .position(mutaxxasis)
                     .educations(List.of(education, education1))
                     .skills(skills)
-                    .attachments(Collections.emptyList())
+                    .appPhotos(Collections.emptyList())
+                    .documents(Collections.emptyList())
                     .createdAt(new Date())
                     .updatedAt(new Date())
                     .build();

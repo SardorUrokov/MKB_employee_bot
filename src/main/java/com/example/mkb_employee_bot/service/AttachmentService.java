@@ -54,7 +54,6 @@ public class AttachmentService {
             e.printStackTrace();
         }
 
-        employee.setAttachments(Collections.singletonList(attachment));
         attachmentRepository.save(attachment);
     }
 

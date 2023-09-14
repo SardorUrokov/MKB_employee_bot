@@ -156,6 +156,7 @@ public class BotService {
                     else
                         messageCompletableFuture = buttonService.employeeSectionButtons(update);
 
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     final var sendMessage = messageCompletableFuture.join();
                     final var replyMarkup = sendMessage.getReplyMarkup();
 

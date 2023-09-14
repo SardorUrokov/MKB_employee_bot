@@ -2274,17 +2274,20 @@ public class ButtonService {
     }
 
     public String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
-        return "Xodim" +
-                "\nIsm Familiyasi: " + employee.getFullName() +
-                "\nTelefon raqami: " + employee.getPhoneNumber() +
-                "\nTug'ilgan sanasi: " + employee.getDateOfBirth() +
-                "\nYoshi: " + employee.getAge() +
-                "\nMillati: " + employee.getNationality() +
-                "\nLavozim: " + employee.getPosition().getName() +
-                "\nBo'lim: " + employee.getPosition().getManagement().getName() +
-                "\nDepartament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
-                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
-                "\nMalakasi\n" + getEmployeeSkills(employee);
+
+        return "Xodim\n" +
+                "Ism Familiyasi: " + employee.getFullName() + "\n" +
+                "Telefon raqami: " + employee.getPhoneNumber() + "\n" +
+                "Tug'ilgan sanasi: " + employee.getDateOfBirth() + "\n" +
+                "Yoshi: " + employee.getAge() + "\n" +
+                "Millati: " + employee.getNationality() + "\n" +
+                "Lavozim: " + employee.getPosition().getName() + "\n" +
+                "Bo'lim: " + employee.getPosition().getManagement().getName() + "\n" +
+                "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
+                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) + "\n" +
+                "Malakasi\n" + getEmployeeSkills(employee) + "\n" +
+                "\nFayl ma'lumotlari\n" +
+                employee.getDocuments().get(0).getFileType() + " uchun link: " + employee.getDocuments().get(0).getLinkForDownloading().toString();
     }
 
     public String getEmployeeInfoForUserLanguage_RU(Employee employee) {
@@ -2298,8 +2301,26 @@ public class ButtonService {
                 "\nОтдел: " + employee.getPosition().getManagement().getName() +
                 "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nОбразование " + getEmployeeEducationsInfo(employee) +
-                "\nНавыки и умения\n" + getEmployeeSkills(employee);
+                "\nНавыки и умения\n" + getEmployeeSkills(employee) +
+                "\nВложения" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
+
+    public String getEmployeeFiles(List<AppDocument> documents, List<AppPhoto> photos) {
+        String returnInfo = "";
+
+        if (documents != null) {
+            for (AppDocument document : documents) {
+                returnInfo = "\nЛинк для " + document.getFileType() + ": " + document.getLinkForDownloading() + "\n";
+            }
+        } else if (photos != null) {
+            for (AppPhoto photo : photos) {
+                if (!photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name()))
+                    returnInfo = "\nЛинк для " + photo.getFileType() + ": " + photo.getLinkForDownloading() + "\n";
+            }
+        }
+        return returnInfo;
+    }
+
 
     public String getEmployeeSkills(Employee employee) {
 
@@ -2786,6 +2807,7 @@ public class ButtonService {
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(chatId)
                             .text(info)
+                            .parseMode("Markdown")
                             .build();
                 }
         );
@@ -2873,7 +2895,7 @@ public class ButtonService {
                         section8 = "Уровень образования";
                         section9 = "Периоды обучения";
                         section10 = "Навыки";
-                        section11 = "Вложения.";
+                        section11 = "Вложения";
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

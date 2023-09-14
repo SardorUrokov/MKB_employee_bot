@@ -1,4 +1,4 @@
-package com.example.mkb_employee_bot;
+package com.example.mkb_employee_bot.component;
 
 import org.hashids.Hashids;
 

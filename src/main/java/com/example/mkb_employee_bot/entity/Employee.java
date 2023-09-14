@@ -1,6 +1,5 @@
 package com.example.mkb_employee_bot.entity;
 
-import java.util.Set;
 import java.util.List;
 import java.util.Date;
 
@@ -39,9 +38,13 @@ public class Employee {
     @ToString.Exclude
     List<Skill> skills;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
-    List<Attachment> attachments;
+    List<AppPhoto> appPhotos;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    List<AppDocument> documents;
 
     boolean isDeleted = false;
 
@@ -51,7 +54,7 @@ public class Employee {
     @Temporal(value = TemporalType.TIMESTAMP)
     Date updatedAt = new Date();
 
-    public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, List<Attachment> attachments) {
+    public Employee(String fullName, String dateOfBirth, String phoneNumber, String additionalNumber, String nationality, Integer age, Position position, List<Education> educations, List<Skill> skills, List<AppPhoto> appPhotos, List<AppDocument> documents) {
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.phoneNumber = phoneNumber;
@@ -61,6 +64,7 @@ public class Employee {
         this.position = position;
         this.educations = educations;
         this.skills = skills;
-        this.attachments = attachments;
+        this.appPhotos = appPhotos;
+        this.documents = documents;
     }
 }

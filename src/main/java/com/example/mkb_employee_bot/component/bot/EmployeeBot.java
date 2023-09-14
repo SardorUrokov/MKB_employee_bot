@@ -1,7 +1,8 @@
 package com.example.mkb_employee_bot.component.bot;
 
-import com.example.mkb_employee_bot.entity.enums.LinkType;
+import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.service.FileService;
+import jakarta.ws.rs.NotFoundException;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -10,14 +11,13 @@ import lombok.experimental.FieldDefaults;
 
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.repository.*;
-import com.example.mkb_employee_bot.entity.enums.Stage;
 import com.example.mkb_employee_bot.service.BotService;
-import com.example.mkb_employee_bot.entity.enums.EduType;
 import com.example.mkb_employee_bot.service.ButtonService;
 
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -49,6 +49,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String userStage;
     String userStep;
     String userLanguage;
+    FileType fileType;
 
     Department prevDepartment = new Department();
     Department selectedDepartment = new Department();
@@ -666,6 +667,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if (("O'tkazib yuborish ⏩".equals(messageText) || "Пропустить ⏩".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 if (userLanguage.equals("UZ"))
@@ -690,35 +692,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if (Stage.ATTACHMENT_SHARED.name().equals(userStep)) {
-
-                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
-
-                if (message.hasDocument()) {
-                    sendMessageCompletableFuture = fileService.processDoc(update, creatingEmployee);
-
-                } else if (message.hasPhoto()) {
-                    final var photo = message.getPhoto();
-
-                    // to do add
-                }
-                SendMessage sendMessage = sendMessageCompletableFuture.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                    );
-                    executeFuture.join();
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else if (Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) {
+            } else if ((Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) || ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
@@ -731,6 +705,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     creatingEmployee = new Employee();
 
                 } else {
+                    fileType = FileType.valueOf(messageText);
                     sendMessageCompletableFuture = buttonService.askSendAttachment(update);
                 }
 
@@ -749,6 +724,36 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (Stage.ATTACHMENT_SHARED.name().equals(userStep)) {
+
+                CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
+                if (message.hasDocument())
+                    sendMessageCompletableFuture = fileService.processDoc(fileType, update, creatingEmployee);
+                else if (message.hasPhoto())
+                    sendMessageCompletableFuture = fileService.processPhoto(fileType, update, creatingEmployee);
+
+
+                SendMessage sendMessage = sendMessageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId.toString(), "Подтвердить сохранение ️⁉️");
+                else
+                    sendTextMessage(chatId.toString(), "Saqlashni tasdiqlaysizmi ⁉️");
+
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 if ("personalInfo".equals(userStep)) {
@@ -765,9 +770,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
                 } else if (Stage.ENTERED_EMPLOYEE_NATIONALITY.name().equals(userStep))
                     creatingEmployee.setNationality(messageText);
-                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
+                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep)) {
                     education.setType(EduType.valueOf(messageText));
-                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
+                } else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
                     education.setName(messageText);
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
                     education.setEducationField(messageText);

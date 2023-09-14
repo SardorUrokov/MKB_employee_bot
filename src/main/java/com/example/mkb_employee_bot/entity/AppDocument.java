@@ -1,7 +1,10 @@
 package com.example.mkb_employee_bot.entity;
 
+import com.example.mkb_employee_bot.entity.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.net.URL;
 
 @Getter
 @Setter
@@ -19,7 +22,13 @@ public class AppDocument {
     private String telegramFileId;
     private String docName;
     private String mimeType;
+
+    @Enumerated(value = EnumType.STRING)
+    private FileType fileType;
+
     private Long fileSize;
+    private URL linkForDownloading;
+    private byte[] fileAsArrayOfBytes;
 
     @OneToOne
     private BinaryContent binaryContent;
