@@ -11,14 +11,21 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -161,8 +168,11 @@ public class BotService {
                     else
                         messageCompletableFuture = buttonService.employeeSectionButtons(update);
 
-                    final var employeePhoto = employeePhotoRepository.findByEmployee_Id(employee.getId());
-                    final var fileAsArrayOfBytes = employeePhoto.get().getAppPhoto().getFileAsArrayOfBytes();
+                    EmployeePhoto employeePhoto = employeePhotoRepository.findByEmployee_Id(employee.getId()).orElseThrow();
+                    AppPhoto appPhoto = employeePhoto.getAppPhoto();
+                    byte[] fileAsArrayOfBytes = appPhoto.getFileAsArrayOfBytes();
+                    InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                    InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
 
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                     final var sendMessage = messageCompletableFuture.join();
@@ -171,8 +181,31 @@ public class BotService {
                     return SendPhoto.builder()
                             .replyMarkup(replyMarkup)
                             .chatId(chatId)
-                            .photo(new InputFile(Arrays.toString(fileAsArrayOfBytes)))
+                            .photo(photoInputFile)
                             .caption(info)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMediaGroup> getEmployeeDocuments(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var employee = employeeRepository
+                            .findByFullName(update.getMessage().getText())
+                            .orElseThrow(NotFoundException::new);
+
+                    SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee);
+                    final var employeeDocumentMedias = sendMediaGroup.getMedias();
+
+                    SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee);
+                    employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
+
+                    return SendMediaGroup.builder()
+                            .chatId(chatId)
+                            .medias(employeeDocumentMedias)
                             .build();
                 }
         );

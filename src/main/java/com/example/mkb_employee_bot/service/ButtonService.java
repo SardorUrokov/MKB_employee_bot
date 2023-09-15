@@ -2274,7 +2274,6 @@ public class ButtonService {
     }
 
     public String getEmployeeInfoForUserLanguage_UZ(Employee employee) {
-
         return "Xodim\n" +
                 "Ism Familiyasi: " + employee.getFullName() + "\n" +
                 "Telefon raqami: " + employee.getPhoneNumber() + "\n" +
@@ -2309,12 +2308,12 @@ public class ButtonService {
 
         if (documents != null) {
             for (AppDocument document : documents) {
-                returnInfo = "\nЛинк для " + document.getFileType() + ": " + document.getLinkForDownloading() + "\n";
+                returnInfo = "\nЛинк для " + document.getFileType() + ":\n" + document.getLinkForDownloading() + "\n";
             }
         } else if (photos != null) {
             for (AppPhoto photo : photos) {
                 if (!photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name()))
-                    returnInfo = "\nЛинк для " + photo.getFileType() + ": " + photo.getLinkForDownloading() + "\n";
+                    returnInfo = "\nЛинк для " + photo.getFileType() + ":\n" + photo.getLinkForDownloading() + "\n";
             }
         }
         return returnInfo;

@@ -13,15 +13,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaDocument;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -93,6 +100,7 @@ public class FileService {
                         var persistentBinaryContent = getPersistentBinaryContent(response);
                         var transientAppPhoto = buildTransientAppPhoto(fileType, telegramPhoto, persistentBinaryContent);
                         final var saved = appPhotoRepository.save(transientAppPhoto);
+                        employee.setAppPhotos(List.of(saved));
 
                     } else
                         throw new UploadFileException("Bad response from telegram service: " + response);
@@ -118,6 +126,7 @@ public class FileService {
             }
         }
     }
+
 
     private record downloadDTO(URL link, byte[] bytes) {
     }
@@ -163,6 +172,7 @@ public class FileService {
     }
 
     private ResponseEntity<String> getFilePath(String fileId) {
+
         var restTemplate = new RestTemplate();
         var headers = new HttpHeaders();
         var request = new HttpEntity<>(headers);
@@ -191,6 +201,49 @@ public class FileService {
         } catch (IOException e) {
             throw new UploadFileException(urlObj.toExternalForm(), e);
         }
+    }
+
+    public SendMediaGroup employeePhotos(Employee employee) {
+        List<InputMedia> mediaPhotos = new ArrayList<>();
+        final var appPhotos = employee.getAppPhotos();
+
+        if (appPhotos != null) {
+            for (AppPhoto appPhoto : appPhotos) {
+                if (!appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())) {
+                    InputMediaPhoto inputMediaPhoto = new InputMediaPhoto();
+                    InputStream inputStream = new ByteArrayInputStream(appPhoto.getFileAsArrayOfBytes());
+                    inputMediaPhoto.setMedia(inputStream, "photo.jpg");
+                    mediaPhotos.add(inputMediaPhoto);
+                }
+            }
+        }
+
+        return SendMediaGroup.builder()
+                .medias(mediaPhotos)
+                .build();
+    }
+
+    public SendMediaGroup employeeDocuments(Employee employee) {
+
+        List<InputMedia> mediaDocuments = new ArrayList<>();
+        final var documents = employee.getDocuments();
+        int i = 1;
+        String fileName = "employee_doc_" + i + ".pdf";
+
+        if (documents != null && !documents.isEmpty()) {
+            for (AppDocument document : documents) {
+
+                InputMediaDocument inputMediaDocument = new InputMediaDocument();
+                InputStream inputStream = new ByteArrayInputStream(document.getFileAsArrayOfBytes());
+                inputMediaDocument.setMedia(inputStream, fileName);
+                mediaDocuments.add(inputMediaDocument);
+                i++;
+            }
+            return SendMediaGroup.builder()
+                    .medias(mediaDocuments)
+                    .build();
+        } else
+            return null;
     }
 
     public String generateLink(Long docId, LinkType linkType) {

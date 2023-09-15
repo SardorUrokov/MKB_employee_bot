@@ -7,10 +7,8 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.Employee;
-import com.example.mkb_employee_bot.repository.SkillRepository;
-import com.example.mkb_employee_bot.repository.EmployeeRepository;
-import com.example.mkb_employee_bot.repository.EducationRepository;
 import com.example.mkb_employee_bot.service.interfaces.EmployeeService;
 
 @Service
@@ -20,6 +18,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
     private final EducationRepository educationRepository;
+    private final AppPhotoRepository appPhotoRepository;
 
     public List<Employee> employeeList() {
         return employeeRepository.findAll(Sort.by("full_name"));
@@ -41,46 +40,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         educationRepository.saveAll(creatingEmployee.getEducations());
         skillRepository.saveAll(creatingEmployee.getSkills());
+        appPhotoRepository.saveAll(creatingEmployee.getAppPhotos());
         return employeeRepository.save(creatingEmployee);
     }
 
     public Employee updateEmployee(Employee updatingEmployee) {
         return employeeRepository.save(updatingEmployee);
     }
-
-    /*
-            switch (step) {
-            case "fullname":
-
-                break;
-            case "phoneNumber":
-
-                break;
-            case "dateOfBirth":
-
-                break;
-            case "nationality":
-
-                break;
-            case "position":
-
-                break;
-            case "eduName":
-
-                break;
-            case "eduField":
-
-                break;
-            case "eduType":
-
-                break;
-            case "eduPeriod":
-
-                break;
-            case "skills":
-
-                break;
-        }
-
-     */
 }

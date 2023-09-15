@@ -2,7 +2,6 @@ package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.service.FileService;
-import jakarta.ws.rs.NotFoundException;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -67,12 +66,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String botUsername = "mkb_employees_bot";
     String botToken = "6608186289:AAER7qqqE-mNPMZCZrIj6zm8JS_q7o7eCmw";
 
-//    @Value("${token}")
-//    private String botToken;
-//
-//    @Value("${username}")
-//    private String botUsername;
-
+    @SuppressWarnings("DataFlowIssue")
     @Override
     public void onUpdateReceived(Update update) {
 
@@ -329,10 +323,27 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
+                //TODO call the method -> getEmployeeDocuments
+//                final var employeeDocuments = botService.getEmployeeDocuments(update);
+//                SendMediaGroup sendMediaGroup = employeeDocuments.join();
+//                try {
+//                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+//                                try {
+//                                    execute(sendMediaGroup);
+//                                } catch (TelegramApiException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//                            }
+//                    );
+//                    executeFuture.join();
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+
             } else if (("Xodimlar".equals(messageText) || "Сотрудники".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.employeeSectionButtons(update);
@@ -732,6 +743,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 else if (message.hasPhoto())
                     sendMessageCompletableFuture = fileService.processPhoto(fileType, update, creatingEmployee);
 
+                userRepository.updateUserStepByUserChatId(chatId, "");
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
                 try {
