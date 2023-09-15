@@ -2768,15 +2768,17 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String confirmationAboutCreating, cancelCreating, info;
+                    String confirmationAboutCreating, cancelCreating, addAttachmentAgain, info;
 
                     if (userLanguage.equals("UZ")) {
                         confirmationAboutCreating = "Tasdiqlash ✅";
                         cancelCreating = "Bekor qilish ❌";
+                        addAttachmentAgain = "Yana fayl qo'shish ➕";
                         info = getEmployeeInfoForUserLanguage_UZ(employee);
                     } else {
                         confirmationAboutCreating = "Подтвердить ✅";
                         cancelCreating = "Отменить ❌";
+                        addAttachmentAgain = "Добавить вложение еще раз ➕";
                         info = getEmployeeInfoForUserLanguage_RU(employee);
                     }
 
@@ -2786,18 +2788,26 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setSelective(true);
 
-                    keyboardRowList.add(
-                            new KeyboardRow(
-                                    List.of(
-                                            KeyboardButton.builder()
-                                                    .text(confirmationAboutCreating)
-                                                    .build(),
-                                            KeyboardButton.builder()
-                                                    .text(cancelCreating)
-                                                    .build()
-                                    )
+                    new KeyboardRow(
+                            Collections.singletonList(
+                                    KeyboardButton.builder()
+                                            .text(addAttachmentAgain)
+                                            .build()
+
                             )
                     );
+                    new KeyboardRow(
+                            List.of(
+                                    KeyboardButton.builder()
+                                            .text(confirmationAboutCreating)
+                                            .build(),
+                                    KeyboardButton.builder()
+                                            .text(cancelCreating)
+                                            .build()
+
+                            )
+                    );
+
 
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 

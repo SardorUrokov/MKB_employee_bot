@@ -703,6 +703,25 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if ("Yana fayl qo'shish ➕".equals(messageText) || "Добавить вложение еще раз ➕".equals(messageText) && (isAdmin || isSuperAdmin)) {
+
+                final var messageCompletableFuture = buttonService.askSendAttachment(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if ((Stage.SELECTED_EMPLOYEE_FILE_TYPE.name().equals(userStep)) || ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture;
