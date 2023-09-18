@@ -2788,27 +2788,27 @@ public class ButtonService {
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setSelective(true);
 
-                    new KeyboardRow(
-                            Collections.singletonList(
-                                    KeyboardButton.builder()
-                                            .text(addAttachmentAgain)
-                                            .build()
-
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(addAttachmentAgain)
+                                                    .build()
+                                    )
                             )
                     );
-                    new KeyboardRow(
-                            List.of(
-                                    KeyboardButton.builder()
-                                            .text(confirmationAboutCreating)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(cancelCreating)
-                                            .build()
-
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    List.of(
+                                            KeyboardButton.builder()
+                                                    .text(confirmationAboutCreating)
+                                                    .build(),
+                                            KeyboardButton.builder()
+                                                    .text(cancelCreating)
+                                                    .build()
+                                    )
                             )
                     );
-
-
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
@@ -3191,6 +3191,5 @@ public class ButtonService {
                             .build();
                 }
         );
-
     }
 }

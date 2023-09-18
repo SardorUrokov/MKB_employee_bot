@@ -729,10 +729,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
                     sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
                     creatingEmployee = new Employee();
+                    education = new Education();
 
                 } else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
                     creatingEmployee = new Employee();
+                    education = new Education();
 
                 } else {
                     fileType = FileType.valueOf(messageText);

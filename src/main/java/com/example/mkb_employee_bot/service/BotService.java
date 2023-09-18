@@ -668,7 +668,8 @@ public class BotService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     final var employee = employeeService.createEmployee(creatingEmployee);
-                    fileService.saveEmployee_Photo(employee);
+                    if (employee.getAppPhotos() != null)
+                        fileService.saveEmployee_Photo(employee);
 
                     if (userLanguage.equals("UZ"))
                         returnText = employee.getPosition().getName().toUpperCase() + " lavozimli xodim " + employee.getFullName().toUpperCase() + "  " + employee.getId() + "-id bilan saqlandi";

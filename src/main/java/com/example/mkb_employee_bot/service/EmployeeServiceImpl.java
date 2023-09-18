@@ -19,6 +19,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EducationRepository educationRepository;
     private final AppPhotoRepository appPhotoRepository;
+    private final AppDocumentRepository appDocumentRepository;
 
     public List<Employee> employeeList() {
         return employeeRepository.findAll(Sort.by("full_name"));
@@ -40,7 +41,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         educationRepository.saveAll(creatingEmployee.getEducations());
         skillRepository.saveAll(creatingEmployee.getSkills());
-        appPhotoRepository.saveAll(creatingEmployee.getAppPhotos());
+
+        if (creatingEmployee.getAppPhotos() != null)
+            appPhotoRepository.saveAll(creatingEmployee.getAppPhotos());
+        if (creatingEmployee.getDocuments() != null)
+            appDocumentRepository.saveAll(creatingEmployee.getDocuments());
+        
         return employeeRepository.save(creatingEmployee);
     }
 

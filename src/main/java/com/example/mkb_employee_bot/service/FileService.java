@@ -51,6 +51,7 @@ public class FileService {
     private final AppPhotoRepository appPhotoRepository;
     private final AppDocumentRepository appDocumentRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeeServiceImpl employeeService;
     private final EmployeePhotoRepository employeePhotoRepository;
     private final BinaryContentRepository binaryContentRepository;
 
@@ -67,7 +68,7 @@ public class FileService {
                         var transientAppDoc = buildTransientAppDoc(fileType, telegramDoc, persistentBinaryContent);
                         final var appDocument = appDocumentRepository.save(transientAppDoc);
                         employee.setDocuments(List.of(appDocument));
-                        employeeRepository.save(employee);
+                        employeeService.createEmployee(employee);
 
                         final var messageCompletableFuture = buttonService.completeAddingEmployeeInfo(update, employee);
                         final var sendMessage = messageCompletableFuture.join();
