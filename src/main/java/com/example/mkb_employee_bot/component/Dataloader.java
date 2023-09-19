@@ -123,7 +123,9 @@ public class Dataloader implements CommandLineRunner {
                     .updatedAt(new Date())
                     .build();
 
-            userRepository.saveAll(List.of(user, user1));
+            userRepository.saveAll(
+                    List.of(user, user1)
+            );
         }
     }
 }

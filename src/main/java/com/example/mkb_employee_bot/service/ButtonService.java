@@ -49,7 +49,7 @@ public class ButtonService {
 
     private String getSteps_uz(int index) {
 
-        steps_uz.add("Xodimning ism-familiyasi va sharifini kiriting");
+        steps_uz.add("Xodimning Ism-Familiyasi va Sharifini kiriting");
         steps_uz.add("""
                 Xodimning telefon raqamini kiriting
                         
@@ -3183,6 +3183,69 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+
+    public CompletableFuture<SendMessage> sendAttachmentAgain(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton = "Остановить 🛑";
+                    returnText = "Выберите следующий тип файла " + sighDown;
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "Navbatdagi fayl turini tanlang " + sighDown;
+                        cancelButton = "To'xtatish 🛑";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    List<KeyboardButton> keyboardButtons = new ArrayList<>();
+
+                    for (FileType value : FileType.values()) {
+                        keyboardButtons.add(
+                                new KeyboardButton(value.name()
+                                )
+                        );
+
+                        // If the number of buttons in the row reaches 2, create a new row
+                        if (keyboardButtons.size() == 2) {
+                            KeyboardRow keyboardRow = new KeyboardRow();
+                            keyboardRow.addAll(keyboardButtons);
+                            keyboardRowList.add(keyboardRow);
+                            keyboardButtons.clear(); // Clear the buttons for the next row
+                        }
+                    }
+
+                    if (!keyboardButtons.isEmpty()) {
+                        KeyboardRow keyboardRow = new KeyboardRow();
+                        keyboardRow.addAll(keyboardButtons);
+                        keyboardRowList.add(
+                                new KeyboardRow(
+                                        Collections.singletonList(
+                                                KeyboardButton.builder()
+                                                        .text(cancelButton)
+                                                        .build()
+                                        )
+                                )
+                        );
+                        keyboardRowList.add(keyboardRow);
+                    }
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)

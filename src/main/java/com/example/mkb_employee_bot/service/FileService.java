@@ -64,6 +64,7 @@ public class FileService {
                     var response = getFilePath(fileId);
 
                     if (response.getStatusCode() == HttpStatus.OK) {
+
                         var persistentBinaryContent = getPersistentBinaryContent(response);
                         var transientAppDoc = buildTransientAppDoc(fileType, telegramDoc, persistentBinaryContent);
                         final var appDocument = appDocumentRepository.save(transientAppDoc);

@@ -705,7 +705,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ("Yana fayl qo'shish ➕".equals(messageText) || "Добавить вложение еще раз ➕".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
-                final var messageCompletableFuture = buttonService.askSendAttachment(update);
+                final var messageCompletableFuture = buttonService.sendAttachmentAgain(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {

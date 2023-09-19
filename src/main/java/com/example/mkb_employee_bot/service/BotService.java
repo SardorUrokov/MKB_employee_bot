@@ -170,22 +170,19 @@ public class BotService {
                     else
                         messageCompletableFuture = buttonService.employeeSectionButtons(update);
 
-                    AppPhoto employeePhoto;
-            for (AppPhoto appPhoto : employee.getAppPhotos()) {
-                if (appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())) {
-                    employeePhoto = appPhoto;
-                }
-            }
+                    AppPhoto employeePhoto = null;
+                    for (AppPhoto appPhoto : employee.getAppPhotos()) {
+                        if (appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())) {
+                            employeePhoto = appPhoto;
+                            break;
+                        }
+                    }
 
-            EmployeePhoto employeeAppPhoto = employeePhotoRepository.findByEmployee_Id(employee.getId()).get();
-
-                    if (employeeAppPhoto == null) {
+                    if (employeePhoto == null) {
 
                         java.io.File photoFile;
                         photoFile = new File("C:\\Users\\user\\IdeaProjects\\MKBank Projects\\MKB_employee_bot\\src\\main\\resources\\mkb_Logo.jpg");
-                        InputStream inputStream = new InputFile(photoFile, "photo.jpg").getNewMediaStream();
-                        InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
-
+                        InputFile photoInputFile = new InputFile(photoFile);
                         userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
                         final var sendMessage = messageCompletableFuture.join();
                         final var replyMarkup = sendMessage.getReplyMarkup();
@@ -197,7 +194,7 @@ public class BotService {
                                 .caption(info)
                                 .build();
                     } else {
-                        employeePhoto = employeeAppPhoto.getAppPhoto();
+
                         byte[] fileAsArrayOfBytes = employeePhoto.getFileAsArrayOfBytes();
                         InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
                         InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
