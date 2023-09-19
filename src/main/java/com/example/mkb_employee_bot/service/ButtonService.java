@@ -49,7 +49,7 @@ public class ButtonService {
 
     private String getSteps_uz(int index) {
 
-        steps_uz.add("Xodimning ism-familiyasini kiriting");
+        steps_uz.add("Xodimning ism-familiyasi va sharifini kiriting");
         steps_uz.add("""
                 Xodimning telefon raqamini kiriting
                         

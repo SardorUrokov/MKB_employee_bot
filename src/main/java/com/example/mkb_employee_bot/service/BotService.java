@@ -10,11 +10,12 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
+import org.apache.tomcat.util.file.ConfigurationSource;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -168,22 +170,49 @@ public class BotService {
                     else
                         messageCompletableFuture = buttonService.employeeSectionButtons(update);
 
-                    EmployeePhoto employeePhoto = employeePhotoRepository.findByEmployee_Id(employee.getId()).orElseThrow();
-                    AppPhoto appPhoto = employeePhoto.getAppPhoto();
-                    byte[] fileAsArrayOfBytes = appPhoto.getFileAsArrayOfBytes();
-                    InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
-                    InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
+                    AppPhoto employeePhoto;
+            for (AppPhoto appPhoto : employee.getAppPhotos()) {
+                if (appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())) {
+                    employeePhoto = appPhoto;
+                }
+            }
 
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
-                    final var sendMessage = messageCompletableFuture.join();
-                    final var replyMarkup = sendMessage.getReplyMarkup();
+            EmployeePhoto employeeAppPhoto = employeePhotoRepository.findByEmployee_Id(employee.getId()).get();
 
-                    return SendPhoto.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .photo(photoInputFile)
-                            .caption(info)
-                            .build();
+                    if (employeeAppPhoto == null) {
+
+                        java.io.File photoFile;
+                        photoFile = new File("C:\\Users\\user\\IdeaProjects\\MKBank Projects\\MKB_employee_bot\\src\\main\\resources\\mkb_Logo.jpg");
+                        InputStream inputStream = new InputFile(photoFile, "photo.jpg").getNewMediaStream();
+                        InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
+
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                        final var sendMessage = messageCompletableFuture.join();
+                        final var replyMarkup = sendMessage.getReplyMarkup();
+
+                        return SendPhoto.builder()
+                                .replyMarkup(replyMarkup)
+                                .chatId(chatId)
+                                .photo(photoInputFile)
+                                .caption(info)
+                                .build();
+                    } else {
+                        employeePhoto = employeeAppPhoto.getAppPhoto();
+                        byte[] fileAsArrayOfBytes = employeePhoto.getFileAsArrayOfBytes();
+                        InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                        InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
+
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                        final var sendMessage = messageCompletableFuture.join();
+                        final var replyMarkup = sendMessage.getReplyMarkup();
+
+                        return SendPhoto.builder()
+                                .replyMarkup(replyMarkup)
+                                .chatId(chatId)
+                                .photo(photoInputFile)
+                                .caption(info)
+                                .build();
+                    }
                 }
         );
     }
