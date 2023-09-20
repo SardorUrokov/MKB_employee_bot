@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
@@ -29,6 +28,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,7 +68,9 @@ public class FileService {
                         var persistentBinaryContent = getPersistentBinaryContent(response);
                         var transientAppDoc = buildTransientAppDoc(fileType, telegramDoc, persistentBinaryContent);
                         final var appDocument = appDocumentRepository.save(transientAppDoc);
-                        employee.setDocuments(List.of(appDocument));
+                        final var employeeDocuments = employee.getDocuments();
+                        employeeDocuments.add(appDocument);
+                        employee.setDocuments(employeeDocuments);
                         employeeService.createEmployee(employee);
 
                         final var messageCompletableFuture = buttonService.completeAddingEmployeeInfo(update, employee);
@@ -99,10 +101,13 @@ public class FileService {
                     var response = getFilePath(fileId);
 
                     if (response.getStatusCode() == HttpStatus.OK) {
+
                         var persistentBinaryContent = getPersistentBinaryContent(response);
                         var transientAppPhoto = buildTransientAppPhoto(fileType, telegramPhoto, persistentBinaryContent);
                         final var saved = appPhotoRepository.save(transientAppPhoto);
-                        employee.setAppPhotos(List.of(saved));
+                        final var appPhotos = employee.getAppPhotos();
+                        appPhotos.add(saved);
+                        employee.setAppPhotos(appPhotos);
 
                     } else
                         throw new UploadFileException("Bad response from telegram service: " + response);
@@ -154,11 +159,11 @@ public class FileService {
         return AppDocument.builder()
                 .telegramFileId(telegramDoc.getFileId())
                 .docName(telegramDoc.getFileName())
-                .binaryContent(persistentBinaryContent)
                 .mimeType(telegramDoc.getMimeType())
                 .fileType(fileType)
                 .fileSize(telegramDoc.getFileSize())
                 .linkForDownloading(persistentBinaryContent.getLink())
+                .createdAt(new Date())
                 .fileAsArrayOfBytes(persistentBinaryContent.getFileAsArrayOfBytes())
                 .build();
     }
@@ -167,9 +172,10 @@ public class FileService {
         return AppPhoto.builder()
                 .telegramFileId(telegramPhoto.getFileId())
                 .fileSize(telegramPhoto.getFileSize())
-                .linkForDownloading("")
+                .linkForDownloading(persistentBinaryContent.getLink())
                 .fileType(fileType)
                 .fileAsArrayOfBytes(persistentBinaryContent.getFileAsArrayOfBytes())
+                .createdAt(new Date())
                 .build();
     }
 
@@ -205,7 +211,7 @@ public class FileService {
         }
     }
 
-    public SendMediaGroup employeePhotos(Employee employee) {
+    public SendMediaGroup employeePhotos(Employee employee, Long chatId) {
         List<InputMedia> mediaPhotos = new ArrayList<>();
         final var appPhotos = employee.getAppPhotos();
 
@@ -222,10 +228,11 @@ public class FileService {
 
         return SendMediaGroup.builder()
                 .medias(mediaPhotos)
+                .chatId(chatId)
                 .build();
     }
 
-    public SendMediaGroup employeeDocuments(Employee employee) {
+    public SendMediaGroup employeeDocuments(Employee employee, Long chatId) {
 
         List<InputMedia> mediaDocuments = new ArrayList<>();
         final var documents = employee.getDocuments();
@@ -242,14 +249,19 @@ public class FileService {
                 i++;
             }
             return SendMediaGroup.builder()
+                    .chatId(chatId)
                     .medias(mediaDocuments)
                     .build();
         } else
             return null;
     }
 
-    public String generateLink(Long docId, LinkType linkType) {
-        var hash = cryptoTool.hashOf(docId);
-        return "http://localhost:9090/" + linkType + "?id=" + hash;
+    public List<AppPhoto> employeePhotos(Employee employee) {
+        return employeeRepository.findAppPhotosByEmployeeId(employee.getId());
     }
+
+    public List<AppDocument> employeeDocuments(Employee employee) {
+        return employeeRepository.findAppDocumentsByEmployeeId(employee.getId());
+    }
+
 }

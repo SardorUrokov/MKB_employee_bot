@@ -46,7 +46,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             appPhotoRepository.saveAll(creatingEmployee.getAppPhotos());
         if (creatingEmployee.getDocuments() != null)
             appDocumentRepository.saveAll(creatingEmployee.getDocuments());
-        
+
         return employeeRepository.save(creatingEmployee);
     }
 

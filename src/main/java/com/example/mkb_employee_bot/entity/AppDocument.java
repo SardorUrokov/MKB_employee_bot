@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.net.URL;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -30,6 +31,6 @@ public class AppDocument {
     private URL linkForDownloading;
     private byte[] fileAsArrayOfBytes;
 
-    @OneToOne
-    private BinaryContent binaryContent;
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
 }

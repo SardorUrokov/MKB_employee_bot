@@ -10,10 +10,7 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
-import org.apache.tomcat.util.file.ConfigurationSource;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -214,28 +211,71 @@ public class BotService {
         );
     }
 
-    public CompletableFuture<SendMediaGroup> getEmployeeDocuments(Update update) {
-        return CompletableFuture.supplyAsync(() -> {
+    //    public CompletableFuture<SendMediaGroup> getEmployeeDocuments(Update update) {
+//        return CompletableFuture.supplyAsync(() -> {
+//
+//                    chatId = update.getMessage().getChatId();
+//                    userLanguage = getUserLanguage(chatId);
+//                    final var employee = employeeRepository
+//                            .findByFullName(update.getMessage().getText())
+//                            .orElseThrow(NotFoundException::new);
+//
+//                    SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee, chatId);
+//                    final var employeeDocumentMedias = sendMediaGroup.getMedias();
+//
+//                    SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee, chatId);
+//                    employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
+//
+//                    return SendMediaGroup.builder()
+//                            .chatId(chatId)
+//                            .medias(employeeDocumentMedias)
+//                            .build();
+//                }
+//        );
+//    }
+//    public CompletableFuture<Void> sendEmployeeDocumentsAndPhotos(Update update) {
+//        return CompletableFuture.runAsync(() -> {
+//            chatId = update.getMessage().getChatId();
+//            userLanguage = getUserLanguage(chatId);
+//            final var employee = employeeRepository
+//                    .findByFullName(update.getMessage().getText())
+//                    .orElseThrow(NotFoundException::new);
+//
+//            SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee, chatId);
+//            final var employeeDocumentMedias = sendMediaGroup.getMedias();
+//
+//            SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee, chatId);
+//            employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
+//
+//            // Check if there are at least two media files to send
+//            if (employeeDocumentMedias.size() >= 2) {
+//                // Send the combined media files
+//                SendMediaGroup sendMediaGroupResult = SendMediaGroup.builder()
+//                        .chatId(chatId)
+//                        .medias(employeeDocumentMedias)
+//                        .build();
+//
+//                try {
+//                    execute(sendMediaGroupResult);
+//                } catch (TelegramApiException e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                // Handle the case when there are not enough media files to send
+//                // You can send a message to the user indicating the issue.
+//                SendMessage errorMessage = new SendMessage();
+//                errorMessage.setChatId(chatId);
+//                errorMessage.setText("Not enough media files to send.");
+//
+//                try {
+//                    execute(errorMessage);
+//                } catch (TelegramApiException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//    }
 
-                    chatId = update.getMessage().getChatId();
-                    userLanguage = getUserLanguage(chatId);
-                    final var employee = employeeRepository
-                            .findByFullName(update.getMessage().getText())
-                            .orElseThrow(NotFoundException::new);
-
-                    SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee);
-                    final var employeeDocumentMedias = sendMediaGroup.getMedias();
-
-                    SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee);
-                    employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
-
-                    return SendMediaGroup.builder()
-                            .chatId(chatId)
-                            .medias(employeeDocumentMedias)
-                            .build();
-                }
-        );
-    }
 
     public String getMessageSection(String messageText) {
 

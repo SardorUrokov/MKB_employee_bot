@@ -101,4 +101,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Modifying
     @Query(value = "UPDATE Employee SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
     void updateEmployeeIsDeleted(Long id);
+
+    @Query("SELECT e.appPhotos FROM Employee e WHERE e.id = :employeeId")
+    List<AppPhoto> findAppPhotosByEmployeeId(Long employeeId);
+
+    @Query("SELECT e.documents FROM Employee e WHERE e.id = :employeeId")
+    List<AppDocument> findAppDocumentsByEmployeeId(Long employeeId);
 }

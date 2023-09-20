@@ -4,6 +4,9 @@ import com.example.mkb_employee_bot.entity.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URL;
+import java.util.Date;
+
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = "id")
@@ -18,7 +21,7 @@ public class AppPhoto {
     private Long id;
 
     private String telegramFileId;
-    private String linkForDownloading;
+    private URL linkForDownloading;
     private Integer fileSize;
 
     @Enumerated(value = EnumType.STRING)
@@ -26,6 +29,6 @@ public class AppPhoto {
 
     private byte[] fileAsArrayOfBytes;
 
-    @OneToOne
-    private BinaryContent binaryContent;
+    @Temporal(value = TemporalType.TIMESTAMP)
+    Date createdAt = new Date();
 }

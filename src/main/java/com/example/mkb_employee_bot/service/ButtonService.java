@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendGame;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -2284,8 +2285,8 @@ public class ButtonService {
                 "Bo'lim: " + employee.getPosition().getManagement().getName() + "\n" +
                 "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nMa'lumoti " + getEmployeeEducationsInfo(employee) + "\n" +
-                "Malakasi\n" + getEmployeeSkills(employee) + "\n" +
-                "\nFayl ma'lumotlari\n" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
+                "Malakasi\n" + getEmployeeSkills(employee);
+//                "\nFayl ma'lumotlari" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
     public String getEmployeeInfoForUserLanguage_RU(Employee employee) {
@@ -2299,26 +2300,27 @@ public class ButtonService {
                 "\nОтдел: " + employee.getPosition().getManagement().getName() +
                 "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nОбразование " + getEmployeeEducationsInfo(employee) +
-                "\nНавыки и умения\n" + getEmployeeSkills(employee) +
-                "\nВложения" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
+                "\nНавыки и умения" + getEmployeeSkills(employee);
+//                "\nВложения" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
-    public String getEmployeeFiles(List<AppDocument> documents, List<AppPhoto> photos) {
-        String returnInfo = "";
+    public String getEmployeeFilesLinks(List<AppDocument> documents, List<AppPhoto> photos) {
+        StringBuilder returnInfo = new StringBuilder();
 
-        if (documents != null) {
+        if (!documents.isEmpty()) {
             for (AppDocument document : documents) {
-                returnInfo = "\nЛинк для " + document.getFileType() + ":\n" + document.getLinkForDownloading() + "\n";
-            }
-        } else if (photos != null) {
-            for (AppPhoto photo : photos) {
-                if (!photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name()))
-                    returnInfo = "\nЛинк для " + photo.getFileType() + ":\n" + photo.getLinkForDownloading() + "\n";
+                returnInfo.append("\n").append(document.getFileType()).append(":\n").append(document.getLinkForDownloading()).append("\n");
             }
         }
-        return returnInfo;
-    }
 
+        if (!photos.isEmpty()) {
+            for (AppPhoto photo : photos) {
+                if (!(photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())))
+                    returnInfo.append("\n").append(photo.getFileType()).append(":\n").append(photo.getLinkForDownloading()).append("\n");
+            }
+        }
+        return returnInfo.toString();
+    }
 
     public String getEmployeeSkills(Employee employee) {
 

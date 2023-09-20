@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -32,7 +33,7 @@ public class Employee {
     Position position;
 
     @OneToMany(fetch = FetchType.EAGER)
-    List<Education> educations;
+    List<Education> educations = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
@@ -40,11 +41,11 @@ public class Employee {
 
     @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
-    List<AppPhoto> appPhotos;
+    List<AppPhoto> appPhotos = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
-    List<AppDocument> documents;
+    List<AppDocument> documents = new ArrayList<>();
 
     boolean isDeleted = false;
 

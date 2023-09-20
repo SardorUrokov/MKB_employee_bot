@@ -2,6 +2,7 @@ package com.example.mkb_employee_bot.component.bot;
 
 import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.service.FileService;
+import jakarta.ws.rs.NotFoundException;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -16,13 +17,20 @@ import com.example.mkb_employee_bot.service.ButtonService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -323,26 +331,40 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
+
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
-                //TODO call the method -> getEmployeeDocuments
-//                final var employeeDocuments = botService.getEmployeeDocuments(update);
-//                SendMediaGroup sendMediaGroup = employeeDocuments.join();
-//                try {
-//                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-//                                try {
-//                                    execute(sendMediaGroup);
-//                                } catch (TelegramApiException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                    );
-//                    executeFuture.join();
-//                } catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                }
+                chatId = update.getMessage().getChatId();
+                final var employee = employeeRepository
+                        .findByFullName(update.getMessage().getText())
+                        .orElseThrow(NotFoundException::new);
+
+                final var appPhotos = fileService.employeePhotos(employee);
+                final var appDocuments = fileService.employeeDocuments(employee);
+
+                if (!appPhotos.isEmpty()) {
+                    for (AppPhoto appPhoto : appPhotos) {
+                        if (!(appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name()))) {
+                            byte[] fileAsArrayOfBytes = appPhoto.getFileAsArrayOfBytes();
+                            InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                            InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
+
+                            sendPhoto(chatId, appPhoto.getFileType().name(), photoInputFile);
+                        }
+                    }
+                }
+
+                if (!appDocuments.isEmpty()) {
+                    for (AppDocument appDocument : appDocuments) {
+                        byte[] fileAsArrayOfBytes = appDocument.getFileAsArrayOfBytes();
+                        InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                        InputFile docInputFile = new InputFile(inputStream, appDocument.getDocName());
+
+                        sendDocument(chatId, appDocument.getFileType().name(), docInputFile);
+                    }
+                }
 
             } else if (("Xodimlar".equals(messageText) || "Сотрудники".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
@@ -1631,6 +1653,34 @@ public class EmployeeBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage(chatId, text);
         try {
             execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendDocument(Long chatId, String photoCaption, InputFile inputFile) {
+        final var sendDocument = SendDocument.builder()
+                .chatId(chatId)
+                .document(inputFile)
+                .caption(photoCaption)
+                .build();
+
+        try {
+            execute(sendDocument);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendPhoto(Long chatId, String photoCaption, InputFile inputFile) {
+        final var sendPhoto = SendPhoto.builder()
+                .chatId(chatId)
+                .photo(inputFile)
+                .caption(photoCaption)
+                .build();
+
+        try {
+            execute(sendPhoto);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
