@@ -11,9 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-    List<Employee> findByFullNameIgnoreCaseContaining(String employeeName);
+    List<Employee> findByFullNameIgnoreCaseContainingAndIsDeletedFalse(String fullName);
 
-    Optional<Employee> findByFullName(String fullName);
+    @Query(value = "select * from Employee e where e.full_name = :fullName and e.is_deleted = false", nativeQuery = true)
+    Optional<Employee> findByFullNameAndDeletedFalse(String fullName);
 
     List<Employee> getEmployeesByPosition_Management_Department_Id(Long department_id);
 

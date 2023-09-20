@@ -155,7 +155,7 @@ public class BotService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow(NotFoundException::new);
+                    Employee employee = employeeRepository.findByFullNameAndDeletedFalse(update.getMessage().getText()).orElseThrow(NotFoundException::new);
 
                     final var info = userLanguage.equals("UZ")
                             ? buttonService.getEmployeeInfoForUserLanguage_UZ(employee)

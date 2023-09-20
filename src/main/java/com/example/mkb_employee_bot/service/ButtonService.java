@@ -656,7 +656,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    final var employees = employeeRepository.findByFullNameIgnoreCaseContaining(
+                    final var employees = employeeRepository.findByFullNameIgnoreCaseContainingAndIsDeletedFalse(
                             update.getMessage().getText()
                     );
 
@@ -2220,7 +2220,7 @@ public class ButtonService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     String confirmationButton, cancelButton;
-                    final var employee = employeeRepository.findByFullName(update.getMessage().getText()).orElseThrow();
+                    final var employee = employeeRepository.findByFullNameAndDeletedFalse(update.getMessage().getText()).orElseThrow();
 
                     if (userLanguage.equals("UZ")) {
                         if (forWhat.equals("forUpdating")) {
@@ -2228,18 +2228,18 @@ public class ButtonService {
                             confirmationButton = "Tahrirlashni boshlash ✅";
                         } else {
                             returnText = getEmployeeInfoForUserLanguage_UZ(employee);
-                            confirmationButton = "Tasdiqlash ✅";
+                            confirmationButton = "O'chirishni Tasdiqlash ✅";
                         }
-                        cancelButton = "Bekor qilish ❌";
+                        cancelButton = "O'chirishni Bekor qilish ❌";
                     } else {
                         if (forWhat.equals("forUpdating")) {
                             returnText = getEmployeeInfoForUserLanguage_RU(employee);
                             confirmationButton = "Начать редактирование ✅";
                         } else {
                             returnText = getEmployeeInfoForUserLanguage_RU(employee);
-                            confirmationButton = "Потвердить ✅";
+                            confirmationButton = "Потвердить Удаление✅";
                         }
-                        cancelButton = "Отменить ❌";
+                        cancelButton = "Отменить Удаление❌";
                     }
 
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -3262,7 +3262,6 @@ public class ButtonService {
                                 new KeyboardButton(value.name()
                                 )
                         );
-
                         // If the number of buttons in the row reaches 2, create a new row
                         if (keyboardButtons.size() == 2) {
                             KeyboardRow keyboardRow = new KeyboardRow();

@@ -18,21 +18,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -97,7 +92,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             System.out.println("messageText: " + messageText);
             System.out.println("userStep: " + userStep);
 
-            final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContaining(messageText);
+            final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContainingAndIsDeletedFalse(messageText);
             final var isCaseContainingListEmpty = caseContainingList.isEmpty();
             final var messageSection = botService.getMessageSection(messageText);
 
@@ -338,7 +333,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 chatId = update.getMessage().getChatId();
                 final var employee = employeeRepository
-                        .findByFullName(update.getMessage().getText())
+                        .findByFullNameAndDeletedFalse(update.getMessage().getText())
                         .orElseThrow(NotFoundException::new);
 
                 final var appPhotos = fileService.employeePhotos(employee);
@@ -613,7 +608,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
-                updatingEmployee = employeeRepository.findByFullName(messageText).orElseThrow();
+                updatingEmployee = employeeRepository.findByFullNameAndDeletedFalse(messageText).orElseThrow();
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askConfirmationForDeletingEmployee(update, "forUpdating");
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
@@ -681,7 +676,10 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendTextMessage(chatId.toString(), "Jarayon to'xtatildi❗️");
                 else
                     sendTextMessage(chatId.toString(), "Процесс остановлен❗️");
+
                 buttonService.retryUserSteps();
+                education = new Education();
+                creatingEmployee = new Employee();
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.employeeSectionButtons(update);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
@@ -781,7 +779,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
                     creatingEmployee = new Employee();
                     education = new Education();
-
+                    /*****************************/
+                    buttonService.retryUserSteps();
                 } else {
                     fileType = FileType.valueOf(messageText);
                     sendMessageCompletableFuture = buttonService.askSendAttachment(update);
@@ -898,10 +897,10 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
 
-                if ("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))
+                if ("O'chirishni Tasdiqlash ✅".equals(messageText) || "Потвердить Удаление✅".equals(messageText))
                     sendMessageCompletableFuture = botService.deleteEmployee(deletingEmployee, update);
 
-                else if ("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))
+                else if ("O'chirishni Bekor qilish ❌".equals(messageText) || "Отменить Удаление❌".equals(messageText))
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forDeletingEmployee");
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();
@@ -922,7 +921,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
-                deletingEmployee = employeeRepository.findByFullName(messageText).orElseThrow();
+                deletingEmployee = employeeRepository.findByFullNameAndDeletedFalse(messageText).orElseThrow();
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askConfirmationForDeletingEmployee(update, "forDeleting");
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
 
