@@ -32,70 +32,70 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> getEmployeesByPosition_Management_Id(Long management_id);
 
     List<Employee> getEmployeesByPosition_Id(Long position_id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set full_name = :fullName, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeFull_name(@Param("fullName")String full_name, Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set dateOfBirth = :birthDate, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeBirthDate(@Param("birthDate")String dateOfBirth, Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set phone_number = :phoneNumber, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeePhoneNumber(@Param("phoneNumber")String number, Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set nationality = :employeeNationality, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeNationality(String employeeNationality, Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set age = :newAge, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeAge(Integer newAge, Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee SET position = :newPosition, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
-            , nativeQuery = true
-    )
-    void updateEmployeePosition(@Param("newPosition") Position newPosition, @Param("id") Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set educations = :newEducations, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeEducations(@Param("newEducations") List<Education> newEducations, @Param("id") Long id);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee SET skills = :newSkills, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
-            , nativeQuery = true
-    )
-    void updateEmployeeSkills(@Param("newSkills") List<Skill> newSkills, @Param("id") Long id);
-
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Employee set attachments = :newAttachments, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
-            , nativeQuery = true
-    )
-    Optional<Employee> updateEmployeeAttachments(List<Attachment> newAttachments, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set full_name = :fullName, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeFull_name(@Param("fullName")String full_name, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set dateOfBirth = :birthDate, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeBirthDate(@Param("birthDate")String dateOfBirth, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set phone_number = :phoneNumber, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeePhoneNumber(@Param("phoneNumber")String number, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set nationality = :employeeNationality, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeNationality(String employeeNationality, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set age = :newAge, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeAge(Integer newAge, Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee SET position = :newPosition, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
+//            , nativeQuery = true
+//    )
+//    void updateEmployeePosition(@Param("newPosition") Position newPosition, @Param("id") Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set educations = :newEducations, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeEducations(@Param("newEducations") List<Education> newEducations, @Param("id") Long id);
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee SET skills = :newSkills, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
+//            , nativeQuery = true
+//    )
+//    void updateEmployeeSkills(@Param("newSkills") List<Skill> newSkills, @Param("id") Long id);
+//
+//
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Employee set attachments = :newAttachments, updated_at = CURRENT_TIMESTAMP where Employee.id = :id"
+//            , nativeQuery = true
+//    )
+//    Optional<Employee> updateEmployeeAttachments(List<Attachment> newAttachments, Long id);
 
     @Transactional
     @Modifying

@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendGame;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -33,7 +32,6 @@ public class ButtonService {
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
-    private final AttachmentService attachmentService;
     private final DepartmentServiceImpl departmentService;
 
     private String mainMenu = "";
@@ -3130,25 +3128,6 @@ public class ButtonService {
                                 .build();
                     }
 
-                }
-        );
-    }
-
-    public CompletableFuture<SendMessage> saveDocument(Update update, Employee creatingEmployee) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                    chatId = update.getMessage().getChatId();
-                    final var document = update.getMessage().getDocument();
-
-                    attachmentService.createAttachment(creatingEmployee, document);
-                    final var messageCompletableFuture = completeAddingEmployeeInfo(update, creatingEmployee);
-                    final var sendMessage = messageCompletableFuture.join();
-                    final var replyMarkup = sendMessage.getReplyMarkup();
-
-                    return SendMessage.builder()
-                            .replyMarkup(replyMarkup)
-                            .chatId(chatId)
-                            .build();
                 }
         );
     }
