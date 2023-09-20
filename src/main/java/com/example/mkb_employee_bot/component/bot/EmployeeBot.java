@@ -38,8 +38,8 @@ import java.util.concurrent.CompletableFuture;
 public class EmployeeBot extends TelegramLongPollingBot {
 
     private static BotService botService;
-    private static ButtonService buttonService;
     private static FileService fileService;
+    private static ButtonService buttonService;
 
     private static UserRepository userRepository;
     private static PositionRepository positionRepository;
@@ -728,6 +728,27 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
+            } else if (userStage.equals(Stage.SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE.name()) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.enterSecondEducationInfo(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
+
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             } else if (("Yana ta'lim ma'lumoti qo'shish ➕".equals(messageText) || "Еще одну образовательную информацию ➕".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.addEducationAgain(update);
@@ -865,6 +886,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     String[] dateFromPeriod = buttonService.getDateFromPeriod(messageText);
                     education.setStartedDate(dateFromPeriod[0]);
                     education.setEndDate(dateFromPeriod[1]);
+
                     final var employeeEducations = creatingEmployee.getEducations();
                     employeeEducations.add(education);
                     creatingEmployee.setEducations(employeeEducations);
@@ -1690,12 +1712,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
     }
 
     public void sendDocument(Long chatId, String photoCaption, InputFile inputFile) {
+
         final var sendDocument = SendDocument.builder()
                 .chatId(chatId)
                 .document(inputFile)
                 .caption(photoCaption)
                 .build();
-
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {

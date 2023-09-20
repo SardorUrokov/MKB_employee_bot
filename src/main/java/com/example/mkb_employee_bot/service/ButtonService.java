@@ -3286,8 +3286,79 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE.name());
                     userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> enterSecondEducationInfo(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton = "Остановить 🛑";
+                    final var step = userRepository.getUserStepByUserChatId(chatId);
+
+                    if (step.equals(Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name())) {
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Ta'lim muassasa nomi:";
+                        else
+                            returnText = "Название учебного заведения:";
+
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
+
+                    } else if (step.equals(Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name())) {
+                        if (userLanguage.equals("UZ"))
+                            returnText = "Ta'lim yo'nalishi nomi:";
+                        else
+                            returnText = "Название направления обучения:";
+
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
+
+                    } else if (step.equals(Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name())) {
+                        if (userLanguage.equals("UZ"))
+                            returnText = """
+                                    Muddatlari:
+
+                                    ❗️Namuna: 2018-2022;
+                                    ❗️Agar hozirda davom etayotgan bo'lsa: 2020-Present""";
+                        else
+                            returnText = """
+                                    Сроки выполнения:
+                                                                        
+                                    ❗️Образец: 2018-2022;
+                                    ❗️Если в данный момент продолжается: 2020-Present""";
+
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+                    }
+
+                    if (userLanguage.equals("UZ"))
+                        cancelButton = "To'xtatish 🛑";
+
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
