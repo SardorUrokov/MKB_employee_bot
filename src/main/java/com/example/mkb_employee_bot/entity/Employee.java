@@ -37,7 +37,7 @@ public class Employee {
 
     @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
-    List<Skill> skills;
+    List<Skill> skills = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude

@@ -3213,19 +3213,81 @@ public class ButtonService {
                     if (!keyboardButtons.isEmpty()) {
                         KeyboardRow keyboardRow = new KeyboardRow();
                         keyboardRow.addAll(keyboardButtons);
-                        keyboardRowList.add(
-                                new KeyboardRow(
-                                        Collections.singletonList(
-                                                KeyboardButton.builder()
-                                                        .text(cancelButton)
-                                                        .build()
-                                        )
-                                )
-                        );
                         keyboardRowList.add(keyboardRow);
                     }
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
                     userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .text(returnText)
+                            .chatId(chatId)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> addEducationAgain(Update update) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton = "Остановить 🛑";
+                    returnText = "Выберите уровень образования:" + sighDown;
+
+                    if (userLanguage.equals("UZ")) {
+                        returnText = "Ta'lim bosqichini tanlang " + sighDown;
+                        cancelButton = "To'xtatish 🛑";
+                    }
+
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    List<KeyboardButton> keyboardButtons = new ArrayList<>();
+
+                    for (EduType value : EduType.values()) {
+                        keyboardButtons.add(
+                                new KeyboardButton(value.name()
+                                )
+                        );
+
+                        // If the number of buttons in the row reaches 2, create a new row
+                        if (keyboardButtons.size() == 2) {
+                            KeyboardRow keyboardRow = new KeyboardRow();
+                            keyboardRow.addAll(keyboardButtons);
+                            keyboardRowList.add(keyboardRow);
+                            keyboardButtons.clear(); // Clear the buttons for the next row
+                        }
+                    }
+
+                    if (!keyboardButtons.isEmpty()) {
+                        KeyboardRow keyboardRow = new KeyboardRow();
+                        keyboardRow.addAll(keyboardButtons);
+                        keyboardRowList.add(keyboardRow);
+                    }
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name());
                     userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
 
                     return SendMessage.builder()

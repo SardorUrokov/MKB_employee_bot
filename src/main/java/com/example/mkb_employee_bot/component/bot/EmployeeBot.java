@@ -703,13 +703,37 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (("O'tkazib yuborish ⏩".equals(messageText) || "Пропустить ⏩".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
-                if (userLanguage.equals("UZ"))
-                    sendTextMessage(chatId.toString(), "Saqlash uchun xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
-                else
-                    sendTextMessage(chatId.toString(), "Подтвердите информацию о сотруднике для сохранения? ⬇️");
+                CompletableFuture<SendMessage> completableFuture;
 
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.completeAddingEmployeeInfo(update, creatingEmployee);
-                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                if (creatingEmployee != null) {
+                    if (userLanguage.equals("UZ"))
+                        sendTextMessage(chatId.toString(), "Saqlash uchun xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
+                    else
+                        sendTextMessage(chatId.toString(), "Подтвердите информацию о сотруднике для сохранения? ⬇️");
+
+                    completableFuture = buttonService.completeAddingEmployeeInfo(update, creatingEmployee);
+                } else
+                    completableFuture = buttonService.superAdminButtons(update);
+
+                SendMessage sendMessage = completableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (("Yana ta'lim ma'lumoti qo'shish ➕".equals(messageText) || "Еще одну образовательную информацию ➕".equals(messageText)) && (isAdmin || isSuperAdmin)) {
+
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.addEducationAgain(update);
+                SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -725,7 +749,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if ("Yana fayl qo'shish ➕".equals(messageText) || "Добавить вложение еще раз ➕".equals(messageText) && (isAdmin || isSuperAdmin)) {
+            } else if (("Yana fayl qo'shish ➕".equals(messageText) || "Добавить вложение еще раз ➕".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
                 final var messageCompletableFuture = buttonService.sendAttachmentAgain(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
@@ -818,33 +842,41 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     }
                 } else if (Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name().equals(userStep))
                     creatingEmployee.setFullName(messageText);
+
                 else if (Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name().equals(userStep))
                     creatingEmployee.setPhoneNumber(messageText);
+
                 else if (Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name().equals(userStep)) {
                     creatingEmployee.setDateOfBirth(messageText);
                     creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
                 } else if (Stage.ENTERED_EMPLOYEE_NATIONALITY.name().equals(userStep))
                     creatingEmployee.setNationality(messageText);
-                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep)) {
+
+                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
                     education.setType(EduType.valueOf(messageText));
-                } else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
+
+                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
                     education.setName(messageText);
+
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
                     education.setEducationField(messageText);
+
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
+
                     String[] dateFromPeriod = buttonService.getDateFromPeriod(messageText);
                     education.setStartedDate(dateFromPeriod[0]);
                     education.setEndDate(dateFromPeriod[1]);
-                    creatingEmployee.setEducations(List.of(education));
+                    final var employeeEducations = creatingEmployee.getEducations();
+                    employeeEducations.add(education);
+                    creatingEmployee.setEducations(employeeEducations);
+
                 } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(userStep)) {
 
-                    List<Skill> skillList = new ArrayList<>();
+                    final var employeeSkills = creatingEmployee.getSkills();
                     for (String s : buttonService.splitSkills(messageText)) {
-                        Skill skill = new Skill();
-                        skill.setName(s);
-                        skillList.add(skill);
+                        employeeSkills.add(new Skill(s));
                     }
-                    creatingEmployee.setSkills(skillList);
+                    creatingEmployee.setSkills(employeeSkills);
                 }
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
