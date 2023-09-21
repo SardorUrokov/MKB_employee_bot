@@ -1,21 +1,21 @@
 package com.example.mkb_employee_bot.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import com.example.mkb_employee_bot.entity.enums.Language;
-import com.example.mkb_employee_bot.entity.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.example.mkb_employee_bot.entity.User;
+import com.example.mkb_employee_bot.entity.enums.Role;
+import com.example.mkb_employee_bot.entity.enums.Language;
 import com.example.mkb_employee_bot.repository.UserRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class UserService {
 
     private final UserRepository userRepository;
 
@@ -53,5 +53,15 @@ public class AuthService {
             userRepository.updateRoleToUSERByPhoneNumber("USER", phoneNumber);
             return true;
         }
+    }
+
+    public List<Long> getUsersChatIdsBySameDepartmentEmployeesPhoneNumber(List<String> phoneNumbers) {
+        List<Long> usersChatIds = new ArrayList<>();
+        final var userList = userRepository.findByPhoneNumberIn(phoneNumbers);
+
+        for (User user : userList) {
+            usersChatIds.add(user.getUserChatId());
+        }
+        return usersChatIds;
     }
 }

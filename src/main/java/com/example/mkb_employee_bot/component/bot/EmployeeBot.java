@@ -29,6 +29,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -79,13 +80,19 @@ public class EmployeeBot extends TelegramLongPollingBot {
             chatId = update.getMessage().getChatId();
             userLanguage = botService.getUserLanguage(chatId);
             userStage = userRepository.getUserStageByUserChatId(chatId);
+            if (userStage == null)
+                userStage = "";
             String userStepByUserChatId = userRepository.getUserStepByUserChatId(chatId);
             userStep = userStepByUserChatId == null ? "" : userStepByUserChatId;
 
-            final var userRole = botService.getUserRole(chatId);
+            var userRole = botService.getUserRole(chatId);
+
+            if (userRole == null)
+                userRole = "USER";
+
+            boolean isUser = userRole.equals("USER");
             final var isSuperAdmin = userRole.equals("SUPER_ADMIN");
             final var isAdmin = userRole.equals("ADMIN");
-            final var isUser = userRole.equals("USER");
 
             Message message = update.getMessage();
             String messageText = message.getText() == null ? "" : message.getText();
@@ -1740,6 +1747,28 @@ public class EmployeeBot extends TelegramLongPollingBot {
         }
     }
 
+    public void sendBirthdayMessages(Employee babyEmployee, List<Long> colleaguesChatIds) {
+
+        SendMessage message = new SendMessage();
+        final var employeeFullName = babyEmployee.getFullName();
+
+        String text = "Assalomu Alaykum! 🎉 " +
+                "\nBugun sizning hamkasbingiz " + employeeFullName + " o'zlarining " + (babyEmployee.getAge() + 1) + " yoshlarini qarshi olyabdilar! 🎂🥳" +
+                "\n" + employeeFullName + " ning omad va muvaffaqiyati har doim siz bilan bo'lsin! 🎉" +
+                "\nDo'stona muhitni bardavom qilish maqsadida siz ham ularni tabriklashni unutmang. 🙂" ;
+
+        for (Long colleaguesChatId : colleaguesChatIds) {
+            message.setChatId(colleaguesChatId);
+            message.setText(text);
+        }
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Autowired
     public void setService(BotService service) {
         EmployeeBot.botService = service;
@@ -1789,4 +1818,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return this.botToken;
     }
+
+
 }

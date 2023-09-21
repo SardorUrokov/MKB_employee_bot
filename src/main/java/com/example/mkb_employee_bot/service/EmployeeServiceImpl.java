@@ -3,6 +3,7 @@ package com.example.mkb_employee_bot.service;
 import java.util.List;
 import java.time.Period;
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -25,16 +26,34 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.findAll(Sort.by("full_name"));
     }
 
-    public void deleteEmployee(Long id) {
-        employeeRepository.updateEmployeeIsDeleted(id);
+    public List<Employee> getDepartmentEmployeesByDepartmentId(Long departmentId){
+        return employeeRepository.getEmployeesByPosition_Management_Department_Id(departmentId);
     }
 
-    private String getEmployeeAge(String birthDate) {
+    public List<String> getDepartmentEmployeesPhoneNumbers(Long departmentId){
+        return employeeRepository.findPhoneNumbersByDepartmentId(departmentId);
+    }
+
+    private List<String> getDepartmentEmployeesNames(Long departmentId) {
+        return getDepartmentEmployeesByDepartmentId(departmentId)
+                .stream()
+                .map(Employee::getFullName)
+                .collect(Collectors.toList());
+    }
+
+    public List<Employee> getManagementEmployeesByManagementId(Long managementId){
+        return employeeRepository.getEmployeesByPosition_Management_Id(managementId);
+    }
+
+    private List<Employee> getPositionEmployeesByPositionId(Long position_id) {
+        return employeeRepository.getEmployeesByPosition_Id(position_id);
+    }
+
+    private Integer getEmployeeAge(String birthDate) {
         LocalDate parsedBirthDate = LocalDate.parse(birthDate);
         LocalDate currentDate = LocalDate.now();
-
         Period period = Period.between(parsedBirthDate, currentDate);
-        return String.valueOf(period.getYears());
+        return period.getYears();
     }
 
     public Employee createEmployee(Employee creatingEmployee) {
@@ -53,4 +72,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee updateEmployee(Employee updatingEmployee) {
         return employeeRepository.save(updatingEmployee);
     }
+
+    public void deleteEmployee(Long id) {
+        employeeRepository.updateEmployeeIsDeleted(id);
+    }
+
+    public List<Employee> getEmployeesWithBirthday(String today) {
+        return employeeRepository.findByDateOfBirth(today);
+    }
+
 }

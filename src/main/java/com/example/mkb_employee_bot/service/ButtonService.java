@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.EduType;
@@ -33,6 +32,7 @@ public class ButtonService {
     private final ManagementRepository managementRepository;
 
     private final DepartmentServiceImpl departmentService;
+    private final EmployeeServiceImpl employeeService;
 
     private String mainMenu = "";
     private final String bosh_Menu = "Bosh Menu ↩️";
@@ -1595,15 +1595,11 @@ public class ButtonService {
     }
 
     private List<Employee> getDepartmentEmployees(Long departmentId) {
-        return employeeRepository.getEmployeesByPosition_Management_Department_Id(departmentId);
+        return employeeService.getDepartmentEmployeesByDepartmentId(departmentId);
     }
 
     private List<Employee> getManagementEmployees(Long departmentId) {
-        return employeeRepository.getEmployeesByPosition_Management_Id(departmentId);
-    }
-
-    private List<Employee> getPositionEmployees(Long position_id) {
-        return employeeRepository.getEmployeesByPosition_Id(position_id);
+        return employeeService.getManagementEmployeesByManagementId(departmentId);
     }
 
     public void setDepartmentListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
@@ -1720,13 +1716,6 @@ public class ButtonService {
                     )
             );
         }
-    }
-
-    private List<String> getDepartmentEmployeesNames(Long departmentId) {
-        return getDepartmentEmployees(departmentId)
-                .stream()
-                .map(Employee::getFullName)
-                .collect(Collectors.toList());
     }
 
     private List<String> getManagementNames() {
@@ -2302,24 +2291,6 @@ public class ButtonService {
 //                "\nВложения" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
-    public String getEmployeeFilesLinks(List<AppDocument> documents, List<AppPhoto> photos) {
-        StringBuilder returnInfo = new StringBuilder();
-
-        if (!documents.isEmpty()) {
-            for (AppDocument document : documents) {
-                returnInfo.append("\n").append(document.getFileType()).append(":\n").append(document.getLinkForDownloading()).append("\n");
-            }
-        }
-
-        if (!photos.isEmpty()) {
-            for (AppPhoto photo : photos) {
-                if (!(photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())))
-                    returnInfo.append("\n").append(photo.getFileType()).append(":\n").append(photo.getLinkForDownloading()).append("\n");
-            }
-        }
-        return returnInfo.toString();
-    }
-
     public String getEmployeeSkills(Employee employee) {
 
         String skills = "";
@@ -2495,7 +2466,7 @@ public class ButtonService {
 
                         chatId = update.getMessage().getChatId();
                         userLanguage = getUserLanguage(chatId);
-                        String addEducationElse = "";
+                        String addEducationElse;
 
                         if (userLanguage.equals("RU"))
                             addEducationElse = "Еще одну образовательную информацию ➕";
@@ -2599,7 +2570,7 @@ public class ButtonService {
     public CompletableFuture<SendMessage> getUserStepsByStage(Update update, boolean moveToNext) {
         return CompletableFuture.supplyAsync(() -> {
 
-                    String messageText = "";
+                    String messageText;
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
 

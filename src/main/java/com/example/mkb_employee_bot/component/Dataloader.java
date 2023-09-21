@@ -100,7 +100,7 @@ public class Dataloader implements CommandLineRunner {
             employeeRepository.save(employee);
 
             User user = User.builder()
-                    .userChatId(632993372L)
+//                    .userChatId(632993372L)
                     .fullName("Сардор")
                     .phoneNumber("998914525468")
                     .userName("Sardor_Shukhratovich")
@@ -124,7 +124,9 @@ public class Dataloader implements CommandLineRunner {
                     .build();
 
             userRepository.saveAll(
-                    List.of(user, user1)
+                    List.of(
+                            user,
+                            user1)
             );
         }
     }

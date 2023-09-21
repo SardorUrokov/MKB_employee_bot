@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import com.example.mkb_employee_bot.entity.User;
@@ -60,4 +61,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhoneNumber(String phoneNumber);
 
     List<User> findAllByRole(Role role);
+
+    List<User> findByPhoneNumberIn(List<String> phoneNumber);
 }

@@ -32,10 +32,8 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class BotService {
-    private final EmployeePhotoRepository employeePhotoRepository;
-    private final SkillRepository skillRepository;
 
-    private final AuthService authService;
+    private final UserService userService;
     private final FileService fileService;
     private final ButtonService buttonService;
     private final PositionServiceImpl positionService;
@@ -44,6 +42,7 @@ public class BotService {
     private final ManagementServiceImpl managementService;
 
     private final UserRepository userRepository;
+    private final SkillRepository skillRepository;
     private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
@@ -65,7 +64,7 @@ public class BotService {
 
                     Optional<User> optionalUser = userRepository.findByUserChatId(chatId);
                     if (optionalUser.isEmpty()) {
-                        authService.register(
+                        userService.register(
                                 User.builder()
                                         .userChatId(chatId)
                                         .fullName(fullName)
@@ -210,72 +209,6 @@ public class BotService {
                 }
         );
     }
-
-    //    public CompletableFuture<SendMediaGroup> getEmployeeDocuments(Update update) {
-//        return CompletableFuture.supplyAsync(() -> {
-//
-//                    chatId = update.getMessage().getChatId();
-//                    userLanguage = getUserLanguage(chatId);
-//                    final var employee = employeeRepository
-//                            .findByFullName(update.getMessage().getText())
-//                            .orElseThrow(NotFoundException::new);
-//
-//                    SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee, chatId);
-//                    final var employeeDocumentMedias = sendMediaGroup.getMedias();
-//
-//                    SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee, chatId);
-//                    employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
-//
-//                    return SendMediaGroup.builder()
-//                            .chatId(chatId)
-//                            .medias(employeeDocumentMedias)
-//                            .build();
-//                }
-//        );
-//    }
-//    public CompletableFuture<Void> sendEmployeeDocumentsAndPhotos(Update update) {
-//        return CompletableFuture.runAsync(() -> {
-//            chatId = update.getMessage().getChatId();
-//            userLanguage = getUserLanguage(chatId);
-//            final var employee = employeeRepository
-//                    .findByFullName(update.getMessage().getText())
-//                    .orElseThrow(NotFoundException::new);
-//
-//            SendMediaGroup sendMediaGroup = fileService.employeeDocuments(employee, chatId);
-//            final var employeeDocumentMedias = sendMediaGroup.getMedias();
-//
-//            SendMediaGroup sendMediaGroup1 = fileService.employeePhotos(employee, chatId);
-//            employeeDocumentMedias.addAll(sendMediaGroup1.getMedias());
-//
-//            // Check if there are at least two media files to send
-//            if (employeeDocumentMedias.size() >= 2) {
-//                // Send the combined media files
-//                SendMediaGroup sendMediaGroupResult = SendMediaGroup.builder()
-//                        .chatId(chatId)
-//                        .medias(employeeDocumentMedias)
-//                        .build();
-//
-//                try {
-//                    execute(sendMediaGroupResult);
-//                } catch (TelegramApiException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                // Handle the case when there are not enough media files to send
-//                // You can send a message to the user indicating the issue.
-//                SendMessage errorMessage = new SendMessage();
-//                errorMessage.setChatId(chatId);
-//                errorMessage.setText("Not enough media files to send.");
-//
-//                try {
-//                    execute(errorMessage);
-//                } catch (TelegramApiException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//    }
-
 
     public String getMessageSection(String messageText) {
 
@@ -585,7 +518,7 @@ public class BotService {
                     userLanguage = getUserLanguage(chatId);
                     final var text = update.getMessage().getText();
                     final var substring = text.substring(text.length() - 12);
-                    final var isUserDeleted = authService.deleteUser(substring);
+                    final var isUserDeleted = userService.deleteUser(substring);
 
                     if (isUserDeleted) {
                         if (userLanguage.equals("UZ"))
@@ -622,7 +555,7 @@ public class BotService {
                     if (updateText.length() == 9) {
                         final var phoneNumber = "998" + updateText;
                         User user = new User(phoneNumber, Role.ADMIN);
-                        authService.register(user);
+                        userService.register(user);
 
                         if (userLanguage.equals("UZ"))
                             returnText = updateText + " telefon raqami bilan ADMIN yaratildi✅";

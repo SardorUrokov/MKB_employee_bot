@@ -1,6 +1,5 @@
 package com.example.mkb_employee_bot.service;
 
-import com.example.mkb_employee_bot.component.CryptoTool;
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.entity.enums.FileType;
 import com.example.mkb_employee_bot.exceptions.UploadFileException;
@@ -39,7 +38,6 @@ public class FileService {
     @Value("${service.file_storage.uri}")
     private String fileStorageUri;
 
-    private static CryptoTool cryptoTool;
     private final ButtonService buttonService;
     private final AppPhotoRepository appPhotoRepository;
     private final AppDocumentRepository appDocumentRepository;
@@ -210,6 +208,24 @@ public class FileService {
 
     public List<AppDocument> employeeDocuments(Employee employee) {
         return employeeRepository.findAppDocumentsByEmployeeId(employee.getId());
+    }
+
+    public String getEmployeeFilesLinks(List<AppDocument> documents, List<AppPhoto> photos) {
+        StringBuilder returnInfo = new StringBuilder();
+
+        if (!documents.isEmpty()) {
+            for (AppDocument document : documents) {
+                returnInfo.append("\n").append(document.getFileType()).append(":\n").append(document.getLinkForDownloading()).append("\n");
+            }
+        }
+
+        if (!photos.isEmpty()) {
+            for (AppPhoto photo : photos) {
+                if (!(photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())))
+                    returnInfo.append("\n").append(photo.getFileType()).append(":\n").append(photo.getLinkForDownloading()).append("\n");
+            }
+        }
+        return returnInfo.toString();
     }
 
 }
