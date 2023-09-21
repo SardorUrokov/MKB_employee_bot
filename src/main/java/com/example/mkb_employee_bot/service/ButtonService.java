@@ -2685,7 +2685,7 @@ public class ButtonService {
         String[] parts = inputDate.split("-");
 
         if (parts.length != 3) {
-            System.out.println("Invalid format. Please use yyyy-MM-dd.");
+            System.err.println("Invalid format. Please use yyyy-MM-dd.");
             return false;
         }
 
@@ -2696,19 +2696,20 @@ public class ButtonService {
 
             LocalDate birthdate = LocalDate.of(year, month, day);
             LocalDate currentDate = LocalDate.now();
+            boolean isValuableAge = (currentDate.getYear() - year) <= 70;
 
-            if (birthdate.isBefore(currentDate)) {
-                System.out.println("Valid birthdate.");
+            if (birthdate.isBefore(currentDate) && isValuableAge) {
+                System.out.println("Valid birthdate -> " + birthdate);
                 return true;
             } else {
-                System.out.println("Invalid birthdate.");
+                System.err.println("Invalid birthdate -> " + birthdate);
                 return false;
             }
         } catch (NumberFormatException e) {
-            System.out.println("Invalid number format.");
+            System.err.println("Invalid number format -> " + inputDate);
             return false;
         } catch (Exception e) {
-            System.out.println("Invalid date values.");
+            System.err.println("Invalid date values -> " + inputDate);
             return false;
         }
     }
@@ -3249,7 +3250,6 @@ public class ButtonService {
                         returnText = "Ta'lim bosqichini tanlang " + sighDown;
                         cancelButton = "To'xtatish 🛑";
                     }
-
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
@@ -3298,12 +3298,13 @@ public class ButtonService {
         );
     }
 
-    public CompletableFuture<SendMessage> enterSecondEducationInfo(Update update) {
+    public CompletableFuture<SendMessage> enterSecondEducationInfo(Update update, Education education, Employee creatingEmployee) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     String cancelButton = "Остановить 🛑";
+                    final var updateText = update.getMessage().getText();
                     final var step = userRepository.getUserStepByUserChatId(chatId);
 
                     if (step.equals(Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name())) {
@@ -3312,6 +3313,7 @@ public class ButtonService {
                         else
                             returnText = "Название учебного заведения:";
 
+                        education.setType(EduType.valueOf(updateText));
                         userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name());
 
                     } else if (step.equals(Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name())) {
@@ -3320,6 +3322,7 @@ public class ButtonService {
                         else
                             returnText = "Название направления обучения:";
 
+                        education.setName(updateText);
                         userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name());
 
                     } else if (step.equals(Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name())) {
@@ -3332,12 +3335,36 @@ public class ButtonService {
                         else
                             returnText = """
                                     Сроки выполнения:
-                                                                        
+
                                     ❗️Образец: 2018-2022;
                                     ❗️Если в данный момент продолжается: 2020-Present""";
 
-                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name());
+                        education.setEducationField(updateText);
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_2ND_EDUCATION_PERIOD.name());
+
+                    } else if (step.equals(Stage.ENTERED_EMPLOYEE_2ND_EDUCATION_PERIOD.name())) {
+
+                        if (userLanguage.equals("UZ"))
+                            returnText = """
+                                    Xodimning malakasini kiriting:
+
+                                    ❗️Namuna: PostgreSQl, JAVA, Problem Solving, Managerial Ability...""";
+                        else
+                            returnText = """
+                                    Введите навык сотрудника:
+
+                                    ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""";
+
+                        String[] dateFromPeriod = getDateFromPeriod(updateText);
+                        education.setStartedDate(dateFromPeriod[0]);
+                        education.setEndDate(dateFromPeriod[1]);
+                        final var employeeEducations = creatingEmployee.getEducations();
+                        employeeEducations.add(education);
+                        creatingEmployee.setEducations(employeeEducations);
+//                        education = new Education();
+
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_EMPLOYEE_SKILLS.name());
                     }
 
                     if (userLanguage.equals("UZ"))

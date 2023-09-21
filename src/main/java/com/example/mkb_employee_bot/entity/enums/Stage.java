@@ -60,7 +60,7 @@ public enum Stage {
     ATTACHMENT_SHARED(10),
 
     SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE(),
-
+    ENTERED_EMPLOYEE_2ND_EDUCATION_PERIOD(),
     EMPLOYEE_CREATED;
     private int value;
 

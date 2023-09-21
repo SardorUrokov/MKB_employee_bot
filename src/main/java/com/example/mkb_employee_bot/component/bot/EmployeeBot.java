@@ -1,8 +1,7 @@
 package com.example.mkb_employee_bot.component.bot;
 
-import com.example.mkb_employee_bot.entity.enums.*;
-import com.example.mkb_employee_bot.service.FileService;
 import jakarta.ws.rs.NotFoundException;
+
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -11,23 +10,25 @@ import lombok.experimental.FieldDefaults;
 
 import com.example.mkb_employee_bot.entity.*;
 import com.example.mkb_employee_bot.repository.*;
+import com.example.mkb_employee_bot.entity.enums.*;
 import com.example.mkb_employee_bot.service.BotService;
+import com.example.mkb_employee_bot.service.FileService;
 import com.example.mkb_employee_bot.service.ButtonService;
 
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.concurrent.CompletableFuture;
 
 @Data
@@ -53,11 +54,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
     String userLanguage;
     FileType fileType;
 
-    Department prevDepartment = new Department();
-    Department selectedDepartment = new Department();
-
     Education education = new Education();
     Management prevManagement = new Management();
+
+    Department prevDepartment = new Department();
+    Department selectedDepartment = new Department();
 
     Position prevPosition = new Position();
     Position selectedPosition = new Position();
@@ -729,11 +730,10 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if (userStage.equals(Stage.SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE.name()) && (isAdmin || isSuperAdmin)) {
+            } else if ((userStage.equals(Stage.SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE.name()) || (userStep.equals(Stage.ENTERED_EMPLOYEE_2ND_EDUCATION_PERIOD.name()))) && (isAdmin || isSuperAdmin)) {
 
-                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.enterSecondEducationInfo(update);
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.enterSecondEducationInfo(update, education, creatingEmployee);
                 SendMessage sendMessage = messageCompletableFuture.join();
-
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -890,6 +890,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     final var employeeEducations = creatingEmployee.getEducations();
                     employeeEducations.add(education);
                     creatingEmployee.setEducations(employeeEducations);
+                    education = new Education();
 
                 } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(userStep)) {
 
