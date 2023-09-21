@@ -2609,7 +2609,25 @@ public class ButtonService {
                         messageText = getSteps_ru(userStageIndex);
 
                     if (moveToNext) {
-                        if (userStageIndex == 3) {
+                        if (userStageIndex == 2) {
+                            String employeePhoneNumber = update.getMessage().getText();
+
+                            final var checkedPhone = checkPhone(employeePhoneNumber);
+                            if (checkedPhone)
+                                incrementUserStage();
+                            else {
+                                if (userLanguage.equals("UZ"))
+                                    messageText = """
+                                            ❌Telefon raqam noto'g'ri formatda kiritilgan. Qaytadan kiriting:
+
+                                            ❗️Namuna: 998991234567""";
+                                else
+                                    messageText = """
+                                            ❌Номер телефона введен в неправильном формате. Введите повторно:
+
+                                            ❗Образец: 998991234567""";
+                            }
+                        } else if (userStageIndex == 3) {
                             String userInputDate = update.getMessage().getText();
 
                             if (isValidDateFormat(userInputDate))
@@ -2696,6 +2714,8 @@ public class ButtonService {
 
             LocalDate birthdate = LocalDate.of(year, month, day);
             LocalDate currentDate = LocalDate.now();
+
+            // Employee's age must be less than 70
             boolean isValuableAge = (currentDate.getYear() - year) <= 70;
 
             if (birthdate.isBefore(currentDate) && isValuableAge) {
@@ -2715,6 +2735,7 @@ public class ButtonService {
     }
 
     private boolean checkEduPeriod(String period) {
+
         boolean isValuable;
         String[] years = period.split("-");
 
@@ -2726,11 +2747,10 @@ public class ButtonService {
             int endYear;
             boolean isPresent = years[1].equalsIgnoreCase("Present");
 
-            if (isPresent) {
+            if (isPresent)
                 endYear = Year.now().getValue();
-            } else {
+            else
                 endYear = Integer.parseInt(years[1]);
-            }
 
             int currentYear = Year.now().getValue();
 
@@ -2745,14 +2765,12 @@ public class ButtonService {
             System.out.println("Invalid year format.");
             isValuable = false;
         }
-
         return isValuable;
     }
 
     private void incrementUserStage() {
-        if (userStageIndex < steps_uz.size() - 1) {
+        if (userStageIndex < steps_uz.size() - 1)
             userStageIndex++;
-        }
     }
 
     private void decrementUserStage() {
@@ -2822,14 +2840,16 @@ public class ButtonService {
         );
     }
 
-    public boolean checkPhone(String input) {
+    public boolean checkPhone(String phoneNumber) {
         int i = 0;
-
-        for (char c : input.toCharArray()) {
-            if (!Character.isDigit(c))
-                i++; // If any character is not a digit, i + 1;
-        }
-        return i == 0;
+        if (phoneNumber.length() >= 9) { // phoneNumber shouldn't be less than 9 digits
+            for (char c : phoneNumber.toCharArray()) {
+                if (!Character.isDigit(c))
+                    i++; // If any character is not a digit, i + 1;
+            }
+            return i == 0; // if there is doesn't exist any case i=0 and return true;
+        } else
+            return false;
     }
 
     public int getAgeFromBirthDate(String birthdateStr) {
