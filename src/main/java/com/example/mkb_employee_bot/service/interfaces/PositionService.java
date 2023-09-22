@@ -13,6 +13,5 @@ public interface PositionService {
 
     Position updatePosition(Long id, PositionDTO positionDTO);
 
-
     void deletePosition(String positionName);
 }

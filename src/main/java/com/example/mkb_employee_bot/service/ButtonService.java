@@ -785,6 +785,7 @@ public class ButtonService {
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                    userRepository.updateUserStepByUserChatId(chatId, "");
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
@@ -1598,8 +1599,8 @@ public class ButtonService {
         return employeeService.getDepartmentEmployeesByDepartmentId(departmentId);
     }
 
-    private List<Employee> getManagementEmployees(Long departmentId) {
-        return employeeService.getManagementEmployeesByManagementId(departmentId);
+    private List<Employee> getManagementEmployees(Long managementId) {
+        return employeeService.getManagementEmployeesByManagementId(managementId);
     }
 
     public void setDepartmentListToButtons(List<KeyboardRow> keyboardRowList, ReplyKeyboardMarkup replyKeyboardMarkup) {
@@ -2291,6 +2292,22 @@ public class ButtonService {
                 "\nНавыки и умения" + getEmployeeSkills(employee);
     }
 
+//    public String getDepartmentInfoLanguage_UZ(Department department) {
+//        return "Departament - " + department.getName() +
+//                "\nTegishli Boshqarmalar: " + getManagementsInsideDepartment(department);
+//    }
+//
+//    public String getManagementsInsideDepartment(Department department) {
+//        for (String management : getManagementNamesByDepartmentId(department.getId())) {
+//
+//        }
+//    }
+//
+//    public String getManagementInfoLanguage_UZ(Management management) {
+//        return "Boshqarma - " + management.getName() +
+//                "\n" + getManagementEmployees(management.getId());
+//    }
+
     public String getEmployeeSkills(Employee employee) {
 
         String skills = "";
@@ -2800,7 +2817,6 @@ public class ButtonService {
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(chatId)
                             .text(info)
-                            .parseMode("Markdown")
                             .build();
                 }
         );
