@@ -1747,20 +1747,50 @@ public class EmployeeBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendBirthdayMessages(Employee babyEmployee, List<Long> colleaguesChatIds) {
+    public void sendBirthdayMessageToColleagues(Employee babyEmployee, List<Long> colleaguesChatIds) {
 
         SendMessage message = new SendMessage();
         final var employeeFullName = babyEmployee.getFullName();
 
-        String text = "Assalomu Alaykum! 🎉 " +
+        String text_uz = "Assalomu Alaykum! 🎉" +
                 "\nBugun sizning hamkasbingiz " + employeeFullName + " o'zlarining " + (babyEmployee.getAge() + 1) + " yoshlarini qarshi olyabdilar! 🎂🥳" +
-                "\n" + employeeFullName + " ning omad va muvaffaqiyati har doim siz bilan bo'lsin! 🎉" +
-                "\nDo'stona muhitni bardavom qilish maqsadida siz ham ularni tabriklashni unutmang. 🙂" ;
+                "\nSizga va hamkasbingizga omad va muvaffaqiyat doim hamroh bo'lsin! 🎉" +
+                "\nDo'stona muhitni bardavom qilish maqsadida siz ham ularni tabriklashni unutmang. 😊";
+
+        String text_ru = "Добрый день! 🎉\n" +
+                "Сегодня ваш коллега " + employeeFullName + " отмечает свое " + (babyEmployee.getAge() + 1) + "-летие! 🎂🥳\n" +
+                "Пусть удача и успех всегда сопутствуют Вам и Вашему коллеге! 🎉\n" +
+                "Не забудьте поздравить его, чтобы поддержать дружескую атмосферу. 😊";
 
         for (Long colleaguesChatId : colleaguesChatIds) {
             message.setChatId(colleaguesChatId);
-            message.setText(text);
+            userLanguage = userRepository.getUserLanguageByUserChatId(colleaguesChatId);
+            message.setText(userLanguage.equals("UZ") ? text_uz : text_ru);
+
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void sendCongratulation(Employee babyEmployee, Long babyEmployeeChatId) {
+
+        String text_uz = "Assalomu Alaykum! 🎉\n" +
+                "Hurmatli " + babyEmployee.getFullName() + ", bugun siz qarshi olayotgan " + (babyEmployee.getAge() + 1) + " yoshingiz bilan qutlaymiz! 🎂🥳\n" +
+                "MKBankning yanada yuqori cho'qqilarga chiqishida o'z hissangizni qo'shayotganingizdan mamnunmiz.\n" +
+                "Sizga uzoq umr, sog'lik, salomatlik va baxt-saodat tilaymiz! 🎉";
+
+        String text_ru = "Добрый день! 🎉\n" +
+                "Дорогой " + babyEmployee.getFullName() + ", сегодня мы поздравляем тебя с " + (babyEmployee.getAge() + 1) + "-летием! 🎂🥳\n" +
+                "Мы рады, что вы вносите свой вклад в рост МКБанка до более высоких высот.\n" +
+                "Желаем вам долгих лет жизни, здоровья, благополучия и счастья! 🎉";
+
+        userLanguage = userRepository.getUserLanguageByUserChatId(babyEmployeeChatId);
+        SendMessage message = new SendMessage();
+        message.setChatId(babyEmployeeChatId);
+        message.setText(userLanguage.equals("UZ") ? text_uz : text_ru);
 
         try {
             execute(message);

@@ -56,11 +56,14 @@ public class UserService {
     }
 
     public List<Long> getUsersChatIdsBySameDepartmentEmployeesPhoneNumber(List<String> phoneNumbers) {
+
         List<Long> usersChatIds = new ArrayList<>();
         final var userList = userRepository.findByPhoneNumberIn(phoneNumbers);
 
-        for (User user : userList) {
-            usersChatIds.add(user.getUserChatId());
+        if (!userList.isEmpty()) {
+            for (User user : userList) {
+                usersChatIds.add(user.getUserChatId());
+            }
         }
         return usersChatIds;
     }

@@ -1,8 +1,11 @@
 package com.example.mkb_employee_bot.entity;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
+import java.util.Locale;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,6 +51,13 @@ public class Employee {
     List<AppDocument> documents = new ArrayList<>();
 
     boolean isDeleted = false;
+
+    public boolean isBirthdayToday() {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
+        LocalDate employeeBirthday = LocalDate.parse(dateOfBirth, formatter);
+        return today.getMonth() == employeeBirthday.getMonth() && today.getDayOfMonth() == employeeBirthday.getDayOfMonth();
+    }
 
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();

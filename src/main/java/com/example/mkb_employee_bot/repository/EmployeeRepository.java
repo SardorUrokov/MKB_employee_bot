@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-    List<Employee> findByDateOfBirth(String dateOfBirth);
-
     List<Employee> getEmployeesByPosition_Id(Long position_id);
 
     List<Employee> getEmployeesByPosition_Management_Id(Long management_id);
@@ -38,5 +36,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Modifying
     @Query(value = "UPDATE Employee SET is_deleted = true, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
     void updateEmployeeIsDeleted(Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Employee SET age = :newAge, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
+    void updateEmployeeAgeById(Long id, int newAge);
 
 }

@@ -1,5 +1,6 @@
 package com.example.mkb_employee_bot.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.time.Period;
 import java.time.LocalDate;
@@ -23,14 +24,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final AppDocumentRepository appDocumentRepository;
 
     public List<Employee> employeeList() {
-        return employeeRepository.findAll(Sort.by("full_name"));
+        return employeeRepository.findAll();
     }
 
-    public List<Employee> getDepartmentEmployeesByDepartmentId(Long departmentId){
+    public List<Employee> getDepartmentEmployeesByDepartmentId(Long departmentId) {
         return employeeRepository.getEmployeesByPosition_Management_Department_Id(departmentId);
     }
 
-    public List<String> getDepartmentEmployeesPhoneNumbers(Long departmentId){
+    public List<String> getDepartmentEmployeesPhoneNumbers(Long departmentId) {
         return employeeRepository.findPhoneNumbersByDepartmentId(departmentId);
     }
 
@@ -41,7 +42,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    public List<Employee> getManagementEmployeesByManagementId(Long managementId){
+    public List<Employee> getManagementEmployeesByManagementId(Long managementId) {
         return employeeRepository.getEmployeesByPosition_Management_Id(managementId);
     }
 
@@ -77,8 +78,19 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.updateEmployeeIsDeleted(id);
     }
 
-    public List<Employee> getEmployeesWithBirthday(String today) {
-        return employeeRepository.findByDateOfBirth(today);
+    public List<Employee> getEmployeesWithBirthday() {
+        List<Employee> birthdayEmployees = new ArrayList<>();
+
+        for (Employee employee : employeeList()) {
+            if (employee.isBirthdayToday())
+                birthdayEmployees.add(employee);
+        }
+        return birthdayEmployees;
     }
 
+    public void increaseEmployeeAge(Employee babyEmployee) {
+        final var employeeNewAge = babyEmployee.getAge() + 1;
+        final var employeeId = babyEmployee.getId();
+        employeeRepository.updateEmployeeAgeById(employeeId,  employeeNewAge);
+    }
 }
