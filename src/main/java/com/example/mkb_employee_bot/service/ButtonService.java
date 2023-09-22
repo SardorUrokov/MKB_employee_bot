@@ -2215,20 +2215,22 @@ public class ButtonService {
                         if (forWhat.equals("forUpdating")) {
                             returnText = getEmployeeInfoForUserLanguage_UZ(employee);
                             confirmationButton = "Tahrirlashni boshlash ✅";
+                            cancelButton = "Tahrirlashni Bekor qilish ❌";
                         } else {
                             returnText = getEmployeeInfoForUserLanguage_UZ(employee);
                             confirmationButton = "O'chirishni Tasdiqlash ✅";
+                            cancelButton = "O'chirishni Bekor qilish ❌";
                         }
-                        cancelButton = "O'chirishni Bekor qilish ❌";
                     } else {
                         if (forWhat.equals("forUpdating")) {
                             returnText = getEmployeeInfoForUserLanguage_RU(employee);
                             confirmationButton = "Начать редактирование ✅";
+                            cancelButton = "Отменить Редактирование❌";
                         } else {
                             returnText = getEmployeeInfoForUserLanguage_RU(employee);
                             confirmationButton = "Потвердить Удаление✅";
+                            cancelButton = "Отменить Удаление❌";
                         }
-                        cancelButton = "Отменить Удаление❌";
                     }
 
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -2273,7 +2275,6 @@ public class ButtonService {
                 "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nMa'lumoti " + getEmployeeEducationsInfo(employee) + "\n" +
                 "Malakasi\n" + getEmployeeSkills(employee);
-//                "\nFayl ma'lumotlari" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
     public String getEmployeeInfoForUserLanguage_RU(Employee employee) {
@@ -2288,7 +2289,6 @@ public class ButtonService {
                 "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nОбразование " + getEmployeeEducationsInfo(employee) +
                 "\nНавыки и умения" + getEmployeeSkills(employee);
-//                "\nВложения" + getEmployeeFiles(employee.getDocuments(), employee.getAppPhotos());
     }
 
     public String getEmployeeSkills(Employee employee) {
@@ -2302,25 +2302,21 @@ public class ButtonService {
     }
 
     public String getEmployeeEducationsInfo(Employee employee) {
-
         String educationInfo = "";
         final var educations = employee.getEducations();
 
         for (Education ignored : educations) {
-
             int value, preValue = 0;
             StringBuilder stringBuilder = new StringBuilder();
 
             for (Education education : educations) {
                 value = education.getType().getValue();
-
                 if (!(value < preValue))
                     educationInfo = String.valueOf(stringBuilder.append(setEduInfos(education)).append(" "));
 
                 preValue = value;
             }
         }
-
         return educationInfo;
     }
 
@@ -2331,7 +2327,6 @@ public class ButtonService {
             final var length = string.length();
             substringed = string.substring(0, length - 2);
         }
-
         return substringed;
     }
 
@@ -2828,12 +2823,9 @@ public class ButtonService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date currentDate = new Date();
         try {
-            // Parse the user's input to a Date object
             Date birthdate = dateFormat.parse(birthdateStr);
-
             // Check if the birthdate has occurred for the current year
             if (birthdate.getMonth() > currentDate.getMonth() || (birthdate.getMonth() == currentDate.getMonth() && birthdate.getDate() > currentDate.getDate())) {
-
                 // If not, subtract one year from the age
                 currentDate.setYear(currentDate.getYear() - 1);
             }
@@ -2854,6 +2846,7 @@ public class ButtonService {
 
         for (String part : parts) {
             String trimmedPart = part.trim();
+
             if (!trimmedPart.isEmpty()) {
                 words.add(trimmedPart);
             }
@@ -3043,9 +3036,10 @@ public class ButtonService {
                             case "Lavozimi", "Должность" -> {
                                 userRepository.updateUserStepByUserChatId(chatId, "position");
                                 if (userLanguage.equals("UZ"))
-                                    returnText = "Xodimning lavozimini qaytadan kiriting " + sighDown;
+                                    returnText = "Xodimning tahrirlanadigan lavozimini tanlang " + sighDown;
                                 else
-                                    returnText = "Заново введите должность сотрудника" + sighDown;
+                                    returnText = "Выберите редактируемую должность сотрудника " + sighDown;
+                                askSelectManagementForCreatingPosition(update, "");
                             }
                             case "Ta'lim muassasasi", "Учебное заведение" -> {
                                 userRepository.updateUserStepByUserChatId(chatId, "eduName");
@@ -3165,7 +3159,6 @@ public class ButtonService {
                 }
         );
     }
-
 
     public CompletableFuture<SendMessage> sendAttachmentAgain(Update update) {
         return CompletableFuture.supplyAsync(() -> {

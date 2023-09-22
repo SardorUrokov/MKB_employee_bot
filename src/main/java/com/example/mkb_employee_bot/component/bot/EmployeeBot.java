@@ -86,7 +86,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
             userStep = userStepByUserChatId == null ? "" : userStepByUserChatId;
 
             var userRole = botService.getUserRole(chatId);
-
             if (userRole == null)
                 userRole = "USER";
 
@@ -583,7 +582,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -609,7 +607,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -630,10 +627,10 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
                 if (userLanguage.equals("RU"))
                     sendTextMessage(chatId.toString(), "Начать редактирование ⁉️");
                 else
@@ -807,7 +804,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
                     creatingEmployee = new Employee();
                     education = new Education();
-                    /*****************************/
+
                     buttonService.retryUserSteps();
                 } else {
                     fileType = FileType.valueOf(messageText);
@@ -825,7 +822,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             }
                     );
                     executeFuture.join();
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -1719,12 +1715,11 @@ public class EmployeeBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendDocument(Long chatId, String photoCaption, InputFile inputFile) {
-
+    public void sendDocument(Long chatId, String caption, InputFile inputFile) {
         final var sendDocument = SendDocument.builder()
                 .chatId(chatId)
                 .document(inputFile)
-                .caption(photoCaption)
+                .caption(caption)
                 .build();
         try {
             execute(sendDocument);
@@ -1739,7 +1734,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 .photo(inputFile)
                 .caption(photoCaption)
                 .build();
-
         try {
             execute(sendPhoto);
         } catch (TelegramApiException e) {

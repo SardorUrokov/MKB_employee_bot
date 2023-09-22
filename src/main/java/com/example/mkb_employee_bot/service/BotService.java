@@ -11,16 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -608,10 +605,10 @@ public class BotService {
 
                     if (userLanguage.equals("UZ")) {
                         userRepository.updateLanguageByUserId(chatId, "RU");
-                        returnText = "Язык изменен \uD83C\uDDFA\uD83C\uDDFF > \uD83C\uDDF7\uD83C\uDDFA";
+                        returnText = "Язык изменен 🇺🇿 > 🇷🇺";
                     } else {
                         userRepository.updateLanguageByUserId(chatId, "UZ");
-                        returnText = "Til o'zgartirildi \uD83C\uDDF7\uD83C\uDDFA > \uD83C\uDDFA\uD83C\uDDFF";
+                        returnText = "Til o'zgartirildi 🇷🇺 > 🇺🇿";
                     }
 
                     final var role = userRepository.getUserRoleByUserChatId(chatId);
@@ -639,7 +636,6 @@ public class BotService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-
                     employeeService.deleteEmployee(deletingEmployee.getId());
 
                     if (userLanguage.equals("UZ"))
@@ -710,10 +706,6 @@ public class BotService {
                         final var userStep = userRepository.getUserStepByUserChatId(chatId);
 
                         switch (userStep) {
-//                            case "cancelled":
-//                                userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
-//                                userRepository.updateUserStepByUserChatId(chatId, "");
-//                                break;
                             case "fullname":
                                 updatingEmployee.setFullName(text);
                                 break;
@@ -728,6 +720,7 @@ public class BotService {
                                 break;
                             case "position":
 //                            updatingEmployee.setPosition();
+                                buttonService.askSelectManagementForCreatingPosition(update, "");
                                 break;
                             case "eduName":
 //                            updatingEmployee.getEducations() //the first iterate edu s and set name
