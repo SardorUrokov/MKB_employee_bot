@@ -2301,8 +2301,8 @@ public class ButtonService {
                 "Lavozim: " + employee.getPosition().getName() + "\n" +
                 "Bo'lim: " + employee.getPosition().getManagement().getName() + "\n" +
                 "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
-                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) + "\n" +
-                "Malakasi\n" + getEmployeeSkills(employee);
+                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
+                "\nMalakasi\n" + getEmployeeSkills(employee);
     }
 
     public String getEmployeeInfoForUserLanguage_RU(Employee employee) {
@@ -2316,7 +2316,7 @@ public class ButtonService {
                 "\nОтдел: " + employee.getPosition().getManagement().getName() +
                 "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
                 "\nОбразование " + getEmployeeEducationsInfo(employee) +
-                "\nНавыки и умения" + getEmployeeSkills(employee);
+                "\nНавыки и умения\n" + getEmployeeSkills(employee);
     }
 
 //    public String getDepartmentInfoLanguage_UZ(Department department) {
@@ -3425,7 +3425,7 @@ public class ButtonService {
         );
     }
 
-    public List<Education> getSelectedEducation(String eduInfo, Employee updatingEmployee) {
+    public Education getSelectedEducation(String eduInfo, Employee updatingEmployee) {
 
         final var educationList = educationRepository.findEmployeeEducations(updatingEmployee.getId());
         Education selectedEducation = new Education();
@@ -3442,10 +3442,43 @@ public class ButtonService {
                 selectedEducation = education;
         }
 
-//        educationRepository.deleteById(selectedEducation.getId());
-        educationRepository.updateEducationIsDeleted(selectedEducation.getId());
-//        educationList.remove(selectedEducation);
+////        educationRepository.deleteById(selectedEducation.getId());
+//        educationRepository.updateEducationIsDeleted(selectedEducation.getId());
+////        educationList.remove(selectedEducation);
+        return selectedEducation;
+    }
 
-        return educationList;
+    public CompletableFuture<SendMessage> askEnterUpdatingEducationInfos(Update update, Education selectedEducation) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    String cancelButton = (userLanguage.equals("UZ")) ? "To'xtatish 🛑" : "Остановить 🛑";
+
+                    final var eduInfos = setEduInfos(selectedEducation);
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    replyKeyboardMarkup.setOneTimeKeyboard(true);
+                    replyKeyboardMarkup.setResizeKeyboard(true);
+                    replyKeyboardMarkup.setSelective(true);
+
+                    keyboardRowList.add(
+                            new KeyboardRow(
+                                    Collections.singletonList(
+                                            KeyboardButton.builder()
+                                                    .text(cancelButton)
+                                                    .build()
+                                    )
+                            )
+                    );
+                    replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyKeyboardMarkup)
+                            .chatId(chatId)
+                            .text(eduInfos)
+                            .build();
+                }
+        );
     }
 }

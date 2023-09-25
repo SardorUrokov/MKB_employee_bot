@@ -56,6 +56,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
     FileType fileType;
 
     Education education = new Education();
+    Education selectedEducation = new Education();
     Management prevManagement = new Management();
 
     Department prevDepartment = new Department();
@@ -705,9 +706,28 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     }
 
                 } else {
+                    selectedEducation = buttonService.getSelectedEducation(messageText, updatingEmployee);
+                    CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askEnterUpdatingEducationInfos(update, selectedEducation);
+                    SendMessage sendMessage = messageCompletableFuture.join();
 
-                    final var educations = buttonService.getSelectedEducation(messageText, updatingEmployee);
-                    System.out.println("\n/*/*/*/*/*/*/*/*/*/*/*/\n" + educations.toString());
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (userLanguage.equals("RU"))
+                        sendTextMessage(chatId.toString(), "Введите заново название учебного заведения ⬇️");
+                    else
+                        sendTextMessage(chatId.toString(), "Ta'lim muassasa nomini qaytadan kiriting ⬇️");
                 }
 
             } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
