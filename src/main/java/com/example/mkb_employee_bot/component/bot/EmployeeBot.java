@@ -97,7 +97,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             String messageText = message.getText() == null ? "" : message.getText();
             System.out.println("userStage: " + userStage);
             System.out.println("messageText: " + messageText);
-            System.out.println("userStep: " + userStep);
+            System.out.println("userStep: " + userStep + "\n");
 
             final var caseContainingList = employeeRepository.findByFullNameIgnoreCaseContainingAndIsDeletedFalse(messageText);
             final var isCaseContainingListEmpty = caseContainingList.isEmpty();
@@ -568,9 +568,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-            } else if ((messageText.equals("Lavozimi") || "Должность".equals(messageText)) && userStage.equals(Stage.SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN.name()) && (isAdmin || isSuperAdmin)) {
+            } else if (("Lavozimi".equals(messageText) || "Должность".equals(messageText)) && userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
-                final var messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "");
+                final var messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forUpdatingEmployeePosition");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -614,6 +614,27 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInfoForSelectedSection(update);
+                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("EMPLOYEE_UPDATING_POSITION_SELECTED") && (isAdmin || isSuperAdmin)) {
+
+                selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
+                updatingEmployee.setPosition(selectedPosition);
+
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -1201,6 +1222,26 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if ("Редактировать Должность".equals(messageText) || "Lavozimni tahrirlash".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forUpdating");
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else if (userStage.equals("MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION") && (isAdmin || isSuperAdmin)) {
+
+                prevManagement = managementRepository.findByName(messageText).orElseThrow();
+                CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectPositionForUpdating(prevManagement, update, "forUpdatingEmployeePosition");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {

@@ -680,7 +680,6 @@ public class ButtonService {
                     }
 
                     if (employees.isEmpty()) {
-
                         if (userLanguage.equals("RU")) {
                             returnText = "Список пуст, сотрудник с таким именем не сохранен ❗️";
                             mainMenu = главное_Меню;
@@ -688,7 +687,6 @@ public class ButtonService {
                             returnText = "Ro'yxat bo'sh, bunday ismli xodim saqlanmagan ❗️";
                             mainMenu = bosh_Menu;
                         }
-
                     } else {
                         if (userLanguage.equals("RU")) {
                             returnText = "Выберите нужного сотрудника из списка " + sighDown;
@@ -726,7 +724,7 @@ public class ButtonService {
         );
     }
 
-    /***
+    /**
      * SUPER_ADMIN role
      */
     public CompletableFuture<SendMessage> superAdminButtons(Update update) {
@@ -1947,6 +1945,8 @@ public class ButtonService {
                         userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_POSITION.name());
                     else if (forWhat.equals("forCreatingEmployee"))
                         userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_EMPLOYEE.name());
+                    else if (forWhat.equals("forUpdatingEmployeePosition"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION.name());
                     else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_POSITION.name());
 
@@ -2063,6 +2063,18 @@ public class ButtonService {
                         } else {
                             returnText = "Tahrirlash uchun Lavozimni tanlang " + sighDown;
 
+                            if (forWhat.equals("forUpdatingEmployeePosition")) {
+                                keyboardRowList.add(
+                                        new KeyboardRow(
+                                                Collections.singletonList(
+                                                        KeyboardButton.builder()
+                                                                .text("Lavozim yaratish")
+                                                                .build()
+                                                )
+                                        )
+                                );
+                            }
+
                             keyboardRowList.add(
                                     new KeyboardRow(
                                             List.of(
@@ -2075,7 +2087,6 @@ public class ButtonService {
                         }
                         mainMenu = bosh_Menu;
                     }
-
                     if (forWhat.equals("forCreatingEmployee")) {
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
                         userRepository.updateUserStepByUserChatId(chatId, "personalInfo");

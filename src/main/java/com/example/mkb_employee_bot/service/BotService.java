@@ -652,7 +652,6 @@ public class BotService {
                             .text(returnText)
                             .chatId(chatId)
                             .build();
-
                 }
         );
     }
