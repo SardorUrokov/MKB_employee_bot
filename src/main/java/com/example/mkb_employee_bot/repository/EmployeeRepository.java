@@ -41,5 +41,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Modifying
     @Query(value = "UPDATE Employee SET age = :newAge, updated_at = CURRENT_TIMESTAMP where Employee.id = :id", nativeQuery = true)
     void updateEmployeeAgeById(Long id, int newAge);
-
 }

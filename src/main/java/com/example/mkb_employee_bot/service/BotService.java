@@ -717,20 +717,20 @@ public class BotService {
                             case "nationality":
                                 updatingEmployee.setNationality(text);
                                 break;
-                            case "position":
+//                            case "position":
 //                            updatingEmployee.setPosition();
-                                buttonService.askSelectManagementForCreatingPosition(update, "");
-                                break;
-                            case "eduName":
+//                                buttonService.askSelectManagementForCreatingPosition(update, "");
+//                                break;
+//                            case "eduName":
 //                            updatingEmployee.getEducations() //the first iterate edu s and set name
-                                break;
-                            case "eduField":
-
-                                break;
-                            case "eduType":
-
-                                break;
-                            case "eduPeriod":
+//                                break;
+//                            case "eduField":
+//
+//                                break;
+//                            case "eduType":
+//
+//                                break;
+                            case "eduInfo":
 
                                 break;
                             case "skills":

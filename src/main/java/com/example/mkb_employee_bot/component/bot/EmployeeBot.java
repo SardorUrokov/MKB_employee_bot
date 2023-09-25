@@ -613,7 +613,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInfoForSelectedSection(update);
+                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInfoForSelectedSection(update, updatingEmployee);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -632,7 +632,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if (userStage.equals("EMPLOYEE_UPDATING_POSITION_SELECTED") && (isAdmin || isSuperAdmin)) {
 
                 selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
-                updatingEmployee.setPosition(selectedPosition);
+                updatingEmployee.setPosition(selectedPosition); //update employee's new position
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
                 SendMessage sendMessage = setUserLanguageAndRequestContact.join();
@@ -674,6 +674,41 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     sendTextMessage(chatId.toString(), "Начать редактирование ⁉️");
                 else
                     sendTextMessage(chatId.toString(), "Tahrirlashni boshlaysizmi ⁉️");
+
+            } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_EDUCATION") && (isAdmin || isSuperAdmin)) {
+
+                if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText)) {
+                    if (userLanguage.equals("RU"))
+                        sendTextMessage(chatId.toString(), "Процесс остановлен ❗️");
+                    else
+                        sendTextMessage(chatId.toString(), "Jarayon to'xtatildi ❗️");
+
+                    final var chatId = update.getMessage().getChatId();
+                    userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
+                    userRepository.updateUserStepByUserChatId(chatId, "");
+
+                    final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
+                    SendMessage sendMessage = messageCompletableFuture.join();
+
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                } else {
+
+                    final var educations = buttonService.getSelectedEducation(messageText, updatingEmployee);
+                    System.out.println("\n/*/*/*/*/*/*/*/*/*/*/*/\n" + educations.toString());
+                }
 
             } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 

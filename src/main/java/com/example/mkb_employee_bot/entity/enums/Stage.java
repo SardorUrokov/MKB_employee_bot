@@ -1,5 +1,7 @@
 package com.example.mkb_employee_bot.entity.enums;
 
+import jakarta.persistence.AssociationOverride;
+
 public enum Stage {
     STARTED(),
     LANGUAGE_SELECTED(),
@@ -63,7 +65,8 @@ public enum Stage {
     SELECTED_EMPLOYEE_2ND_EDUCATION_TYPE(),
     ENTERED_EMPLOYEE_2ND_EDUCATION_PERIOD(),
     EMPLOYEE_UPDATING_POSITION_SELECTED(),
-    MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION();
+    MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION(),
+    SELECTED_EMPLOYEE_UPDATING_EDUCATION();
 
     private int value;
 

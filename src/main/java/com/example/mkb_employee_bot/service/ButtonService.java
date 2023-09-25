@@ -28,6 +28,7 @@ public class ButtonService {
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
+    private final EducationRepository educationRepository;
     private final DepartmentRepository departmentRepository;
     private final ManagementRepository managementRepository;
 
@@ -1941,14 +1942,16 @@ public class ButtonService {
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
-                    if (forWhat.equals("forCreating"))
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_POSITION.name());
-                    else if (forWhat.equals("forCreatingEmployee"))
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_EMPLOYEE.name());
-                    else if (forWhat.equals("forUpdatingEmployeePosition"))
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION.name());
-                    else
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_POSITION.name());
+                    switch (forWhat) {
+                        case "forCreating" ->
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_POSITION.name());
+                        case "forCreatingEmployee" ->
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_CREATING_EMPLOYEE.name());
+                        case "forUpdatingEmployeePosition" ->
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_EMPLOYEE_POSITION.name());
+                        default ->
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.MANAGEMENT_SELECTED_FOR_UPDATING_POSITION.name());
+                    }
 
                     return SendMessage.builder()
                             .chatId(chatId)
@@ -2899,7 +2902,7 @@ public class ButtonService {
 
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
-                    String cancelButton, section1, section2, section3, section4, section5, section6, section7, section8, section9, section10, section11;
+                    String cancelButton, section1, section2, section3, section4, section5, section6, section7, section8;
 
                     if (userLanguage.equals("UZ")) {
                         returnText = "Xodimning qaysi ma'lumotini tahrirlamoqchisiz?";
@@ -2909,12 +2912,9 @@ public class ButtonService {
                         section3 = "Tug'ilgan sanasi";
                         section4 = "Millati";
                         section5 = "Lavozimi";
-                        section6 = "Ta'lim muassasasi";
-                        section7 = "Ta'lim yo'nalishi";
-                        section8 = "Ta'lim bosqichi";
-                        section9 = "O'quv Muddatlari";
-                        section10 = "Malakasi";
-                        section11 = "Fayl ma'lumotlari";
+                        section6 = "Ta'lim ma'lumotlari";
+                        section7 = "Malakasi";
+                        section8 = "Fayl ma'lumotlari";
                     } else {
                         returnText = "Какую информацию о сотруднике вы хотите изменить?";
                         cancelButton = "Отменить ❌";
@@ -2923,12 +2923,9 @@ public class ButtonService {
                         section3 = "Дата рождения";
                         section4 = "Национальность";
                         section5 = "Должность";
-                        section6 = "Учебное заведение";
-                        section7 = "Образовательная сфера";
-                        section8 = "Уровень образования";
-                        section9 = "Периоды обучения";
-                        section10 = "Навыки";
-                        section11 = "Вложения";
+                        section6 = "Учебное информация";
+                        section7 = "Навыки";
+                        section8 = "Вложения";
                     }
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -2977,25 +2974,11 @@ public class ButtonService {
                                             .build()
                             )
                     );
-                    KeyboardRow row5 = new KeyboardRow(
-                            List.of(
-                                    KeyboardButton.builder()
-                                            .text(section9)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(section10)
-                                            .build(),
-                                    KeyboardButton.builder()
-                                            .text(section11)
-                                            .build()
-                            )
-                    );
 
                     keyboardRowList.add(row1);
                     keyboardRowList.add(row2);
                     keyboardRowList.add(row3);
                     keyboardRowList.add(row4);
-                    keyboardRowList.add(row5);
                     keyboardRowList.add(
                             new KeyboardRow(
                                     Collections.singletonList(
@@ -3017,7 +3000,7 @@ public class ButtonService {
         );
     }
 
-    public CompletableFuture<SendMessage> askInfoForSelectedSection(Update update) {
+    public CompletableFuture<SendMessage> askInfoForSelectedSection(Update update, Employee updatingEmployee) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -3074,41 +3057,62 @@ public class ButtonService {
                                     returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
                             }
                             case "Lavozimi", "Должность" -> {
-//                                userRepository.updateUserStepByUserChatId(chatId, "position");
                                 if (userLanguage.equals("UZ"))
                                     returnText = "Xodimning tahrirlanadigan lavozimini tanlang " + sighDown;
                                 else
                                     returnText = "Выберите редактируемую должность сотрудника " + sighDown;
-//                                final var messageCompletableFuture = askSelectManagementForCreatingPosition(update, "");
-//                                return messageCompletableFuture.join();
                             }
-                            case "Ta'lim muassasasi", "Учебное заведение" -> {
-                                userRepository.updateUserStepByUserChatId(chatId, "eduName");
+                            case "Ta'lim ma'lumotlari", "Учебное информация" -> {
+
+                                cancelButton = "To'xtatish 🛑";
+                                userRepository.updateUserStepByUserChatId(chatId, "eduInfo");
+
                                 if (userLanguage.equals("UZ"))
                                     returnText = "Xodimning ta'lim muassasasini qaytadan kiriting " + sighDown;
-                                else
+                                else {
+                                    cancelButton = "Остановить 🛑";
                                     returnText = "Заново введите учебное заведение сотрудника" + sighDown;
-                            }
-                            case "Ta'lim yo'nalishi", "Образовательная сфера" -> {
-                                userRepository.updateUserStepByUserChatId(chatId, "eduField");
-                                if (userLanguage.equals("UZ"))
-                                    returnText = "Xodimning ta'lim yo'nalishini qaytadan kiriting " + sighDown;
-                                else
-                                    returnText = "Заново введите сферу обучения сотрудника" + sighDown;
-                            }
-                            case "Ta'lim bosqichi", "Уровень образования" -> {
-                                userRepository.updateUserStepByUserChatId(chatId, "eduType");
-                                if (userLanguage.equals("UZ"))
-                                    returnText = "Xodimning ta'lim bosqichini qaytadan kiriting " + sighDown;
-                                else
-                                    returnText = "Заново введите уровень образования сотрудника" + sighDown;
-                            }
-                            case "O'quv Muddatlari", "Периоды обучения" -> {
-                                userRepository.updateUserStepByUserChatId(chatId, "eduPeriod");
-                                if (userLanguage.equals("UZ"))
-                                    returnText = "Xodimning o'quv muddatlarini qaytadan kiriting " + sighDown;
-                                else
-                                    returnText = "Заново введите периоды обучения сотрудника" + sighDown;
+                                }
+
+                                final var employeeEducations = educationRepository.findEmployeeEducations(updatingEmployee.getId());
+                                ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                                List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                                replyKeyboardMarkup.setOneTimeKeyboard(true);
+                                replyKeyboardMarkup.setResizeKeyboard(true);
+                                replyKeyboardMarkup.setSelective(true);
+
+                                for (Education employeeEducation : employeeEducations) {
+                                    final var type = employeeEducation.getType();
+                                    final var field = employeeEducation.getEducationField();
+                                    final var eduInfoButton = type.name() + " - " + field;
+
+                                    keyboardRowList.add(
+                                            new KeyboardRow(
+                                                    Collections.singletonList(
+                                                            KeyboardButton.builder()
+                                                                    .text(eduInfoButton)
+                                                                    .build()
+                                                    )
+                                            )
+                                    );
+                                }
+                                keyboardRowList.add(
+                                        new KeyboardRow(
+                                                Collections.singletonList(
+                                                        KeyboardButton.builder()
+                                                                .text(cancelButton)
+                                                                .build()
+                                                )
+                                        )
+                                );
+                                replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                                userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_UPDATING_EDUCATION.name());
+
+                                return SendMessage.builder()
+                                        .replyMarkup(replyKeyboardMarkup)
+                                        .text(returnText)
+                                        .chatId(chatId)
+                                        .build();
                             }
                             case "Malakasi", "Навыки" -> {
                                 userRepository.updateUserStepByUserChatId(chatId, "skills");
@@ -3419,5 +3423,29 @@ public class ButtonService {
                             .build();
                 }
         );
+    }
+
+    public List<Education> getSelectedEducation(String eduInfo, Employee updatingEmployee) {
+
+        final var educationList = educationRepository.findEmployeeEducations(updatingEmployee.getId());
+        Education selectedEducation = new Education();
+
+        String[] parts = eduInfo.split(" - ");
+        final var typePart = parts[0];
+        final var fieldPart = parts[1];
+
+        for (Education education : educationList) {
+            final var type = education.getType().name();
+            final var field = education.getEducationField();
+
+            if (type.equals(typePart) && field.equals(fieldPart))
+                selectedEducation = education;
+        }
+
+//        educationRepository.deleteById(selectedEducation.getId());
+        educationRepository.updateEducationIsDeleted(selectedEducation.getId());
+//        educationList.remove(selectedEducation);
+
+        return educationList;
     }
 }

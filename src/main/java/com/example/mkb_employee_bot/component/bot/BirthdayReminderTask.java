@@ -20,7 +20,7 @@ public class BirthdayReminderTask {
     private final EmployeeServiceImpl employeeService;
     private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 30 8 * * ?", zone = "Asia/Tashkent") //daily at 8AM (08:00)
+    @Scheduled(cron = "0 30 8 * * ?", zone = "Asia/Tashkent") //daily at 08:30 AM
     public void remindBirthdays() {
 
         List<Employee> employeesWithBirthday = employeeService.getEmployeesWithBirthday();
@@ -48,7 +48,7 @@ public class BirthdayReminderTask {
             LocalDate today = LocalDate.now();
             final var month = today.getMonth();
             final var dayOfMonth = today.getDayOfMonth();
-            System.out.println("No employees born on " + dayOfMonth + " " + month + " were found!");
+            System.out.println("No employees born on " + dayOfMonth + " " + month.toString().toUpperCase() + " were found!");
         }
     }
 }

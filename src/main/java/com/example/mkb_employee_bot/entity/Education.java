@@ -26,6 +26,8 @@ public class Education {
     @Enumerated(EnumType.STRING)
     EduType type;
 
+    boolean isDeleted = false;
+
     @Temporal(value = TemporalType.TIMESTAMP)
     Date createdAt = new Date();
 
