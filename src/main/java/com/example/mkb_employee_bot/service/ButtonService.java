@@ -660,14 +660,6 @@ public class ButtonService {
                             update.getMessage().getText()
                     );
 
-                    if (userLanguage.equals("RU")) {
-                        returnText = "Выберите нужного сотрудника из списка " + sighDown;
-                        mainMenu = главное_Меню;
-                    } else {
-                        returnText = "Kerakli xodimni ro'yhatdan tanlang " + sighDown;
-                        mainMenu = bosh_Menu;
-                    }
-
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setSelective(true);
@@ -687,6 +679,33 @@ public class ButtonService {
                         );
                     }
 
+                    if (employees.isEmpty()) {
+
+                        if (userLanguage.equals("RU")) {
+                            returnText = "Список пуст, сотрудник с таким именем не сохранен ❗️";
+                            mainMenu = главное_Меню;
+                        } else {
+                            returnText = "Ro'yxat bo'sh, bunday ismli xodim saqlanmagan ❗️";
+                            mainMenu = bosh_Menu;
+                        }
+
+                    } else {
+                        if (userLanguage.equals("RU")) {
+                            returnText = "Выберите нужного сотрудника из списка " + sighDown;
+                            mainMenu = главное_Меню;
+                        } else {
+                            returnText = "Kerakli xodimni ro'yhatdan tanlang " + sighDown;
+                            mainMenu = bosh_Menu;
+                        }
+
+                        if (forWhat.equals("forDeleting"))
+                            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_ADMIN.name());
+                        else if (forWhat.equals("forUpdating"))
+                            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN.name());
+                        else
+                            userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
+                    }
+
                     keyboardRowList.add(
                             new KeyboardRow(
                                     Collections.singletonList(
@@ -697,13 +716,6 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
-
-                    if (forWhat.equals("forDeleting"))
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_DELETING_ROLE_ADMIN.name());
-                    else if (forWhat.equals("forUpdating"))
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN.name());
-                    else
-                        userRepository.updateUserStageByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_NAME_FOR_SEARCH_ROLE_USER.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
@@ -1898,7 +1910,6 @@ public class ButtonService {
 
                         else if (forWhat.equals("forCreatingEmployee"))
                             returnText = "Xodim qo'shiladigan Boshqarmani tanlang " + sighDown;
-
                         else
                             returnText = "Lavozim tahrirlanadigan Boshqarmani tanlang " + sighDown;
 
@@ -1908,10 +1919,10 @@ public class ButtonService {
                         if (forWhat.equals("forCreating"))
                             returnText = "Выберите отдела, в которой будет создана Должность " + sighDown;
 
-                        else if (forWhat.equals("forCreatingEmployee")) {
+                        else if (forWhat.equals("forCreatingEmployee"))
                             returnText = "Выберите отдела, в которую будет добавлен сотрудник " + sighDown;
 
-                        } else
+                        else
                             returnText = "Выберите отдела, в которой будет редактирована Должность " + sighDown;
 
                         mainMenu = главное_Меню;
@@ -2068,6 +2079,8 @@ public class ButtonService {
                     if (forWhat.equals("forCreatingEmployee")) {
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
                         userRepository.updateUserStepByUserChatId(chatId, "personalInfo");
+                    } else if (forWhat.equals("forUpdatingEmployeePosition")) {
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.EMPLOYEE_UPDATING_POSITION_SELECTED.name());
                     } else
                         userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_SELECTED_FOR_UPDATING.name());
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
@@ -3050,12 +3063,13 @@ public class ButtonService {
                                     returnText = "Заново введите имя и фамилию сотрудника" + sighDown;
                             }
                             case "Lavozimi", "Должность" -> {
-                                userRepository.updateUserStepByUserChatId(chatId, "position");
+//                                userRepository.updateUserStepByUserChatId(chatId, "position");
                                 if (userLanguage.equals("UZ"))
                                     returnText = "Xodimning tahrirlanadigan lavozimini tanlang " + sighDown;
                                 else
                                     returnText = "Выберите редактируемую должность сотрудника " + sighDown;
-                                askSelectManagementForCreatingPosition(update, "");
+//                                final var messageCompletableFuture = askSelectManagementForCreatingPosition(update, "");
+//                                return messageCompletableFuture.join();
                             }
                             case "Ta'lim muassasasi", "Учебное заведение" -> {
                                 userRepository.updateUserStepByUserChatId(chatId, "eduName");

@@ -568,6 +568,24 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if ((messageText.equals("Lavozimi") || "Должность".equals(messageText)) && userStage.equals(Stage.SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN.name()) && (isAdmin || isSuperAdmin)) {
+
+                final var messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "");
+                SendMessage sendMessage = messageCompletableFuture.join();
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (!userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
