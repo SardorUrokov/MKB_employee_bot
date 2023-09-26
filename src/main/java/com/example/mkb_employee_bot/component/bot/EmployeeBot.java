@@ -1045,11 +1045,29 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                if ("Отменить ❌".equals(messageText) || "Bekor qilish ❌".equals(messageText)){
+                if ("Отменить ❌".equals(messageText) || "Bekor qilish ❌".equals(messageText)) {
                     if (userLanguage.equals("RU"))
                         sendTextMessage(chatId, "Процесс отменено ❗️");
                     else
                         sendTextMessage(chatId, "Jarayon bekor qilindi ❗️");
+
+                    final var messageCompletableFuture = buttonService.employeeSectionButtons(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
                 } else {
 
                     if ("personalInfo".equals(userStep)) {

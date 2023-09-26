@@ -337,7 +337,6 @@ public class BotService {
         );
     }
 
-
     /**
      * MANAGEMENT methods
      */
@@ -713,6 +712,8 @@ public class BotService {
                                 break;
                             case "dateOfBirth":
                                 updatingEmployee.setDateOfBirth(text);
+                                final var employeeAge = employeeService.getEmployeeAge(text);
+                                updatingEmployee.setAge(employeeAge);
                                 break;
                             case "nationality":
                                 updatingEmployee.setNationality(text);

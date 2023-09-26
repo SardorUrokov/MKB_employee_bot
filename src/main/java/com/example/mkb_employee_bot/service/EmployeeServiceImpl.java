@@ -50,7 +50,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.getEmployeesByPosition_Id(position_id);
     }
 
-    private Integer getEmployeeAge(String birthDate) {
+    public Integer getEmployeeAge(String birthDate) {
         LocalDate parsedBirthDate = LocalDate.parse(birthDate);
         LocalDate currentDate = LocalDate.now();
         Period period = Period.between(parsedBirthDate, currentDate);
