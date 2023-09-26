@@ -2302,7 +2302,7 @@ public class ButtonService {
                 "Lavozim: " + employee.getPosition().getName() + "\n" +
                 "Bo'lim: " + employee.getPosition().getManagement().getName() + "\n" +
                 "Departament: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
-                "\nMa'lumoti " + getEmployeeEducationsInfo(employee) +
+                "\nMa'lumoti " + getEmployeeEducationsInfo(employee, "UZ") +
                 "\nMalakasi\n" + getEmployeeSkills(employee);
     }
 
@@ -2316,7 +2316,7 @@ public class ButtonService {
                 "\nДолжность: " + employee.getPosition().getName() +
                 "\nОтдел: " + employee.getPosition().getManagement().getName() +
                 "\nДепартамент: " + employee.getPosition().getManagement().getDepartment().getName() + "\n" +
-                "\nОбразование " + getEmployeeEducationsInfo(employee) +
+                "\nОбразование " + getEmployeeEducationsInfo(employee, "RU") +
                 "\nНавыки и умения\n" + getEmployeeSkills(employee);
     }
 
@@ -2346,7 +2346,7 @@ public class ButtonService {
         return checkCommas(skills) + ";";
     }
 
-    public String getEmployeeEducationsInfo(Employee employee) {
+    public String getEmployeeEducationsInfo(Employee employee, String language) {
 
         String educationInfo = "";
         final var educations = educationRepository.findEmployeeEducations(employee.getId());
@@ -2357,9 +2357,10 @@ public class ButtonService {
 
             for (Education education : educations) {
                 value = education.getType().getValue();
-                if (!(value < preValue))
-                    educationInfo = String.valueOf(stringBuilder.append(setEduInfos(education)).append(" "));
-
+                if (!(value < preValue)) {
+                    String eduInfo = language.equals("UZ") ? setEduInfo_UZ(education) : setEduInfo_RU(education);
+                    educationInfo = String.valueOf(stringBuilder.append(eduInfo).append(" "));
+                }
                 preValue = value;
             }
         }
@@ -2376,11 +2377,18 @@ public class ButtonService {
         return substringed;
     }
 
-    public String setEduInfos(Education education) {
+    public String setEduInfo_UZ(Education education) {
         return "\nTa'lim muassasi: " + education.getName() +
                 "\nTa'lim yo'nalishi: " + education.getEducationField() +
                 "\n" + education.getType() +
                 "\nMuddatlari: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
+    }
+
+    public String setEduInfo_RU(Education education) {
+        return "\nУчебное заведение: " + education.getName() +
+                "\nОбразовательная направленность: " + education.getEducationField() +
+                "\n" + education.getType() +
+                "\nСроки: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
     }
 
     public CompletableFuture<SendMessage> cancelledConfirmation(Update update, String forWhat) {
@@ -2893,9 +2901,8 @@ public class ButtonService {
         for (String part : parts) {
             String trimmedPart = part.trim();
 
-            if (!trimmedPart.isEmpty()) {
+            if (!trimmedPart.isEmpty())
                 words.add(trimmedPart);
-            }
         }
         return words;
     }
@@ -2918,6 +2925,7 @@ public class ButtonService {
                         section6 = "Ta'lim ma'lumotlari";
                         section7 = "Malakasi";
                         section8 = "Fayl ma'lumotlari";
+
                     } else {
                         returnText = "Какую информацию о сотруднике вы хотите изменить?";
                         cancelButton = "Отменить ❌";
@@ -3005,7 +3013,6 @@ public class ButtonService {
 
     public CompletableFuture<SendMessage> askInfoForSelectedSection(Update update, Employee updatingEmployee) {
         return CompletableFuture.supplyAsync(() -> {
-
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     final var text = update.getMessage().getText();
@@ -3444,10 +3451,6 @@ public class ButtonService {
             if (type.equals(typePart) && field.equals(fieldPart))
                 selectedEducation = education;
         }
-
-////        educationRepository.deleteById(selectedEducation.getId());
-//        educationRepository.updateEducationIsDeleted(selectedEducation.getId());
-////        educationList.remove(selectedEducation);
         return selectedEducation;
     }
 
@@ -3457,7 +3460,7 @@ public class ButtonService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     String cancelButton = (userLanguage.equals("UZ")) ? "To'xtatish 🛑" : "Остановить 🛑";
-                    final var eduInfos = setEduInfos(selectedEducation);
+                    final var eduInfos = setEduInfo_UZ(selectedEducation);
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
