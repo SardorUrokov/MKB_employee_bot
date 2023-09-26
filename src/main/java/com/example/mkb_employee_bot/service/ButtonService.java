@@ -17,6 +17,7 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -2346,8 +2347,9 @@ public class ButtonService {
     }
 
     public String getEmployeeEducationsInfo(Employee employee) {
+
         String educationInfo = "";
-        final var educations = employee.getEducations();
+        final var educations = educationRepository.findEmployeeEducations(employee.getId());
 
         for (Education ignored : educations) {
             int value, preValue = 0;
@@ -3500,6 +3502,41 @@ public class ButtonService {
                             .replyMarkup(replyKeyboardMarkup)
                             .chatId(chatId)
                             .text(eduInfos)
+                            .build();
+                }
+        );
+    }
+
+    public CompletableFuture<SendMessage> saveUpdatingEducationInfo(Update update, Employee employee, Education updatedEducation) {
+        return CompletableFuture.supplyAsync(() -> {
+
+                    chatId = update.getMessage().getChatId();
+                    userLanguage = getUserLanguage(chatId);
+                    final var updatedEducationId = updatedEducation.getId();
+                    final var education = educationRepository.findById(updatedEducationId).orElseThrow();
+
+                    education.setName(updatedEducation.getName());
+                    education.setType(updatedEducation.getType());
+                    education.setEducationField(updatedEducation.getEducationField());
+                    education.setStartedDate(updatedEducation.getStartedDate());
+                    education.setEndDate(updatedEducation.getEndDate());
+                    education.setUpdatedAt(new Date());
+                    educationRepository.save(education);
+
+                    if (userLanguage.equals("UZ"))
+                        returnText = getEmployeeInfoForUserLanguage_UZ(employee);
+                    else
+                        returnText = getEmployeeInfoForUserLanguage_RU(employee);
+
+                    final var messageCompletableFuture = askSectionForUpdatingEmployee(update);
+                    final var sendMessage = messageCompletableFuture.join();
+                    final var replyMarkup = sendMessage.getReplyMarkup();
+                    userRepository.updateUserStepByUserChatId(chatId, "");
+
+                    return SendMessage.builder()
+                            .replyMarkup(replyMarkup)
+                            .chatId(chatId)
+                            .text(returnText)
                             .build();
                 }
         );

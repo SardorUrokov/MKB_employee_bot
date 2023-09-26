@@ -727,10 +727,29 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     selectedEducation.setStartedDate(startDate);
                     selectedEducation.setEndDate(endDate);
 
-                    if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId, "Muvaffaqiyatli o'zgartirildi ");
-                    else
-                        sendTextMessage(chatId, "Успешно изменен ️");
+                    final var messageCompletableFuture = buttonService.saveUpdatingEducationInfo(update, updatingEmployee, selectedEducation);
+                    final var sendMessage = messageCompletableFuture.join();
+
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    final String info;
+                    if (userLanguage.equals("UZ")) {
+                        info = buttonService.getEmployeeInfoForUserLanguage_UZ(updatingEmployee);
+                    } else {
+                        info = buttonService.getEmployeeInfoForUserLanguage_RU(updatingEmployee);
+                    }
+                    sendTextMessage(chatId, info);
 
                 } else {
                     if (userLanguage.equals("UZ"))

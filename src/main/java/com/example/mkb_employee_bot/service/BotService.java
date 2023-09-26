@@ -717,26 +717,15 @@ public class BotService {
                             case "nationality":
                                 updatingEmployee.setNationality(text);
                                 break;
-//                            case "position":
-//                            updatingEmployee.setPosition();
-//                                buttonService.askSelectManagementForCreatingPosition(update, "");
-//                                break;
-//                            case "eduName":
-//                            updatingEmployee.getEducations() //the first iterate edu s and set name
-//                                break;
-//                            case "eduField":
-//
-//                                break;
-//                            case "eduType":
-//
-//                                break;
-                            case "eduInfo":
-
-                                break;
                             case "skills":
-                                final var skills = updatingEmployee.getSkills();
-                                skills.add(skillRepository.save(new Skill(text)));
+                                final var skillList = buttonService.splitSkills(text);
+                                List<Skill> skills = new ArrayList<>();
+                                for (String skill : skillList) {
+                                    skills.add(new Skill(skill));
+                                }
+                                skillRepository.saveAll(skills);
                                 updatingEmployee.setSkills(skills);
+                                userRepository.updateUserStepByUserChatId(chatId, "");
                                 break;
                             case "attachments":
 
