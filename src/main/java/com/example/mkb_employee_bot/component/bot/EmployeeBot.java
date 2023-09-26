@@ -1045,66 +1045,74 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
-                if ("personalInfo".equals(userStep)) {
-                    if (creatingEmployee.getPosition() == null) {
-                        selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
-                        creatingEmployee.setPosition(selectedPosition);
+                if ("Отменить ❌".equals(messageText) || "Bekor qilish ❌".equals(messageText)){
+                    if (userLanguage.equals("RU"))
+                        sendTextMessage(chatId, "Процесс отменено ❗️");
+                    else
+                        sendTextMessage(chatId, "Jarayon bekor qilindi ❗️");
+                } else {
+
+                    if ("personalInfo".equals(userStep)) {
+                        if (creatingEmployee.getPosition() == null) {
+                            selectedPosition = positionRepository.findByNameAndManagement(messageText, prevManagement.getId()).orElseThrow();
+                            creatingEmployee.setPosition(selectedPosition);
+                        }
+                    } else if (Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name().equals(userStep))
+                        creatingEmployee.setFullName(messageText);
+
+                    else if (Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name().equals(userStep))
+                        creatingEmployee.setPhoneNumber(messageText);
+
+                    else if (Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name().equals(userStep)) {
+                        creatingEmployee.setDateOfBirth(messageText);
+                        creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
+                    } else if (Stage.ENTERED_EMPLOYEE_NATIONALITY.name().equals(userStep))
+                        creatingEmployee.setNationality(messageText);
+
+                    else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
+                        education.setType(EduType.valueOf(messageText));
+
+                    else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
+                        education.setName(messageText);
+
+                    else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
+                        education.setEducationField(messageText);
+
+                    else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
+
+                        String[] dateFromPeriod = buttonService.getDatesFromPeriod(messageText);
+                        education.setStartedDate(dateFromPeriod[0]);
+                        education.setEndDate(dateFromPeriod[1]);
+
+                        final var employeeEducations = creatingEmployee.getEducations();
+                        employeeEducations.add(education);
+                        creatingEmployee.setEducations(employeeEducations);
+                        education = new Education();
+
+                    } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(userStep)) {
+
+                        final var employeeSkills = creatingEmployee.getSkills();
+                        for (String s : buttonService.splitSkills(messageText)) {
+                            employeeSkills.add(new Skill(s));
+                        }
+                        creatingEmployee.setSkills(employeeSkills);
                     }
-                } else if (Stage.ENTERED_EMPLOYEE_NAME_ROLE_ADMIN.name().equals(userStep))
-                    creatingEmployee.setFullName(messageText);
 
-                else if (Stage.ENTERED_EMPLOYEE_PHONE_NUMBER_ROLE_ADMIN.name().equals(userStep))
-                    creatingEmployee.setPhoneNumber(messageText);
-
-                else if (Stage.ENTERED_EMPLOYEE_BIRTHDATE_ROLE_ADMIN.name().equals(userStep)) {
-                    creatingEmployee.setDateOfBirth(messageText);
-                    creatingEmployee.setAge(buttonService.getAgeFromBirthDate(messageText));
-                } else if (Stage.ENTERED_EMPLOYEE_NATIONALITY.name().equals(userStep))
-                    creatingEmployee.setNationality(messageText);
-
-                else if (Stage.SELECTED_EMPLOYEE_EDUCATION_TYPE.name().equals(userStep))
-                    education.setType(EduType.valueOf(messageText));
-
-                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_NAME.name().equals(userStep))
-                    education.setName(messageText);
-
-                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_FIELD.name().equals(userStep))
-                    education.setEducationField(messageText);
-
-                else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
-
-                    String[] dateFromPeriod = buttonService.getDatesFromPeriod(messageText);
-                    education.setStartedDate(dateFromPeriod[0]);
-                    education.setEndDate(dateFromPeriod[1]);
-
-                    final var employeeEducations = creatingEmployee.getEducations();
-                    employeeEducations.add(education);
-                    creatingEmployee.setEducations(employeeEducations);
-                    education = new Education();
-
-                } else if (Stage.ENTERED_EMPLOYEE_SKILLS.name().equals(userStep)) {
-
-                    final var employeeSkills = creatingEmployee.getSkills();
-                    for (String s : buttonService.splitSkills(messageText)) {
-                        employeeSkills.add(new Skill(s));
-                    }
-                    creatingEmployee.setSkills(employeeSkills);
-                }
-
-                CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
-                SendMessage sendMessage = setUserLanguageAndRequestContact.join();
-                try {
-                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                                try {
-                                    execute(sendMessage);
-                                } catch (TelegramApiException e) {
-                                    throw new RuntimeException(e);
+                    CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askInformationOfEmployeeForCreating(update, userStep);
+                    SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
-                            }
-                    );
-                    executeFuture.join();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                        );
+                        executeFuture.join();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
             } else if (userStage.equals("CONFIRMATION_FOR_DELETING_EMPLOYEE") && (isAdmin || isSuperAdmin)) {
