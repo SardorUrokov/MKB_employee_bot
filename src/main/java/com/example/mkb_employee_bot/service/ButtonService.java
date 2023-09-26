@@ -2418,6 +2418,7 @@ public class ButtonService {
 
     public CompletableFuture<SendMessage> askPositionNameForCreatingEmployee(Update update) {
         return CompletableFuture.supplyAsync(() -> {
+
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     String cancelButton;
@@ -2744,7 +2745,7 @@ public class ButtonService {
         }
     }
 
-    private boolean checkEduPeriod(String period) {
+    public boolean checkEduPeriod(String period) {
 
         boolean isValuable;
         String[] years = period.split("-");
@@ -2879,7 +2880,7 @@ public class ButtonService {
         return age;
     }
 
-    public String[] getDateFromPeriod(String eduPeriod) {
+    public String[] getDatesFromPeriod(String eduPeriod) {
         return eduPeriod.split("-");
     }
 
@@ -3384,7 +3385,7 @@ public class ButtonService {
 
                                     ❗️Образец: PostgreSQl, JAVA, Problem Solving, Управленческие способности...""";
 
-                        String[] dateFromPeriod = getDateFromPeriod(updateText);
+                        String[] dateFromPeriod = getDatesFromPeriod(updateText);
                         education.setStartedDate(dateFromPeriod[0]);
                         education.setEndDate(dateFromPeriod[1]);
                         final var employeeEducations = creatingEmployee.getEducations();
@@ -3454,14 +3455,35 @@ public class ButtonService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     String cancelButton = (userLanguage.equals("UZ")) ? "To'xtatish 🛑" : "Остановить 🛑";
-
                     final var eduInfos = setEduInfos(selectedEducation);
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setSelective(true);
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
+                    List<KeyboardButton> keyboardButtons = new ArrayList<>();
 
+                    for (EduType value : EduType.values()) {
+                        keyboardButtons.add(
+                                new KeyboardButton(
+                                        value.name()
+                                )
+                        );
+                        // If the number of buttons in the row reaches 2, create a new row
+                        if (keyboardButtons.size() == 2) {
+                            KeyboardRow keyboardRow = new KeyboardRow();
+                            keyboardRow.addAll(keyboardButtons);
+                            keyboardRowList.add(keyboardRow);
+                            keyboardButtons.clear(); // Clear the buttons for the next row
+                        }
+                    }
+
+                    if (!keyboardButtons.isEmpty()) {
+                        KeyboardRow keyboardRow = new KeyboardRow();
+                        keyboardRow.addAll(keyboardButtons);
+                        keyboardRowList.add(keyboardRow);
+                    }
                     keyboardRowList.add(
                             new KeyboardRow(
                                     Collections.singletonList(
@@ -3472,6 +3494,7 @@ public class ButtonService {
                             )
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
+                    userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_UPDATING_EDUCATION_TYPE.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)

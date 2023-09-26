@@ -120,7 +120,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         Добро пожаловать в бот для сотрудников МКБанк!
                         """;
 
-                sendTextMessage(String.valueOf(chatId), welcomeMessage);
+                sendTextMessage(chatId, welcomeMessage);
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.selectLanguageButtons(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
@@ -282,8 +282,8 @@ public class EmployeeBot extends TelegramLongPollingBot {
                             sendMessageCompletableFuture = buttonService.managementEmployees(update);
                     default -> {
                         if (userLanguage.equals("UZ"))
-                            sendTextMessage(String.valueOf(chatId), "Iltimos, ro'yhatdagi bo'limlardan birini tanlang ❗️");
-                        else sendTextMessage(chatId.toString(), "Пожалуйста, выберите один из разделов списка ❗️");
+                            sendTextMessage(chatId, "Iltimos, ro'yhatdagi bo'limlardan birini tanlang ❗️");
+                        else sendTextMessage(chatId, "Пожалуйста, выберите один из разделов списка ❗️");
                     }
                 }
 
@@ -607,9 +607,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 if (!("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
                     if (userLanguage.equals("RU"))
-                        sendTextMessage(chatId.toString(), "Информация о сотруднике изменена ❗️");
+                        sendTextMessage(chatId, "Информация о сотруднике изменена ❗️");
                     else
-                        sendTextMessage(chatId.toString(), "Xodim ma'lumotlari o'zgartirildi ❗️");
+                        sendTextMessage(chatId, "Xodim ma'lumotlari o'zgartirildi ❗️");
                 }
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
@@ -672,17 +672,90 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
 
                 if (userLanguage.equals("RU"))
-                    sendTextMessage(chatId.toString(), "Начать редактирование ⁉️");
+                    sendTextMessage(chatId, "Начать редактирование ⁉️");
                 else
-                    sendTextMessage(chatId.toString(), "Tahrirlashni boshlaysizmi ⁉️");
+                    sendTextMessage(chatId, "Tahrirlashni boshlaysizmi ⁉️");
+
+            } else if (userStep.equals("SELECTED_UPDATING_EDUCATION_TYPE") && (isAdmin || isSuperAdmin)) {
+
+                selectedEducation.setType(EduType.valueOf(messageText));
+
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId, "Введите заново название учебного заведения ");
+                else
+                    sendTextMessage(chatId, "Ta'lim muassasa nomini qaytadan kiriting ");
+
+                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_UPDATING_EDUCATION_NAME.name());
+
+            } else if (userStep.equals("ENTERED_UPDATING_EDUCATION_NAME") && (isAdmin || isSuperAdmin)) {
+
+                selectedEducation.setName(messageText);
+                if (userLanguage.equals("RU"))
+                    sendTextMessage(chatId, "Заново введите направление обучения ");
+                else
+                    sendTextMessage(chatId, "Ta'lim yo'nalishini qaytadan kiriting ");
+
+                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_UPDATING_EDUCATION_FIELD.name());
+
+            } else if (userStep.equals("ENTERED_UPDATING_EDUCATION_FIELD") && (isAdmin || isSuperAdmin)) {
+
+                selectedEducation.setEducationField(messageText);
+
+                if (userLanguage.equals("UZ"))
+                    sendTextMessage(chatId, """
+                            O'quv yili muddatlarini qaytadan kiriting:
+                                    
+                            ❗️Namuna: 2018-2022;
+                            ❗️Agar hozirda davom etayotgan bo'lsa: 2020-Present""");
+                else
+                    sendTextMessage(chatId, """
+                            Заново введите сроки учебного года:
+
+                            ❗️Образец: 2018-2022;
+                            ❗️Если в данный момент продолжается: 2020-Present""");
+
+                userRepository.updateUserStepByUserChatId(chatId, Stage.ENTERED_UPDATING_EDUCATION_PERIOD.name());
+
+            } else if (userStep.equals("ENTERED_UPDATING_EDUCATION_PERIOD") && (isAdmin || isSuperAdmin)) {
+
+                final var checkedEduPeriod = buttonService.checkEduPeriod(messageText);
+                if (checkedEduPeriod) {
+                    final var period = buttonService.getDatesFromPeriod(messageText);
+                    final var startDate = period[0];
+                    final var endDate = period[1];
+
+                    selectedEducation.setStartedDate(startDate);
+                    selectedEducation.setEndDate(endDate);
+
+                    if (userLanguage.equals("UZ"))
+                        sendTextMessage(chatId, "Muvaffaqiyatli o'zgartirildi ");
+                    else
+                        sendTextMessage(chatId, "Успешно изменен ️");
+
+                } else {
+                    if (userLanguage.equals("UZ"))
+                        messageText = """
+                                ❌Muddat oralig'i noto'g'ri kiritildi. Sana formatini to'g'ri kiriting:
+
+                                ❗️Namuna: 2018-2022;
+                                ❗️Agar hozirda davom etayotgan bo'lsa: 2020-Present""";
+                    else
+                        messageText = """
+                                ❌Неверно введен сроки выполнения. Введите правильный формат даты:
+                                                                             
+                                ❗️Образец: 2018-2022;
+                                ❗️Если в настоящее время продолжается: (2020-Present)""";
+
+                    sendTextMessage(chatId, messageText);
+                }
 
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_EDUCATION") && (isAdmin || isSuperAdmin)) {
 
                 if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText)) {
                     if (userLanguage.equals("RU"))
-                        sendTextMessage(chatId.toString(), "Процесс остановлен ❗️");
+                        sendTextMessage(chatId, "Процесс остановлен ❗️");
                     else
-                        sendTextMessage(chatId.toString(), "Jarayon to'xtatildi ❗️");
+                        sendTextMessage(chatId, "Jarayon to'xtatildi ❗️");
 
                     final var chatId = update.getMessage().getChatId();
                     userRepository.updateUserStageByUserChatId(chatId, Stage.STARTED.name());
@@ -706,6 +779,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     }
 
                 } else {
+
                     selectedEducation = buttonService.getSelectedEducation(messageText, updatingEmployee);
                     CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askEnterUpdatingEducationInfos(update, selectedEducation);
                     SendMessage sendMessage = messageCompletableFuture.join();
@@ -725,9 +799,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     }
 
                     if (userLanguage.equals("RU"))
-                        sendTextMessage(chatId.toString(), "Введите заново название учебного заведения ⬇️");
+                        sendTextMessage(chatId, "Выберите заново уровень образования: ⬇️");
                     else
-                        sendTextMessage(chatId.toString(), "Ta'lim muassasa nomini qaytadan kiriting ⬇️");
+                        sendTextMessage(chatId, "Ta'lim bosqichini qaytadan tanlang ⬇️");
                 }
 
             } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_UPDATING_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
@@ -772,9 +846,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
             } else if ("To'xtatish 🛑".equals(messageText) || "Остановить 🛑".equals(messageText) && (isAdmin || isSuperAdmin)) {
 
                 if (userLanguage.equals("UZ"))
-                    sendTextMessage(chatId.toString(), "Jarayon to'xtatildi❗️");
+                    sendTextMessage(chatId, "Jarayon to'xtatildi❗️");
                 else
-                    sendTextMessage(chatId.toString(), "Процесс остановлен❗️");
+                    sendTextMessage(chatId, "Процесс остановлен❗️");
 
                 buttonService.retryUserSteps();
                 education = new Education();
@@ -804,9 +878,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 if (creatingEmployee != null) {
                     if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId.toString(), "Saqlash uchun xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
+                        sendTextMessage(chatId, "Saqlash uchun xodimning ma'lumotlarini tasdiqlaysizmi? ⬇️");
                     else
-                        sendTextMessage(chatId.toString(), "Подтвердите информацию о сотруднике для сохранения? ⬇️");
+                        sendTextMessage(chatId, "Подтвердите информацию о сотруднике для сохранения? ⬇️");
 
                     completableFuture = buttonService.completeAddingEmployeeInfo(update, creatingEmployee);
                 } else
@@ -946,9 +1020,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 }
 
                 if (userLanguage.equals("RU"))
-                    sendTextMessage(chatId.toString(), "Подтвердить сохранение ️⁉️");
+                    sendTextMessage(chatId, "Подтвердить сохранение ️⁉️");
                 else
-                    sendTextMessage(chatId.toString(), "Saqlashni tasdiqlaysizmi ⁉️");
+                    sendTextMessage(chatId, "Saqlashni tasdiqlaysizmi ⁉️");
 
             } else if ((userStage.equals("POSITION_FOR_CREATING_EMPLOYEE") || !userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
@@ -980,7 +1054,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 else if (Stage.ENTERED_EMPLOYEE_EDUCATION_PERIOD.name().equals(userStep)) {
 
-                    String[] dateFromPeriod = buttonService.getDateFromPeriod(messageText);
+                    String[] dateFromPeriod = buttonService.getDatesFromPeriod(messageText);
                     education.setStartedDate(dateFromPeriod[0]);
                     education.setEndDate(dateFromPeriod[1]);
 
@@ -1060,9 +1134,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
                 if (userLanguage.equals("RU"))
-                    sendTextMessage(chatId.toString(), "Подтвердить удаление ️");
+                    sendTextMessage(chatId, "Подтвердить удаление ️");
                 else
-                    sendTextMessage(chatId.toString(), "O'chirishni tasdiqlaysizmi ⁉️");
+                    sendTextMessage(chatId, "O'chirishni tasdiqlaysizmi ⁉️");
 
             } else if (userStage.equals("ENTERED_EMPLOYEE_NAME_FOR_DELETE_ROLE_USER") && (isAdmin || isSuperAdmin)) {
 
@@ -1338,7 +1412,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 String text;
                 if (userLanguage.equals("UZ")) text = "Juda soz! Endi tahrirlashni boshlaymiz.";
                 else text = "Отлично! Теперь приступим к редактированию.";
-                sendTextMessage(chatId.toString(), text);
+                sendTextMessage(chatId, text);
 
                 prevPosition = positionRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askNameForCreatingPosition(update, "forUpdating");
@@ -1462,7 +1536,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 if (userLanguage.equals("UZ")) text = "Juda soz! Endi tahrirlashni boshlaymiz.";
                 else text = "Отлично! Теперь приступим к редактированию.";
 
-                sendTextMessage(chatId.toString(), text);
+                sendTextMessage(chatId, text);
 
                 prevManagement = managementRepository.findByName(messageText).orElseThrow();
                 CompletableFuture<SendMessage> messageCompletableFuture = buttonService.askSelectDepartmentForUpdatingManagement(update, "forSaving");
@@ -1674,9 +1748,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 if (isAdmin) {
 
                     if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId.toString(), "ADMIN roli boshqa adminlar haqida to'liq ma'lumot olish huquqiga ega emas ‼️");
+                        sendTextMessage(chatId, "ADMIN roli boshqa adminlar haqida to'liq ma'lumot olish huquqiga ega emas ‼️");
                     else
-                        sendTextMessage(chatId.toString(), "Роль ADMIN не имеет полного доступа к информацию другим администраторам ‼️");
+                        sendTextMessage(chatId, "Роль ADMIN не имеет полного доступа к информацию другим администраторам ‼️");
 
                 } else if (userStage.equals("ADMIN_SELECTED_FOR_DELETING")) {
 
@@ -1738,9 +1812,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 if (isAdmin) {
                     if (userLanguage.equals("UZ"))
-                        sendTextMessage(chatId.toString(), "ADMIN roli boshqa admin qo'shish huquqiga ega emas ‼️");
+                        sendTextMessage(chatId, "ADMIN roli boshqa admin qo'shish huquqiga ega emas ‼️");
                     else
-                        sendTextMessage(chatId.toString(), "Роль АДМИН не имеет права добавлять еще одного админа ‼️");
+                        sendTextMessage(chatId, "Роль АДМИН не имеет права добавлять еще одного админа ‼️");
                 } else {
 
                     CompletableFuture<SendMessage> sendMessageCompletableFuture = buttonService.askPhoneNumberForAddingAdmin(update);
@@ -1820,8 +1894,9 @@ public class EmployeeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendTextMessage(String chatId, String text) {
-        SendMessage message = new SendMessage(chatId, text);
+    private void sendTextMessage(Long chatId, String text) {
+
+        SendMessage message = new SendMessage(chatId.toString(), text);
         try {
             execute(message);
         } catch (TelegramApiException e) {
