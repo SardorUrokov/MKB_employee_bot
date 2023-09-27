@@ -128,9 +128,7 @@ public class FileService {
         }
     }
 
-
-    private record downloadDTO(URL link, byte[] bytes) {
-    }
+    private record downloadDTO(URL link, byte[] bytes) {}
 
     private BinaryContent getPersistentBinaryContent(ResponseEntity<String> response) {
         var filePath = getFilePath(response);
@@ -189,6 +187,7 @@ public class FileService {
     }
 
     private downloadDTO downloadFile(String filePath) {
+
         var fullUri = fileStorageUri.replace("{token}", token)
                 .replace("{filePath}", filePath);
         URL urlObj;
