@@ -24,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * @author <a href="https://www.linkedin.com/in/urokovsardor">Sardor Urokov</a>
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
