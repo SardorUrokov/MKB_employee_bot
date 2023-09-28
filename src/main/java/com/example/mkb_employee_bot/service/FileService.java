@@ -220,14 +220,14 @@ public class FileService {
                 returnInfo.append("\n").append(document.getFileType()).append(":\n").append(document.getLinkForDownloading()).append("\n");
             }
         }
-
         if (!photos.isEmpty()) {
             for (AppPhoto photo : photos) {
                 if (!(photo.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name())))
                     returnInfo.append("\n").append(photo.getFileType()).append(":\n").append(photo.getLinkForDownloading()).append("\n");
             }
         }
+
+        //return links with FileType
         return returnInfo.toString();
     }
-
 }
