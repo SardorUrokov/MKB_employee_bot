@@ -2925,7 +2925,6 @@ public class ButtonService {
                         section6 = "Ta'lim ma'lumotlari";
                         section7 = "Malakasi";
                         section8 = "Fayl ma'lumotlari";
-
                     } else {
                         returnText = "Какую информацию о сотруднике вы хотите изменить?";
                         cancelButton = "Отменить ❌";
