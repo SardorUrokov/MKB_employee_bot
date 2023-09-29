@@ -17,7 +17,6 @@ import com.example.mkb_employee_bot.entity.enums.Stage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -2367,16 +2366,6 @@ public class ButtonService {
         return educationInfo;
     }
 
-    public String checkCommas(String string) {
-
-        String substringed = "";
-        if (string.endsWith(", ")) {
-            final var length = string.length();
-            substringed = string.substring(0, length - 2);
-        }
-        return substringed;
-    }
-
     public String setEduInfo_UZ(Education education) {
         return "\nTa'lim muassasi: " + education.getName() +
                 "\nTa'lim yo'nalishi: " + education.getEducationField() +
@@ -2389,6 +2378,16 @@ public class ButtonService {
                 "\nОбразовательная направленность: " + education.getEducationField() +
                 "\n" + education.getType() +
                 "\nСроки: (" + education.getStartedDate() + " - " + education.getEndDate() + ")\n";
+    }
+
+    public String checkCommas(String string) {
+
+        String substringed = "";
+        if (string.endsWith(", ")) {
+            final var length = string.length();
+            substringed = string.substring(0, length - 2);
+        }
+        return substringed;
     }
 
     public CompletableFuture<SendMessage> cancelledConfirmation(Update update, String forWhat) {
@@ -3542,5 +3541,59 @@ public class ButtonService {
                             .build();
                 }
         );
+    }
+
+    public SendMessage askDeleteOrAddAttachment(Update update) {
+
+        chatId = update.getMessage().getChatId();
+        userLanguage = getUserLanguage(chatId);
+
+        String deleteButton = "File o'chirish ❌",
+                addButton = "File qo'shish ➕",
+                cancelButton = "To'xtatish 🛑";
+        returnText = "Fayl ma'lumotlar bilan ishlash uchun quyidagilardan birini tanlang " + sighDown;
+
+        if (userLanguage.equals("RU")) {
+            deleteButton = "Удалить вложения ❌";
+            addButton = "Добавить вложения ➕";
+            cancelButton = "Остановить 🛑";
+            returnText = "Выберите один из следующих вариантов работы с данными файла " + sighDown;
+        }
+
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setSelective(true);
+        List<KeyboardRow> keyboardRowList = new ArrayList<>();
+
+        keyboardRowList.add(
+                new KeyboardRow(
+                        List.of(
+                                KeyboardButton.builder()
+                                        .text(addButton)
+                                        .build(),
+                                KeyboardButton.builder()
+                                        .text(deleteButton)
+                                        .build()
+                        )
+                )
+        );
+        keyboardRowList.add(
+                new KeyboardRow(
+                        Collections.singletonList(
+                                KeyboardButton.builder()
+                                        .text(cancelButton)
+                                        .build()
+                        )
+                )
+        );
+        replyKeyboardMarkup.setKeyboard(keyboardRowList);
+        userRepository.updateUserStageByUserChatId(chatId, Stage.PROCEDURE_WITH_ATTACHMENTS.name());
+
+        return SendMessage.builder()
+                .replyMarkup(replyKeyboardMarkup)
+                .text(returnText)
+                .chatId(chatId)
+                .build();
     }
 }

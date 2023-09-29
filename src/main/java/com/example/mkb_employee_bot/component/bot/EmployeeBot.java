@@ -569,6 +569,84 @@ public class EmployeeBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
+            } else if (("Fayl ma'lumotlari".equals(messageText) || "Вложения".equals(messageText)) && userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
+
+                final var sendMessage = buttonService.askDeleteOrAddAttachment(update);
+                try {
+                    CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+                    executeFuture.join();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                final var appPhotos = fileService.employeePhotos(updatingEmployee);
+                final var appDocuments = fileService.employeeDocuments(updatingEmployee);
+
+                if (!appPhotos.isEmpty()) {
+                    for (AppPhoto appPhoto : appPhotos) {
+                        if (!(appPhoto.getFileType().name().equals(FileType.EMPLOYEE_PHOTO.name()))) {
+                            byte[] fileAsArrayOfBytes = appPhoto.getFileAsArrayOfBytes();
+                            InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                            InputFile photoInputFile = new InputFile(inputStream, "photo.jpg");
+
+                            sendPhoto(chatId, appPhoto.getFileType().name(), photoInputFile);
+                        }
+                    }
+                }
+
+                if (!appDocuments.isEmpty()) {
+                    for (AppDocument appDocument : appDocuments) {
+                        byte[] fileAsArrayOfBytes = appDocument.getFileAsArrayOfBytes();
+                        InputStream inputStream = new ByteArrayInputStream(fileAsArrayOfBytes);
+                        InputFile docInputFile = new InputFile(inputStream, appDocument.getDocName());
+
+                        sendDocument(chatId, appDocument.getFileType().name(), docInputFile);
+                    }
+                }
+
+            } else if (userStage.equals("PROCEDURE_WITH_ATTACHMENTS") && (isAdmin || isSuperAdmin)) {
+
+                if ("File qo'shish ➕".equals(messageText)) {
+
+                    final var messageCompletableFuture = buttonService.sendAttachmentAgain(update);
+                    SendMessage sendMessage = messageCompletableFuture.join();
+
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                } else if ("File o'chirish ❌".equals(messageText)) {
+
+                    final var appPhotos = fileService.employeePhotos(updatingEmployee);
+                    final var appDocuments = fileService.employeeDocuments(updatingEmployee);
+
+                    if (appPhotos.isEmpty() && appDocuments.isEmpty()) {
+                        if (userLanguage.equals("RU"))
+                            sendTextMessage(chatId, "Данные файла сотрудника не были сохранены, удалить невозможно ❗️");
+                        else
+                            sendTextMessage(chatId, "Xodimning fayl ma'lumotlari saqlanmagan, o'chirishning iloji yo'q ❗️");
+                    }
+                }
+
             } else if (("Lavozimi".equals(messageText) || "Должность".equals(messageText)) && userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
 
                 final var messageCompletableFuture = buttonService.askSelectManagementForCreatingPosition(update, "forUpdatingEmployeePosition");
@@ -587,6 +665,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if (userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (!userStep.equals("")) && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> setUserLanguageAndRequestContact = botService.updateEmployee(update, updatingEmployee);
