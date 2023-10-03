@@ -227,7 +227,6 @@ public class FileService {
             }
         }
 
-        //return links with FileType
         return returnInfo.toString();
     }
 }

@@ -645,6 +645,29 @@ public class EmployeeBot extends TelegramLongPollingBot {
                         else
                             sendTextMessage(chatId, "Xodimning fayl ma'lumotlari saqlanmagan, o'chirishning iloji yo'q ❗️");
                     }
+                } else {
+                    if (userLanguage.equals("UZ"))
+                        sendTextMessage(chatId, "Jarayon to'xtatildi❗️");
+                    else
+                        sendTextMessage(chatId, "Процесс остановлен❗️");
+
+                    CompletableFuture<SendMessage> setUserLanguageAndRequestContact = buttonService.askSectionForUpdatingEmployee(update);
+                    SendMessage sendMessage = setUserLanguageAndRequestContact.join();
+
+                    try {
+                        CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
+                                    try {
+                                        execute(sendMessage);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        );
+                        executeFuture.join();
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
             } else if (("Lavozimi".equals(messageText) || "Должность".equals(messageText)) && userStage.equals("SELECTED_EMPLOYEE_UPDATING_INFO_ROLE_ADMIN") && (isAdmin || isSuperAdmin)) {
@@ -1640,12 +1663,12 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
             } else if (userStage.equals("ENTER_NAME_FOR_SAVING_UPDATED_MANAGEMENT") && (isAdmin || isSuperAdmin)) {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = botService.updateManagement(update, prevManagement);
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
+
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
                                     execute(sendMessage);
@@ -1786,6 +1809,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 CompletableFuture<SendMessage> messageCompletableFuture = botService.deleteDepartment(update);
                 SendMessage sendMessage = messageCompletableFuture.join();
+
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
                                 try {
@@ -1818,6 +1842,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             } else if (userStage.equals("DEPARTMENT_SELECTED_FOR_UPDATING") && (isAdmin || isSuperAdmin)) {
 
                 prevDepartment = departmentRepository.findByName(messageText).orElseThrow();
@@ -1844,12 +1869,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                                try {
+                                    execute(sendMessage);
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
                     executeFuture.join();
 
                 } catch (Exception e) {
@@ -2045,7 +2071,6 @@ public class EmployeeBot extends TelegramLongPollingBot {
     }
 
     private void sendTextMessage(Long chatId, String text) {
-
         SendMessage message = new SendMessage(chatId.toString(), text);
         try {
             execute(message);

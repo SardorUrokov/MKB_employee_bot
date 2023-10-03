@@ -2872,6 +2872,7 @@ public class ButtonService {
     }
 
     public int getAgeFromBirthDate(String birthdateStr) {
+
         int age = 0;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date currentDate = new Date();
@@ -2883,6 +2884,7 @@ public class ButtonService {
                 currentDate.setYear(currentDate.getYear() - 1);
             }
             age = currentDate.getYear() - birthdate.getYear();
+
         } catch (ParseException e) {
             System.out.println("Invalid date format. Please enter birthdate in yyyy-MM-dd format!");
         }
@@ -2894,6 +2896,7 @@ public class ButtonService {
     }
 
     public List<String> splitSkills(String input) {
+
         List<String> words = new ArrayList<>();
         String[] parts = input.split(",");
 
