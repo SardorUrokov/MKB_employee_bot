@@ -3299,7 +3299,8 @@ public class ButtonService {
 
                     for (EduType value : EduType.values()) {
                         keyboardButtons.add(
-                                new KeyboardButton(value.name()
+                                new KeyboardButton(
+                                        value.name()
                                 )
                         );
                         // If the number of buttons in the row reaches 2, create a new row
