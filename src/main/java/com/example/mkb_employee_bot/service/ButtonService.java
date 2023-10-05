@@ -3188,7 +3188,11 @@ public class ButtonService {
                         cancelButton = "Остановить 🛑";
                         returnText = "Отправьте файл для сохранения";
                     }
-                    userRepository.updateUserStepByUserChatId(chatId, Stage.ATTACHMENT_SHARED.name());
+
+                    if (userRepository.getUserStageByUserChatId(chatId).equals("ADDING_FILE_FOR_UPDATING"))
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ATTACHMENT_SHARED_FOR_UPDATING.name());
+                    else
+                        userRepository.updateUserStepByUserChatId(chatId, Stage.ATTACHMENT_SHARED.name());
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     List<KeyboardRow> keyboardRowList = new ArrayList<>();
@@ -3216,7 +3220,7 @@ public class ButtonService {
         );
     }
 
-    public CompletableFuture<SendMessage> sendAttachmentAgain(Update update) {
+    public CompletableFuture<SendMessage> sendAttachmentAgain(Update update, String forWhat) {
         return CompletableFuture.supplyAsync(() -> {
 
                     chatId = update.getMessage().getChatId();
@@ -3267,7 +3271,11 @@ public class ButtonService {
                     );
                     replyKeyboardMarkup.setKeyboard(keyboardRowList);
                     userRepository.updateUserStepByUserChatId(chatId, Stage.SELECTED_EMPLOYEE_FILE_TYPE.name());
-                    userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
+
+                    if (forWhat.equals("addingEmployeeFilesForUpdating"))
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.ADDING_FILE_FOR_UPDATING.name());
+                    else
+                        userRepository.updateUserStageByUserChatId(chatId, Stage.POSITION_FOR_CREATING_EMPLOYEE.name());
 
                     return SendMessage.builder()
                             .replyMarkup(replyKeyboardMarkup)
@@ -3291,11 +3299,11 @@ public class ButtonService {
                         cancelButton = "To'xtatish 🛑";
                     }
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+                    List<KeyboardButton> keyboardButtons = new ArrayList<>();
+                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
                     replyKeyboardMarkup.setOneTimeKeyboard(true);
                     replyKeyboardMarkup.setResizeKeyboard(true);
                     replyKeyboardMarkup.setSelective(true);
-                    List<KeyboardRow> keyboardRowList = new ArrayList<>();
-                    List<KeyboardButton> keyboardButtons = new ArrayList<>();
 
                     for (EduType value : EduType.values()) {
                         keyboardButtons.add(

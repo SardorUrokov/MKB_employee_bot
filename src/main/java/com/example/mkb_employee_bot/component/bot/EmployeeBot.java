@@ -616,7 +616,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
                 if ("File qo'shish ➕".equals(messageText)) {
 
-                    final var messageCompletableFuture = buttonService.sendAttachmentAgain(update);
+                    final var messageCompletableFuture = buttonService.sendAttachmentAgain(update, "addingEmployeeFilesForUpdating");
                     SendMessage sendMessage = messageCompletableFuture.join();
 
                     try {
@@ -1089,7 +1089,7 @@ public class EmployeeBot extends TelegramLongPollingBot {
 
             } else if (("Yana fayl qo'shish ➕".equals(messageText) || "Добавить вложение еще раз ➕".equals(messageText)) && (isAdmin || isSuperAdmin)) {
 
-                final var messageCompletableFuture = buttonService.sendAttachmentAgain(update);
+                final var messageCompletableFuture = buttonService.sendAttachmentAgain(update, "");
                 SendMessage sendMessage = messageCompletableFuture.join();
                 try {
                     CompletableFuture<Void> executeFuture = CompletableFuture.runAsync(() -> {
@@ -1140,14 +1140,25 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (Stage.ATTACHMENT_SHARED.name().equals(userStep)) {
+            } else if (userStep.startsWith("ATTACHMENT_SHARED")) {
 
                 CompletableFuture<SendMessage> sendMessageCompletableFuture = new CompletableFuture<>();
-                if (message.hasDocument())
-                    sendMessageCompletableFuture = fileService.processDoc(fileType, update, creatingEmployee);
-                else if (message.hasPhoto())
-                    sendMessageCompletableFuture = fileService.processPhoto(fileType, update, creatingEmployee);
+                if (message.hasDocument()) {
 
+                    if ("ATTACHMENT_SHARED".equals(userStep))
+                        sendMessageCompletableFuture = fileService.processDoc(fileType, update, creatingEmployee);
+
+                    else if ("ATTACHMENT_SHARED_FOR_UPDATING".equals(userStep))
+                        sendMessageCompletableFuture = fileService.processDoc(fileType, update, updatingEmployee);
+
+                } else if (message.hasPhoto()) {
+
+                    if ("ATTACHMENT_SHARED".equals(userStep))
+                        sendMessageCompletableFuture = fileService.processPhoto(fileType, update, creatingEmployee);
+
+                    else if ("ATTACHMENT_SHARED_FOR_UPDATING".equals(userStep))
+                        sendMessageCompletableFuture = fileService.processPhoto(fileType, update, updatingEmployee);
+                }
                 userRepository.updateUserStepByUserChatId(chatId, "");
 
                 SendMessage sendMessage = sendMessageCompletableFuture.join();

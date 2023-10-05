@@ -16,11 +16,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 @RequiredArgsConstructor
 public class BirthdayReminderTask {
 
+    private final UserRepository userRepository;
     private final UserService userService;
     private final EmployeeServiceImpl employeeService;
-    private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 30 8 * * ?", zone = "Asia/Tashkent") //daily at 08:30 AM
+    @Scheduled(cron = "0 30 9 * * ?", zone = "Asia/Tashkent") //daily at 09:30 AM
     public void remindBirthdays() {
 
         List<Employee> employeesWithBirthday = employeeService.getEmployeesWithBirthday();
