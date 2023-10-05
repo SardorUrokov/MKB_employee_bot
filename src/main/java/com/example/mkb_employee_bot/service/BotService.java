@@ -661,6 +661,7 @@ public class BotService {
                     chatId = update.getMessage().getChatId();
                     userLanguage = getUserLanguage(chatId);
                     final var employee = employeeService.createEmployee(creatingEmployee);
+
                     if (employee.getAppPhotos() != null)
                         fileService.saveEmployee_Photo(employee);
 

@@ -4,9 +4,9 @@ public enum EduType {
     MAKTAB(0),
     KOLLEJ(1),
     AKADEMIK_LITSEY(1),
+    MUTAXXASISLIK_KURSI(4),
     BAKALAVRIAT(2),
-    MAGISTRATURA(3),
-    PhD(4);
+    MAGISTRATURA(3);
 
     private int value;
 

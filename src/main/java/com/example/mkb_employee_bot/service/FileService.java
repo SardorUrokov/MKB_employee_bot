@@ -1,11 +1,11 @@
 package com.example.mkb_employee_bot.service;
 
 import com.example.mkb_employee_bot.entity.*;
+import com.example.mkb_employee_bot.repository.*;
 import com.example.mkb_employee_bot.entity.enums.FileType;
 import com.example.mkb_employee_bot.exceptions.UploadFileException;
-import com.example.mkb_employee_bot.repository.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -77,9 +77,8 @@ public class FileService {
                                 .text(text)
                                 .chatId(chatId)
                                 .build();
-                    } else {
+                    } else
                         throw new UploadFileException("Bad response from telegram service: " + response);
-                    }
                 }
         );
     }
@@ -128,7 +127,8 @@ public class FileService {
         }
     }
 
-    private record downloadDTO(URL link, byte[] bytes) {}
+    private record downloadDTO(URL link, byte[] bytes) {
+    }
 
     private BinaryContent getPersistentBinaryContent(ResponseEntity<String> response) {
         var filePath = getFilePath(response);

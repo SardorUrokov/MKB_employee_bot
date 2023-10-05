@@ -71,7 +71,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     public Employee updateEmployee(Employee updatingEmployee) {
-        return employeeRepository.save(updatingEmployee);
+        final var savedEmployee = employeeRepository.save(updatingEmployee);
+        employeeRepository.updateEmployeeUpdatedAt(savedEmployee.getId());
+        return savedEmployee;
     }
 
     public void deleteEmployee(Long id) {
@@ -91,6 +93,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void increaseEmployeeAge(Employee babyEmployee) {
         final var employeeNewAge = babyEmployee.getAge() + 1;
         final var employeeId = babyEmployee.getId();
-        employeeRepository.updateEmployeeAgeById(employeeId,  employeeNewAge);
+        employeeRepository.updateEmployeeAgeById(employeeId, employeeNewAge);
     }
 }

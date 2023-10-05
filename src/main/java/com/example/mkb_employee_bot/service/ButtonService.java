@@ -2879,10 +2879,9 @@ public class ButtonService {
         try {
             Date birthdate = dateFormat.parse(birthdateStr);
             // Check if the birthdate has occurred for the current year
-            if (birthdate.getMonth() > currentDate.getMonth() || (birthdate.getMonth() == currentDate.getMonth() && birthdate.getDate() > currentDate.getDate())) {
-                // If not, subtract one year from the age
-                currentDate.setYear(currentDate.getYear() - 1);
-            }
+            if (birthdate.getMonth() > currentDate.getMonth() || (birthdate.getMonth() == currentDate.getMonth() && birthdate.getDate() > currentDate.getDate()))
+                currentDate.setYear(currentDate.getYear() - 1); // If not, subtract one year from the age
+
             age = currentDate.getYear() - birthdate.getYear();
 
         } catch (ParseException e) {

@@ -1,6 +1,5 @@
 package com.example.mkb_employee_bot.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import com.example.mkb_employee_bot.entity.User;
@@ -14,9 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUserChatId(Long userChatId);
 
-    @Query(value = "SELECT u FROM users u WHERE u.role = 'ADMIN' OR u.role = 'SUPER_ADMIN'"
-//            , nativeQuery = true
-    )
+    @Query(value = "SELECT u FROM users u WHERE u.role = 'ADMIN' OR u.role = 'SUPER_ADMIN'")
     List<User> getAdminList();
 
     boolean existsByUserChatId(Long userChatId);

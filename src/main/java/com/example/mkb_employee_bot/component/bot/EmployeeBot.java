@@ -1111,10 +1111,13 @@ public class EmployeeBot extends TelegramLongPollingBot {
                 CompletableFuture<SendMessage> sendMessageCompletableFuture;
 
                 if (("Tasdiqlash ✅".equals(messageText) || "Потвердить ✅".equals(messageText))) {
-                    sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
-                    creatingEmployee = new Employee();
-                    education = new Education();
-
+                    if (Stage.ADDING_FILE_FOR_UPDATING.name().equals(userStage))
+                        sendMessageCompletableFuture = botService.updateEmployee(update, updatingEmployee);
+                    else {
+                        sendMessageCompletableFuture = botService.createEmployee(creatingEmployee, update);
+                        creatingEmployee = new Employee();
+                        education = new Education();
+                    }
                 } else if (("Bekor qilish ❌".equals(messageText) || "Отменить ❌".equals(messageText))) {
                     sendMessageCompletableFuture = buttonService.cancelledConfirmation(update, "forCreatingEmployee");
                     creatingEmployee = new Employee();

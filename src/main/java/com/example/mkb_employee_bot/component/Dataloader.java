@@ -1,6 +1,5 @@
 package com.example.mkb_employee_bot.component;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +49,7 @@ public class Dataloader implements CommandLineRunner {
                     .createdAt(new Date())
                     .updatedAt(new Date())
                     .build();
+
             final var education1 = Education.builder()
                     .name("TUIT")
                     .educationField("Dasturiy Injiniring")
