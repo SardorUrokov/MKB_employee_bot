@@ -89,7 +89,7 @@ public class Dataloader implements CommandLineRunner {
                     .dateOfBirth("2004-10-05")
                     .phoneNumber("998914525468")
                     .nationality("Uzbek")
-                    .age(18)
+                    .age(19)
                     .position(mutaxxasis)
                     .educations(List.of(education, education1))
                     .skills(skills)

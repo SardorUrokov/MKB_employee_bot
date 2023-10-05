@@ -9,9 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PositionInfoDTO {
-
-    String positionId;
-
-    Long managementId,
+    Long positionId,
+            managementId,
             departmentId;
 }
