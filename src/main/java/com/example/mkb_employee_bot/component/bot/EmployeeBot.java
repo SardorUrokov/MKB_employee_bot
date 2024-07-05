@@ -39,15 +39,15 @@ import java.util.concurrent.CompletableFuture;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeBot extends TelegramLongPollingBot {
 
-    private static BotService botService;
-    private static FileService fileService;
-    private static ButtonService buttonService;
+    static BotService botService;
+    static FileService fileService;
+    static ButtonService buttonService;
 
-    private static UserRepository userRepository;
-    private static PositionRepository positionRepository;
-    private static EmployeeRepository employeeRepository;
-    private static DepartmentRepository departmentRepository;
-    private static ManagementRepository managementRepository;
+    static UserRepository userRepository;
+    static PositionRepository positionRepository;
+    static EmployeeRepository employeeRepository;
+    static DepartmentRepository departmentRepository;
+    static ManagementRepository managementRepository;
 
     Long chatId;
     String userStage;
